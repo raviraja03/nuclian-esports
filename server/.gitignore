@@ -1,0 +1,10 @@
+.idea
+.idea/*
+public/form-submissions-uploads/*
+node_modules
+.env
+*.log
+/.vscode
+package-lock.json
+public
+nsc-master-files
