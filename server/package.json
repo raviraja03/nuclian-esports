@@ -1,7 +1,6 @@
 {
   "name": "nuclian-esports-server",
   "version": "1.0.0",
-  "type": "module",
   "description": "Backend server for Nuclian Esports using ES Modules",
   "main": "src/index.js",
   "scripts": {
@@ -12,10 +11,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
     "mongoose": "^8.0.3",
-    "express-async-handler": "^1.2.0"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
   }
-} 
+}
