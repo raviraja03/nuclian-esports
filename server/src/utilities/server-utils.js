@@ -8,19 +8,24 @@ const loadRoutesAndMiddleware = function (app, apiVersion = "v1") {
     const modules = fs.readdirSync(baseModulesPath);
     
     modules.forEach((folderName) => {
-        const preFix = `/api/${apiVersion}`;
-        
         // Skip v2 logic for now
         if (folderName === "v2") return;
-        
+
         const routeFileName = `${folderName}.route.js`;
         const routeFilePath = path.join(baseModulesPath, folderName, routeFileName);
         
         if (fs.existsSync(routeFilePath)) {
             try {
-                const route = require(routeFilePath);
-                if (typeof route === 'function' || route.router) {
-                    app.use(preFix, route);
+                const { appRouter, adminRouter } = require(routeFilePath);
+                
+                // Mount app routes at /api/v1
+                if (appRouter && (typeof appRouter === 'function' || appRouter.router)) {
+                    app.use(`/api/${apiVersion}`, appRouter);
+                }
+                
+                // Mount admin routes at /api/v1/admin
+                if (adminRouter && (typeof adminRouter === 'function' || adminRouter.router)) {
+                    app.use(`/api/${apiVersion}/admin`, adminRouter);
                 }
             } catch (error) {
                 console.error(`Error loading route ${routeFilePath}:`, error);

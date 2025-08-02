@@ -31,7 +31,7 @@ const connectDB = async () => {
 };
 
 // Routes
-app.use('/api/users', userRoutes);
+// app.use('/api/users', userRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
