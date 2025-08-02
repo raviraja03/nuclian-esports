@@ -1,7 +1,4 @@
-
-const errorHandler = (err, req, res, next) => {
-
-import { verifyToken } from '../utilities/jwt.js';
+const verifyToken = require('../utilities/jwt.js');
 
 function authMiddleware(req, res, next) {
   // Checks for JWT token in Authorization header
@@ -17,10 +14,7 @@ function authMiddleware(req, res, next) {
   }
 }
 
-export default authMiddleware;
-
-export const errorHandler = (err, req, res, next) => {
-
+const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   
   res.status(statusCode).json({
@@ -29,5 +23,4 @@ export const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { errorHandler }; 
-};
+module.exports = { authMiddleware, errorHandler }; 
