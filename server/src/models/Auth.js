@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const authSchema = new mongoose.Schema({
   userId: {
@@ -34,4 +34,4 @@ authSchema.index({ jwtToken: 1 });
 
 const Auth = mongoose.model('Auth', authSchema);
 
-export default Auth; 
+module.exports = Auth; 

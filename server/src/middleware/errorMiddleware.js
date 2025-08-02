@@ -1,3 +1,6 @@
+
+const errorHandler = (err, req, res, next) => {
+
 import { verifyToken } from '../utilities/jwt.js';
 
 function authMiddleware(req, res, next) {
@@ -17,10 +20,14 @@ function authMiddleware(req, res, next) {
 export default authMiddleware;
 
 export const errorHandler = (err, req, res, next) => {
+
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   
   res.status(statusCode).json({
     message: err.message,
     stack: process.env.NODE_ENV === 'production' ? null : err.stack
   });
+};
+
+module.exports = { errorHandler }; 
 };

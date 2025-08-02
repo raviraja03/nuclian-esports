@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -62,6 +62,5 @@ userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email });
 };
 
-
 const User = mongoose.model('User', userSchema);
-export default User;
+module.exports = User; 
