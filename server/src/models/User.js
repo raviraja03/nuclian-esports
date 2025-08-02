@@ -1,10 +1,17 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Name is required'],
     trim: true
+  },
+  username: {
+    type: String,
+    trim: true,
+    unique: true,
+    sparse: true
   },
   email: {
     type: String,
@@ -16,9 +23,13 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Phone number is required'],
+    trim: true,
     unique: true,
-    trim: true
+    sparse: true
+  },
+  password: {
+    type: String,
+    required: true
   },
   otp: {
     code: String,
@@ -43,10 +54,13 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Indexes
-userSchema.index({ email: 1 });
-userSchema.index({ phone: 1 });
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email });
+};
 
 const User = mongoose.model('User', userSchema);
-
 module.exports = User; 
