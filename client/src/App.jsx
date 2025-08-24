@@ -1,42 +1,63 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import CreateUser from './pages/CreateUser';
-import UserList from './pages/UserList';
+import React from "react";
+import Home from "./components/Home/Home";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Tournament from "./components/Tournaments/Tournament";
+import Leaderboard from "./components/Leaderboard/Leaderboard";
+import Matches from "./components/Matches/Matches";
+import Layout from "./components/Layout/Layout";
+import Login from "./components/Auth/Login";
+import Contact from "./components/Contact/Contact";
+import Blog from "./components/Blog/Blog";
+import WalletPage from "./components/Coins/WalletPage";
+import Signup from "./components/Auth/Signup";
 
-// Admin components
-import AdminLayout from './components/admin/AdminLayout';
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminUsers from './pages/admin/Users';
-import AdminStatistics from './pages/admin/Statistics';
+const App = () => {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      children: [
+        {
+          path: '/',
+          element: <Home />
+        },
+        {
+          path: "/tournaments",
+          element: <Tournament />,
+        },
+        {
+          path: "/leaderboard",
+          element: <Leaderboard />,
+        },
+        {
+          path: "/matches",
+          element: <Matches />,
+        },
+        {
+          path: "/login",
+          element: <Login />,
+        },
+        {
+          path: "/contact",
+          element: <Contact />,
+        },
+        {
+          path: "/blog",
+          element: <Blog />,
+        },
+        {
+          path: "/walletpage",
+          element: <WalletPage />,
+        },
+        {
+          path: "/signup",
+          element: <Signup />,
+        },
+      ],
+    },
+  ]);
 
-function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Admin routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<AdminDashboard />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="statistics" element={<AdminStatistics />} />
-        </Route>
+  return <RouterProvider router={router} />;
+};
 
-        {/* Public routes */}
-        <Route path="/" element={
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <main className="container mx-auto px-4 py-8">
-              <Routes>
-                <Route index element={<Home />} />
-                <Route path="/create-user" element={<CreateUser />} />
-                <Route path="/users" element={<UserList />} />
-              </Routes>
-            </main>
-          </div>
-        } />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App; 
+export default App;
