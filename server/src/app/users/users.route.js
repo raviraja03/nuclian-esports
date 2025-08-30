@@ -1,6 +1,6 @@
 
 const express = require('express');
-const User = require('../../models/User');
+const User = require('../../models/users.model');
 
 // Create separate routers for app and admin
 const appRouter = express.Router();
@@ -17,7 +17,6 @@ appRouter.use(
         res.json("hello World!!!!!!!!!!!");
     })
 );
-
 
 
 

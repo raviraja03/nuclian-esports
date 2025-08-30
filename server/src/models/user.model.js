@@ -27,11 +27,24 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true
   },
+  userProfileImage: {
+    type: String,
+    default: null
+  },
   password: {
     type: String,
     required: true
   },
+  userStatus: {
+    type: String,
+    enum: ['active', 'inactive', 'pending', 'blocked'],
+    default: 'pending'
+  },
   otp: {
+    code: String,
+    expiresAt: Date
+  },
+  verifyOtp: {
     code: String,
     expiresAt: Date
   },
@@ -49,6 +62,48 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'admin', 'superadmin'],
     default: 'user'
+  },
+  loc: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      // default: "Point",
+    },
+    coordinates: { type: [Number] }, // [longitude, latitude]
+  },
+  sessionInfo: {
+    type: String,
+    enum: ['loggedIn', 'loggedOut'],
+    default: 'loggedOut'
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now
+  },
+  deviceType: {
+    type: String,
+    enum: ['desktop', 'mobile', 'tablet'],
+    default: 'desktop'
+  },
+  deviceToken: {
+    type: String,
+    default: null
+  },
+  appVersion: {
+    type: String,
+    default: null
+  },
+  remark: {
+    type: String,
+    default: null
+  },
+  isSuspended: {
+    type: Boolean,
+    default: false
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
@@ -61,6 +116,8 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.statics.findByEmail = function(email) {
   return this.findOne({ email });
 };
+
+userSchema.index({ 'loc': '2dsphere' });
 
 const User = mongoose.model('User', userSchema);
 module.exports = User; 
