@@ -7,9 +7,6 @@ const appRouter = express.Router();
 const adminRouter = express.Router();
 
 // ============= App Routes =============
-// appRouter.get('/checking', async(req, res) => {
-    
-// });
 
 appRouter.use(
     "/users",
