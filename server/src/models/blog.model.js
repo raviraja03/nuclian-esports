@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const blogSchema = new mongoose.Schema({
   title: {
@@ -62,6 +63,58 @@ const blogSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Auto-generate slug from title
+blogSchema.pre('save', function(next) {
+  if (this.isModified('title')) {
+    this.slug = slugify(this.title, {
+      lower: true,
+      strict: true,
+      remove: /[*+~.()'"!:@]/g
+    });
+  }
+  next();
+});
+
+// Instance method to toggle status
+blogSchema.methods.toggleStatus = async function(newStatus) {
+  if (!["draft", "published", "archived"].includes(newStatus)) {
+    throw new Error("Invalid status");
+  }
+  this.status = newStatus;
+  return this.save();
+};
+
+// Static method to get published blogs with filters and pagination
+blogSchema.statics.getPublished = async function(filters = {}, page = 1, limit = 10) {
+  const query = {
+    status: "published",
+    isDeleted: false,
+    ...filters
+  };
+
+  const skip = (page - 1) * limit;
+  
+  const [blogs, total] = await Promise.all([
+    this.find(query)
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    this.countDocuments(query)
+  ]);
+
+  return {
+    blogs,
+    pagination: {
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+      limit
+    }
+  };
+};
 
 const Blog = mongoose.model("Blog", blogSchema);
 module.exports = Blog;
