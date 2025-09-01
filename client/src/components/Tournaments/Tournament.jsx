@@ -7,9 +7,7 @@ import herobg from "../../assets/hero_image_3.png";
 import Button_2 from '../Button/Button_2';
 import Coins from '../Coins/Coins';
 
-
-// --- Data for Tournament Cards ---
-// Updated to match the property names in your new card component
+// --- Tournament Data ---
 const tournamentsData = [
   {
     id: 1,
@@ -67,65 +65,73 @@ const tournamentsData = [
   },
 ];
 
-
-// --- Sub-Components ---
-
+// --- Banner Component ---
 const Banner = () => (
   <section className="relative">
-    <div className="absolute left-0 z-10 h-[55vh] w-full bg-gradient-to-b from-white/20 to-black/20 pointer-events-none"></div>
-    <div className="min-h-[55vh] bg-cover bg-center" style={{ backgroundImage: `url(${herobg})` }}></div>
+    <div className="absolute left-0 z-10 h-[55vh] w-full bg-gradient-to-b from-black/40 to-black/80 pointer-events-none"></div>
+    <div
+      className="min-h-[55vh] bg-cover bg-center"
+      style={{ backgroundImage: `url(${herobg})` }}
+    ></div>
   </section>
 );
 
+// --- Filter Bar Component ---
 const FilterBar = () => (
-  <div className="relative z-20 flex w-full items-center justify-center bg-[#b0123a]">
-    <button className="mx-1.5 cursor-pointer border-b-4 border-transparent bg-transparent py-[18px] px-7 text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">Upcoming tournament</button>
-    <button className="mx-1.5 cursor-pointer border-b-4 border-transparent bg-transparent py-[18px] px-7 text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">Ongoing tournament</button>
-    <button className="mx-1.5 cursor-pointer border-b-4 border-transparent bg-transparent py-[18px] px-7 text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">Past tournament</button>
+  <div className="relative z-20 flex flex-wrap items-center justify-center bg-[#b0123a] px-2">
+    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
+      Upcoming
+    </button>
+    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
+      Ongoing
+    </button>
+    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
+      Past
+    </button>
   </div>
 );
 
-// --- TournamentCard component exactly matching your provided code ---
+// --- TournamentCard Component ---
 const TournamentCard = ({ card }) => {
-    return (
-        // Card container
-        <div className="bg-[#0a141d] p-2 rounded-lg border-2 border-[#fc4e5b]" key={card.id}>
-        
-            {/* Card Image */}
-            <div className="h-64 overflow-hidden">
-                <img 
-                    src={card.image} 
-                    alt={card.title} 
-                    className="h-full w-full object-cover rounded-lg" 
-                />
-            </div>
+  return (
+    <div className="bg-[#0a141d] p-3 rounded-lg border-2 border-[#fc4e5b] flex flex-col">
+      {/* Image */}
+      <div className="h-48 md:h-64 overflow-hidden rounded-lg">
+        <img
+          src={card.image}
+          alt={card.title}
+          className="h-full w-full object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+        />
+      </div>
 
-            {/* Card Content */}
-            <div className="p-2 text-white font-['Lexend',_sans-serif]">
-                <h3 className="text-3xl font-bold">{card.title}</h3>
-                <div className="flex justify-between font-semibold mt-4">
-                    <h4>Entry Amount:</h4>
-                    <h4>{card.entry_amount}</h4>
-                </div>
-                <div className="flex justify-between font-semibold">
-                    <h4>Price Pool:</h4>
-                    <h4>{card.price_pool}</h4>
-                </div>
-                <div className="flex justify-between font-semibold">
-                    <h4>Room ID:</h4>
-                    <h4>{card.room_id}</h4>
-                </div>
-                <div className="flex justify-between font-semibold mb-6">
-                    <h4>Participants:</h4>
-                    <h4>{card.participants}</h4>
-                </div>
-                {/* Standard button replacing <Button_2 /> */}
-                <Button_2 content="Join Now"/>
-            </div>
+      {/* Content */}
+      <div className="p-3 text-white font-['Lexend',_sans-serif] flex flex-col flex-grow">
+        <h3 className="text-xl md:text-2xl font-bold line-clamp-2">{card.title}</h3>
+        <div className="flex justify-between font-semibold mt-3 text-sm md:text-base">
+          <span>Entry:</span>
+          <span>₹{card.entry_amount}</span>
         </div>
-    );
-};
+        <div className="flex justify-between font-semibold text-sm md:text-base">
+          <span>Prize:</span>
+          <span>₹{card.price_pool}</span>
+        </div>
+        <div className="flex justify-between font-semibold text-sm md:text-base">
+          <span>Room ID:</span>
+          <span>{card.room_id}</span>
+        </div>
+        <div className="flex justify-between font-semibold mb-4 text-sm md:text-base">
+          <span>Players:</span>
+          <span>{card.participants}</span>
+        </div>
 
+        {/* Button */}
+        <div className="mt-auto">
+          <Button_2 content="Join Now" />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // --- Main Page Content ---
 const TournamentsPageContent = () => {
@@ -133,8 +139,8 @@ const TournamentsPageContent = () => {
     <main className="bg-black text-white font-['Lexend',_sans-serif]">
       <Banner />
       <FilterBar />
-      <section className="px-4 md:px-12 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 px-10">
+      <section className="px-4 md:px-12 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
           {tournamentsData.map((cardData) => (
             <TournamentCard key={cardData.id} card={cardData} />
           ))}

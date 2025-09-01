@@ -21,6 +21,11 @@ const { validateRequest } = require('../../middleware/error');
 
 const router = express.Router();
 
+router.get('/checking', async(req, res) => {
+  res.json("hello World!!!!!!!!!!!");
+});
+
+
 // Public routes
 router.post('/register', registerValidation, validateRequest, register);
 router.post('/login', loginValidation, validateRequest, login);
