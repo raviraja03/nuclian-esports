@@ -1,38 +1,37 @@
 import React from "react";
 import coin_image from "../../assets/coin_image.png";
+import Button from "../Button/Button";
 import { Link } from "react-router-dom";
+
+// from-[#C0103F] via-[#260E27] to-[#000]
+// #230957
+// 7338AD
 
 const Coins = () => {
   return (
-    <section className="py-20 bg-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl min-h-[40vh] bg-gradient-to-r from-[#E11D48] via-[#FC4E5B] to-[#E11D48] overflow-hidden shadow-2xl">
-          
-          {/* Left Content */}
-          <div className="flex-1 flex flex-col p-8 lg:p-12 text-center lg:text-left text-white">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
-              Buy Coins
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl leading-relaxed opacity-90 mb-8">
-              Battle for top-tier coin prizes in elite competitions <br />
-              Unlock special discounts and in-game bundles <br />
-              Experience fair matchmaking with players at your skill level
+    <section>
+      <div className="max-w-full mx-auto px-15 py-10 text-white font-Lex mt-8 mb-5">
+        <div className="flex justify-between rounded-lg mx-[50px] min-h-[30vh] bg-gradient-to-r from-indigo-800 via-indigo-700 to-indigo-600 overflow-hidden">
+          <div className="flex flex-col p-5">
+            <h1 className="text-3xl font-bold">Buy Coins</h1>
+            <p className="mt-5 ">
+                Battle for top-tier coin prizes in elite competitions <br />
+                Unlock special discounts and in-game bundles <br />
+                Experience fair matchmaking with players at your skill level
             </p>
-            <Link to="/walletpage" className="inline-block">
-              <button className="w-full sm:w-auto text-[#E11D48] text-lg sm:text-xl px-8 sm:px-10 py-3 sm:py-4 bg-white font-bold rounded-xl tracking-wide border-2 border-white transition-all duration-300 cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-white/20 transform">
-                Buy Coins Here
+            <Link to="/walletpage">
+              <button className=" max-w-64 text-black text-xl mt-14 px-3 py-3 bg-white font-Lex font-semibold rounded-lg tracking-wide border-2 border-white  transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-none">
+                Buy coins here
               </button>
             </Link>
           </div>
 
-          {/* Right Content */}
-          <div className="flex-1 relative flex justify-center items-center mt-8 lg:mt-0">
+          <div className="flex flex-col relative">
             <img
               src={coin_image}
-              alt="Coins"
-              className="w-48 sm:w-64 md:w-80 lg:w-96 object-contain relative z-10 drop-shadow-2xl"
+              className="h-full w-full object-fill rounded-lg z-10"
             />
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 size-72 sm:size-80 md:size-96 rounded-full bg-gradient-to-r from-yellow-300/60 to-yellow-400/60 shadow-2xl shadow-yellow-400/50 blur-3xl"></div>
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 size-96 rounded-full bg-gradient-to-r from-yellow-300/88 to-yellow-300/88 shadow-lg shadow-pink-400/50 blur-2xl"></div>
           </div>
         </div>
       </div>

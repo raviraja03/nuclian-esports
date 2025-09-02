@@ -18,8 +18,7 @@ const Testimonials = () => {
       <div className="max-w-full mx-auto px-15 py-10 text-white font-Lex">
         <Heading highlight="Players" nohighlight="Reviews" />
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-end py-5 gap-x-3 mt-7">
+        <div className=" flex justify-end py-5 gap-x-3 mt-7">
           <button className="custom-prev text-2xl rounded-lg w-11 h-11 text-black bg-zinc-100 flex justify-center items-center hover:bg-gradient-to-b hover:from-[#e11d48] hover:to-[#fc4e5b] hover:text-white cursor-pointer">
             <IoIosArrowBack />
           </button>
@@ -28,43 +27,44 @@ const Testimonials = () => {
           </button>
         </div>
 
-        {/* Swiper */}
         <Swiper 
-          navigation={{
-            nextEl: ".custom-next",
-            prevEl: ".custom-prev"
-          }} 
-          loop={true}
-          breakpoints={{
-            640: { slidesPerView: 1, spaceBetween: 20 },
-            768: { slidesPerView: 2, spaceBetween: 20 },
-            1024: { slidesPerView: 3, spaceBetween: 20 }
-          }}
-          modules={[Navigation]} 
-          className="mySwiper"
-        >
-          {review.map((item) => (
-            <SwiperSlide key={item.id} className="bg-white/90 rounded-lg p-5 hover:scale-105 transition-transform duration-300 ease-in-out shadow-lg">
-              <div className="flex gap-5 items-center">
-                <div className="w-16 h-16 rounded-full outline-2 outline-[#e11d48] outline-offset-4 overflow-hidden">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover"/>
+        navigation={{
+          nextEl: ".custom-next",
+          prevEl: ".custom-prev"
+        }} 
+        loop={true}
+        breakpoints={{
+          640: {slidesPerView: 1, spaceBetween: 20},
+          768: {slidesPerView: 2, spaceBetween: 20},
+          1024: {slidesPerView: 3, spaceBetween: 20}
+        }}
+        modules={[Navigation]} className="mySwiper">
+          {review.map((item) => {
+            return (
+              <SwiperSlide className="bg-white/90 rounded-lg p-5">
+                <div className="flex gap-5 items-center">
+                  <div className="w-16 h-16 rounded-full outline-2 outline-[#e11d48] outline-offset-4 overflow-hidden">
+                    <img src={item.image} className="w-full h-full object-center"/>
+                  </div>
+                  <div>
+                    <h5 className="text-xl font-bold text-black">{item.name}</h5>
+                    <p className="text-black">{item.profession}</p>
+                    <span className="flex text-yellow-400 mt-2 text-xl gap-1">
+                      {Array.from({length: item.rating}, (_, index)=>(
+                        <FaStar />
+                      ))}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h5 className="text-xl font-bold text-black">{item.name}</h5>
-                  <p className="text-black">{item.profession}</p>
-                  <span className="flex text-yellow-400 mt-2 text-xl gap-1">
-                    {Array.from({length: item.rating}, (_, index) => (
-                      <FaStar key={index}/>
-                    ))}
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-7 min-h-[15vh]">
-                <p className="text-black">{item.para}</p>
-              </div>
-            </SwiperSlide>
-          ))}
+                <div className="mt-7 min-h-[15vh]">
+                  <p className="text-black">
+                    {item.para}
+                  </p>
+                </div>
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
       </div>
     </section>
@@ -73,7 +73,6 @@ const Testimonials = () => {
 
 export default Testimonials;
 
-// Data
 const review = [
   {
     id: 1,

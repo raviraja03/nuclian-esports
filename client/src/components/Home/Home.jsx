@@ -15,7 +15,6 @@ import Coins from '../Coins/Coins'
 const Home = () => {
   return (
     <div>
-        <Navbar />
         <Hero />
         <Banner />
         <Category />
@@ -25,7 +24,6 @@ const Home = () => {
         <Achievement />
         <CommunitySection />
         <Testimonials />
-        <Footer />
     </div>
   )
 }

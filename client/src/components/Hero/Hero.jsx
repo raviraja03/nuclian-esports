@@ -5,38 +5,29 @@ import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${herobg})` }}
-      >
-        <div className="absolute inset-0 bg-black/50"></div>
-      </div>
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+    <section>
+      <div className="max-w-full min-h-[80vh] p-15 bg-contain bg-center mt-18 rounded-lg bg-black/30 bg-blend-color" style={{ backgroundImage: `url(${herobg})` }}>
+        <div className="flex flex-col text-white justify-start mt-40 font-Lex">
             {/* Hero Content */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-6xl font-bold text-shadow-sm/20 text-shadow-white">
                 JOIN THE ULTIMATE
-          <br />
-          <span className="text-[#E11D48]">ESPORTS</span> EXPERIENCE
-          <br />
-          TODAY!
+                <br />ESPORTS EXPERIENCE
+                <br />TODAY!
             </h1>
-        
-        <p className="text-lg sm:text-xl md:text-2xl mb-8 max-w-4xl mx-auto leading-relaxed opacity-90">
+            <p className="text-white text-lg mt-5 text-shadow-sm/20 text-shadow-white font-semibold">
                 Dive into thrilling tournaments and connect with fellow gamers.
                 <br />
                 Discover your next favorite game and be part of our vibrant community!
             </p>
-        
             {/* Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
+            <div className="flex gap-7 mt-5">
                 <Link to="/tournaments">
                   <Button content="Tournaments"/>
                 </Link>
                 <Link to="/leaderboard">
                   <Button content="Leaderboard"/>
                 </Link>
+            </div>
         </div>
       </div>
     </section>

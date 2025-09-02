@@ -2,7 +2,7 @@ import React from "react";
 import Home from "./components/Home/Home";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Tournament from "./components/Tournaments/Tournament";
-import Leaderboard from "./components/LeaderBoard/LeaderBoard";
+import Leaderboard from "./components/Leaderboard/Leaderboard";
 import Matches from "./components/Matches/Matches";
 import Layout from "./components/Layout/Layout";
 import Login from "./components/Auth/Login";
