@@ -3,60 +3,73 @@ import Heading from "../Heading/Heading";
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
-import Freefire from "../../assets/ff_game_poster.jpg";
 import Button from "../Button/Button";
 import Button_2 from "../Button/Button_2";
 import { Link } from "react-router-dom";
 
 const Category = () => {
+  const renderCards = category.map((card) => {
+    return (
+      <div
+        className="bg-white/30 p-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+        key={card.id}
+      >
+        {/* Card Image */}
+        <div className="w-full h-40 sm:h-52 md:h-64 overflow-hidden rounded-lg">
+          <img
+            src={card.image}
+            alt={card.title}
+            className="w-full h-full object-cover rounded-lg"
+          />
+        </div>
 
-    const renderCards = category.map(card => {
-        return(
-            // Card [#0a141d]/76
-            <div className=" bg-white/30 p-2 rounded-lg" key={card.id}>
+        {/* Card Content */}
+        <div className="p-3 text-black font-Lex">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold">
+            {card.title}
+          </h3>
 
-                {/* Card Image */}
-                <div>
-                    <img src={card.image} alt="" className="rounded-lg"/>
-                </div>
+          <div className="flex justify-between font-semibold mt-3 text-sm sm:text-base">
+            <h4>Entry Amount:</h4>
+            <h4>{card.entry_amount}</h4>
+          </div>
 
-                {/* Card Content */}
-                <div className="p-2 text-black font-Lex">
-                    <h3 className="text-3xl font-bold">{card.title}</h3>
-                    <div className="flex justify-between font-semibold mt-4">
-                        <h4>Entry Amount: </h4> 
-                        <h4>{card.entry_amount}</h4>
-                    </div>
-                    <div className="flex justify-between font-semibold">
-                        <h4>Price Pool: </h4>
-                        <h4>{card.price_pool}</h4>
-                    </div>
-                    <div className="flex justify-between font-semibold">
-                        <h4>Room ID: </h4>
-                        <h4>{card.room_id}</h4>
-                    </div>
-                    <div className="flex justify-between font-semibold mb-4">
-                        <h4>Participants:</h4>
-                        <h4>{card.participants}</h4>
-                    </div>
-                    <Button_2 content="JOIN NOW"/>
-                </div>
-            </div>
-        )
-    })
+          <div className="flex justify-between font-semibold text-sm sm:text-base">
+            <h4>Prize Pool:</h4>
+            <h4>{card.price_pool}</h4>
+          </div>
+
+          <div className="flex justify-between font-semibold text-sm sm:text-base">
+            <h4>Room ID:</h4>
+            <h4>{card.room_id}</h4>
+          </div>
+
+          <div className="flex justify-between font-semibold mb-3 text-sm sm:text-base">
+            <h4>Participants:</h4>
+            <h4>{card.participants}</h4>
+          </div>
+
+          <Button_2 content="JOIN NOW" />
+        </div>
+      </div>
+    );
+  });
+
   return (
     <section>
-      <div className="max-w-full mx-auto px-15 py-10 text-white bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(252,78,91,1)_40%,rgba(225,29,72,1)_62%,rgba(0,0,0,1)_80%)]">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-12 py-10 text-white bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(252,78,91,1)_40%,rgba(225,29,72,1)_62%,rgba(0,0,0,1)_80%)]">
         <Heading highlight="Featured" nohighlight="Tournaments" />
 
-        {/* Category Card */}
-        <div className="flex gap-7 mt-10 px-8">
-            {renderCards}
+        {/* Category Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+          {renderCards}
         </div>
-        <div className="mt-5 w-fit m-auto">
-            <Link to='/tournaments'>
-              <Button content="View All"/>
-            </Link>
+
+        {/* View All Button */}
+        <div className="mt-6 w-fit mx-auto">
+          <Link to="/tournaments">
+            <Button content="View All" />
+          </Link>
         </div>
       </div>
     </section>
