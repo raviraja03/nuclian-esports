@@ -1,4 +1,4 @@
-const express = require('express');
+const router = require("express").Router();
 const {
   register,
   login,
@@ -8,7 +8,7 @@ const {
   deleteUser,
   getProfile,
   updateProfile
-} = require('./user.controller');
+} = require('./users.controller');
 const { protect, authorize } = require('../../middleware/auth');
 const {
   registerValidation,
@@ -19,16 +19,9 @@ const {
 } = require('../../utils/validation');
 const { validateRequest } = require('../../middleware/error');
 
-const router = express.Router();
-
-router.get('/checking', async(req, res) => {
-  res.json("hello World!!!!!!!!!!!");
-});
-
-
 // Public routes
-router.post('/register', registerValidation, validateRequest, register);
-router.post('/login', loginValidation, validateRequest, login);
+router.post('/users/register', registerValidation, validateRequest, register);
+router.post('/users/login', loginValidation, validateRequest, login);
 
 // Protected routes
 router.use(protect); // Apply authentication middleware to all routes below

@@ -135,7 +135,7 @@ import {
   deleteUser,
   getProfile
 } from './user.controller.js';
-import authMiddleware from '../../middleware/errorMiddleware.js'; // Adjust if you have a real auth middleware
+import authMiddleware from '../middleware/errorMiddleware.js'; // Adjust if you have a real auth middleware
 
 const router = express.Router();
 

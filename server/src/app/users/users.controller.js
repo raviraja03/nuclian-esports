@@ -7,18 +7,38 @@ const { generateToken } = require('../../middleware/auth');
 // @access  Public
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phoneNumber, role } = req.body;
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Check if email or phone number already exists
+    const existingUser = await User.findOne({ 
+      $or: [
+        { email }, 
+        { phoneNumber: phoneNumber || null }
+      ] 
+    });
+    if (existingUser) {
+      let message = 'Email or phone number already exists';
+      if (existingUser.email === email) {
+        message = 'Email already exists';
+      } else if (phoneNumber && existingUser.phoneNumber === phoneNumber) {
+        message = 'Phone number already exists';
+      }
+      return res.status(400).json({
+        success: false,
+        message
+      });
+    }
 
     // Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      phone,
+      phoneNumber,
       role: role || 'user',
       userStatus: 'active'
     });
@@ -32,7 +52,7 @@ const register = async (req, res, next) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
+        phoneNumber: user.phoneNumber,
         role: user.role,
         token
       }
@@ -236,12 +256,12 @@ const getProfile = async (req, res, next) => {
 const updateProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    const { name, email, phone, currentPassword, newPassword } = req.body;
+    const { name, email, phoneNumber, currentPassword, newPassword } = req.body;
 
     // Update basic fields
     if (name) user.name = name;
     if (email) user.email = email;
-    if (phone) user.phone = phone;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
 
     // Update password if provided
     if (currentPassword && newPassword) {
@@ -265,7 +285,7 @@ const updateProfile = async (req, res, next) => {
         _id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        phone: updatedUser.phone,
+        phoneNumber: updatedUser.phoneNumber,
         role: updatedUser.role
       }
     });

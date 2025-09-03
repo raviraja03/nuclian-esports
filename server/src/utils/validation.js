@@ -20,7 +20,7 @@ const registerValidation = [
     .withMessage('Password is required')
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
-  body('phone')
+  body('phoneNumber')
     .optional()
     .trim()
     .matches(/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
