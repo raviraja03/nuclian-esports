@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify');
 
 const newsSchema = new mongoose.Schema({
   headline: {
@@ -73,109 +72,6 @@ const newsSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-// Pre-save hook for slug generation
-newsSchema.pre('save', function(next) {
-  if (this.isModified('headline')) {
-    this.slug = slugify(this.headline, {
-      lower: true,
-      strict: true,
-      remove: /[*+~.()'"!:@]/g
-    });
-  }
-  next();
-});
-
-// Instance method to toggle status
-newsSchema.methods.toggleStatus = async function(newStatus, userId) {
-  const validStatuses = ["draft", "published", "archived"];
-  if (!validStatuses.includes(newStatus)) {
-    throw new Error("Invalid status. Must be one of: draft, published, archived");
-  }
-
-  this.status = newStatus;
-  this.updatedBy = userId;
-
-  if (newStatus === "published") {
-    this.publishedAt = new Date();
-  } else {
-    // Clear publishedAt for draft or archived status
-    this.publishedAt = null;
-  }
-
-  return this.save();
-};
-
-// Static method to get published news with filters and pagination
-newsSchema.statics.getPublished = async function(filters = {}, { page = 1, limit = 10 } = {}) {
-  const query = {
-    status: "published",
-    isDeleted: false
-  };
-
-  // Apply search filter
-  if (filters.search) {
-    query.$or = [
-      { headline: { $regex: filters.search, $options: 'i' } },
-      { summary: { $regex: filters.search, $options: 'i' } },
-      { content: { $regex: filters.search, $options: 'i' } }
-    ];
-  }
-
-  // Apply category filter
-  if (filters.category) {
-    query.category = filters.category;
-  }
-
-  // Apply tags filter
-  if (filters.tag) {
-    query.tags = filters.tag;
-  }
-
-  const skip = (page - 1) * limit;
-
-  const [news, total] = await Promise.all([
-    this.find(query)
-      .populate('createdBy', 'name')
-      .sort({ publishedAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    this.countDocuments(query)
-  ]);
-
-  return {
-    news,
-    pagination: {
-      total,
-      page: parseInt(page),
-      pages: Math.ceil(total / limit),
-      limit: parseInt(limit)
-    }
-  };
-};
-
-// Static method to get all unique tags
-newsSchema.statics.getAllTags = async function() {
-  const result = await this.aggregate([
-    { $match: { isDeleted: false } },
-    { $unwind: "$tags" },
-    { 
-      $group: { 
-        _id: null,
-        tags: { $addToSet: "$tags" }
-      }
-    },
-    {
-      $project: {
-        _id: 0,
-        tags: { $sortArray: { input: "$tags", sortBy: 1 } }
-      }
-    }
-  ]);
-
-  return result.length > 0 ? result[0].tags : [];
-};
 
 const News = mongoose.model("News", newsSchema);
 module.exports = News;
