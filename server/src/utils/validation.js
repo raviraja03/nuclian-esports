@@ -1,0 +1,102 @@
+const { body, param, query } = require('express-validator');
+
+const registerValidation = [
+  body('name')
+    .trim()
+    .notEmpty()
+    .withMessage('Name is required')
+    .isLength({ min: 2 })
+    .withMessage('Name must be at least 2 characters long'),
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  body('phoneNumber')
+    .optional()
+    .trim()
+    .matches(/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
+    .withMessage('Please enter a valid phone number'),
+  body('role')
+    .optional()
+    .isIn(['user', 'admin', 'superadmin'])
+    .withMessage('Invalid role specified'),
+];
+
+const loginValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+  body('password')
+    .trim()
+    .notEmpty()
+    .withMessage('Password is required'),
+];
+
+const updateUserValidation = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage('Name must be at least 2 characters long'),
+  body('email')
+    .optional()
+    .trim()
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+  body('phone')
+    .optional()
+    .trim()
+    .matches(/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
+    .withMessage('Please enter a valid phone number'),
+  body('userStatus')
+    .optional()
+    .isIn(['active', 'inactive', 'pending', 'blocked'])
+    .withMessage('Invalid user status'),
+  body('role')
+    .optional()
+    .isIn(['user', 'admin', 'superadmin'])
+    .withMessage('Invalid role specified'),
+];
+
+const paginationValidation = [
+  query('page')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Page must be a positive integer')
+    .toInt(),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Limit must be between 1 and 100')
+    .toInt(),
+];
+
+const userIdValidation = [
+  param('id')
+    .notEmpty()
+    .withMessage('User ID is required')
+    .isMongoId()
+    .withMessage('Invalid user ID format'),
+];
+
+module.exports = {
+  registerValidation,
+  loginValidation,
+  updateUserValidation,
+  paginationValidation,
+  userIdValidation,
+};
