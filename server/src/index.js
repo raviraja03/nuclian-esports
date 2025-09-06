@@ -22,7 +22,7 @@ swaggerAPIDoc(app);
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://kisan251:7pXvcpzKYezUzFea@cluster0.bihao.mongodb.net/businessTask');
+    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://kisan251:7pXvcpzKYezUzFea@cluster0.bihao.mongodb.net/eSports');
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -40,7 +40,7 @@ app.use(errorHandler);
 loadRoutesAndMiddleware(app);
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 connectDB().then(() => {
   app.listen(PORT, () => {
