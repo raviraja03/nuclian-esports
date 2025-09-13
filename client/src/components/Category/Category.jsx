@@ -11,62 +11,68 @@ const Category = () => {
   const renderCards = category.map((card) => {
     return (
       <div
-        className="bg-white/30 p-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+  className="bg-white/20 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-white/10 min-w-[280px] sm:min-w-[320px] md:min-w-[360px]"
         key={card.id}
       >
-        {/* Card Image */}
-        <div className="w-full h-40 sm:h-52 md:h-64 overflow-hidden rounded-lg">
-          <img
-            src={card.image}
-            alt={card.title}
-            className="w-full h-full object-cover rounded-lg"
-          />
-        </div>
-
-        {/* Card Content */}
-        <div className="p-3 text-black font-Lex">
-          <h3 className="text-lg sm:text-xl md:text-2xl font-bold">
-            {card.title}
-          </h3>
-
-          <div className="flex justify-between font-semibold mt-3 text-sm sm:text-base">
-            <h4>Entry Amount:</h4>
-            <h4>{card.entry_amount}</h4>
+        {/* Card Container with Flex to Stick Button to Bottom */}
+        <div className="flex flex-col h-full">
+          {/* Card Image */}
+          <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-lg">
+            <img
+              src={card.image}
+              alt={card.title}
+              className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+            />
           </div>
 
-          <div className="flex justify-between font-semibold text-sm sm:text-base">
-            <h4>Prize Pool:</h4>
-            <h4>{card.price_pool}</h4>
-          </div>
+          {/* Card Content */}
+          <div className="flex flex-col flex-grow p-4 text-white font-Lex">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight mb-3">
+              {card.title}
+            </h3>
 
-          <div className="flex justify-between font-semibold text-sm sm:text-base">
-            <h4>Room ID:</h4>
-            <h4>{card.room_id}</h4>
-          </div>
+            <div className="flex justify-between text-sm sm:text-base font-medium mb-2">
+              <span>Entry Amount:</span>
+              <span>₹{card.entry_amount}</span>
+            </div>
 
-          <div className="flex justify-between font-semibold mb-3 text-sm sm:text-base">
-            <h4>Participants:</h4>
-            <h4>{card.participants}</h4>
-          </div>
+            <div className="flex justify-between text-sm sm:text-base font-medium mb-2">
+              <span>Prize Pool:</span>
+              <span>₹{card.price_pool}</span>
+            </div>
 
-          <Button_2 content="JOIN NOW" />
+            <div className="flex justify-between text-sm sm:text-base font-medium mb-2">
+              <span>Room ID:</span>
+              <span>{card.room_id}</span>
+            </div>
+
+            <div className="flex justify-between text-sm sm:text-base font-medium mb-4">
+              <span>Participants:</span>
+              <span>{card.participants}</span>
+            </div>
+
+            {/* Button Pushed to Bottom */}
+            <div className="mt-auto">
+              <Button_2 content="JOIN NOW" />
+            </div>
+          </div>
         </div>
       </div>
     );
   });
 
   return (
-    <section>
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-12 py-10 text-white bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(252,78,91,1)_40%,rgba(225,29,72,1)_62%,rgba(0,0,0,1)_80%)]">
+    <section className="bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(252,78,91,1)_40%,rgba(225,29,72,1)_62%,rgba(0,0,0,1)_80%)] py-12">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <Heading highlight="Featured" nohighlight="Tournaments" />
 
-        {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+        {/* Category Cards Horizontal Scroll */}
+<div className="flex overflow-x-auto space-x-6 mt-10 pb-4 custom-scroll ">
           {renderCards}
         </div>
 
         {/* View All Button */}
-        <div className="mt-6 w-fit mx-auto">
+        <div className="mt-8 flex justify-center">
           <Link to="/tournaments">
             <Button content="View All" />
           </Link>

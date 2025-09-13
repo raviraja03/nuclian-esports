@@ -1,21 +1,28 @@
 import React from "react";
-import Home from "./components/Home/Home";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Tournament from "./components/Tournaments/Tournament";
-import Leaderboard from "./components/LeaderBoard/LeaderBoard";
-import Matches from "./components/Matches/Matches";
+
+
 import Layout from "./components/Layout/Layout";
-import Login from "./components/Auth/Login";
-import Contact from "./components/Contact/Contact";
-import Blog from "./components/Blog/Blog";
-import WalletPage from "./components/Coins/WalletPage";
-import Signup from "./components/Auth/Signup";
+import LoadingScreen from "./components/shared/LoadingScreen";
+
+// Lazy load components for better performance
+const Home = React.lazy(() => import("./components/Home/Home"));
+const Tournament = React.lazy(() => import("./components/Tournaments/Tournament"));
+const Leaderboard = React.lazy(() => import("./components/Leaderboard/Leaderboard"));
+const Matches = React.lazy(() => import("./components/Matches/Matches"));
+const Login = React.lazy(() => import("./components/Auth/Login"));
+const Contact = React.lazy(() => import("./components/Contact/Contact"));
+const Blog = React.lazy(() => import("./components/Blog/Blog"));
+const WalletPage = React.lazy(() => import("./components/Coins/WalletPage"));
+const Signup = React.lazy(() => import("./components/Auth/Signup"));
+
 
 const App = () => {
+
   const router = createBrowserRouter([
     {
       path: "/",
-      element: <Layout />,
+      element: <React.Suspense fallback={<LoadingScreen />}><Layout /></React.Suspense>,
       children: [
         {
           path: '/',

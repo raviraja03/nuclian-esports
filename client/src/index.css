@@ -6,3 +6,37 @@
   --font-Lex: "Lexend", sans-serif; 
 }
 /* Remove these lines if present */
+
+/* scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  
+  scrollbar-width: none;     
+} */
+
+
+/* Thin black/red scrollbar */
+.custom-scroll::-webkit-scrollbar {
+  height: 6px;   /* horizontal scrollbar height */
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #0a0a0a;  /* dark background (track) */
+  border-radius: 9999px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(to right, #e11d48, #fc4e5b); /* red gradient */
+  border-radius: 9999px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to right, #fc4e5b, #e11d48);
+}
+
+/* Firefox */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #e11d48 #0a0a0a;
+}

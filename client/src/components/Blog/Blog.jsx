@@ -93,9 +93,9 @@ const latestPostsData = [
 
 // --- Reusable Blog Card Component ---
 const BlogCard = ({ post, isFeatured }) => (
-  <article className="group relative rounded-lg border border-[#2a2a2a] bg-gradient-to-br from-[#1a1a1a] to-[#121212] p-4 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(225,29,72,0.2)]">
+  <article className="group relative rounded-xl bg-[#0a141d]/80 backdrop-blur-sm border border-white/10 p-4 sm:p-5 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-[#E11D48]/20 hover:border-[#FC4E5B]/50">
     {post.tag && (
-      <span className="absolute top-4 right-4 rounded bg-[#E11D48] px-2 py-1 text-xs font-bold">
+      <span className="absolute top-3 right-3 rounded bg-[#E11D48] px-2 py-1 text-xs font-bold text-white shadow-md">
         {post.tag}
       </span>
     )}
@@ -103,24 +103,28 @@ const BlogCard = ({ post, isFeatured }) => (
     <img
       src={post.image}
       alt={post.title}
-      className={`mb-4 w-full rounded object-cover ${
-        isFeatured ? "h-48" : "h-40"
+      className={`mb-4 w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105 ${
+        isFeatured ? "h-48 sm:h-52 md:h-56" : "h-40 sm:h-44 md:h-48"
       }`}
     />
 
     <h3
-      className={`font-bold transition-colors group-hover:text-[#FC4E5B] ${
-        isFeatured ? "text-xl mb-2" : "text-lg mb-2"
+      className={`font-bold transition-colors duration-300 group-hover:text-[#FC4E5B] line-clamp-2 ${
+        isFeatured ? "text-lg sm:text-xl md:text-2xl mb-2 sm:mb-3" : "text-base sm:text-lg mb-2"
       }`}
     >
       {post.title}
     </h3>
 
-    {isFeatured && <p className="mb-4 text-gray-400">{post.description}</p>}
+    {isFeatured && (
+      <p className="mb-3 sm:mb-4 text-gray-300 text-sm sm:text-base line-clamp-3">
+        {post.description}
+      </p>
+    )}
 
     <div className="flex items-center justify-between">
-      <span className="text-sm text-gray-500">{post.date}</span>
-      <button className="text-sm font-bold text-[#FC4E5B] transition-colors hover:text-red-400 cursor-pointer">
+      <span className="text-xs sm:text-sm text-gray-400">{post.date}</span>
+      <button className="text-sm font-semibold text-[#FC4E5B] transition-colors duration-300 hover:text-[#E11D48] focus:outline-none focus:ring-2 focus:ring-[#E11D48]/50 rounded">
         {isFeatured ? "Read More →" : "Read →"}
       </button>
     </div>
@@ -130,55 +134,49 @@ const BlogCard = ({ post, isFeatured }) => (
 // --- Main News Page Component ---
 const Blog = () => {
   return (
-    <section>
-      <div className='max-w-full mx-auto px-15 py-10'>
-        <div className="font-['Lexend',_sans-serif] bg-black text-white">
-          {/* Hero Section */}
-          <section className="border-b border-gray-800">
-            <div className="container mx-auto px-4 py-16">
-              <div className="flex flex-col items-center text-center">
-                <h2 className="mb-6 text-5xl font-bold [text-shadow:0_0_10px_rgba(255,51,51,0.5)]">
-                  GAMING & TECH NEWS
-                </h2>
-                <p className="max-w-2xl text-xl text-gray-400">
-                  Your portal to the latest in gaming technology, hardware
-                  reviews, and the most exciting developments in the digital
-                  frontier.
-                </p>
-              </div>
-            </div>
-          </section>
+    <section className="bg-black/95 text-white font-Lex pt-[10vh]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
+        {/* Hero Section */}
+        <section className="border-b border-white/10 py-10 sm:py-12 lg:py-16">
+          <div className="flex flex-col items-center text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 tracking-tight shadow-md shadow-[#E11D48]/20">
+              GAMING & TECH <span className="text-[#E11D48]">NEWS</span>
+            </h2>
+            <p className="max-w-xl sm:max-w-2xl text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed">
+              Your portal to the latest in gaming technology, hardware reviews, and the most exciting developments in the digital frontier.
+            </p>
+          </div>
+        </section>
 
-          {/* Featured Posts */}
-          <section className="border-b border-gray-800 py-12">
-            <div className="container mx-auto px-4">
-              <h2 className="mb-8 flex items-center text-3xl font-bold gap-2">
-                <span className="mr-4 inline-block h-8 w-2 bg-[#E11D48]"></span>    
-                FEATURED <span className="text-[#e11d48]">STORIES</span>
-              </h2>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {featuredPostsData.map((post) => (
-                  <BlogCard key={post.id} post={post} isFeatured={true} />
-                ))}
-              </div>
+        {/* Featured Posts */}
+        <section className="border-b border-white/10 py-8 sm:py-10 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-0">
+            <h2 className="mb-6 sm:mb-8 flex items-center text-2xl sm:text-3xl font-bold gap-2">
+              <span className="inline-block h-6 sm:h-8 w-2 bg-[#E11D48]"></span>
+              FEATURED <span className="text-[#E11D48]">STORIES</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+              {featuredPostsData.map((post) => (
+                <BlogCard key={post.id} post={post} isFeatured={true} />
+              ))}
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Latest Posts */}
-          <section className="py-12">
-            <div className="container mx-auto px-4">
-              <h2 className="mb-8 flex items-center text-3xl font-bold gap-2">
-                <span className="mr-4 inline-block h-8 w-2 bg-[#E11D48]"></span>
-                LATEST <span className="text-[#e11d48]">POSTS</span>
-              </h2>
-              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {latestPostsData.map((post) => (
-                  <BlogCard key={post.id} post={post} />
-                ))}
-              </div>
+        {/* Latest Posts */}
+        <section className="py-8 sm:py-10 lg:py-12">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-0">
+            <h2 className="mb-6 sm:mb-8 flex items-center text-2xl sm:text-3xl font-bold gap-2">
+              <span className="inline-block h-6 sm:h-8 w-2 bg-[#E11D48]"></span>
+              LATEST <span className="text-[#E11D48]">POSTS</span>
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+              {latestPostsData.map((post) => (
+                <BlogCard key={post.id} post={post} />
+              ))}
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </section>
   );

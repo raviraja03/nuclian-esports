@@ -67,66 +67,78 @@ const tournamentsData = [
 
 // --- Banner Component ---
 const Banner = () => (
-  <section className="relative">
-    <div className="absolute left-0 z-10 h-[55vh] w-full bg-gradient-to-b from-black/40 to-black/80 pointer-events-none"></div>
+  <section className="relative overflow-hidden">
     <div
-      className="min-h-[55vh] bg-cover bg-center"
+      className="min-h-[55vh] sm:min-h-[60vh] bg-cover bg-center bg-no-repeat transform transition-transform duration-300"
       style={{ backgroundImage: `url(${herobg})` }}
-    ></div>
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#E11D48]/10 via-transparent to-[#FC4E5B]/10"></div>
+    </div>
   </section>
 );
 
 // --- Filter Bar Component ---
 const FilterBar = () => (
-  <div className="relative z-20 flex flex-wrap items-center justify-center bg-[#b0123a] px-2">
-    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
-      Upcoming
-    </button>
-    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
-      Ongoing
-    </button>
-    <button className="mx-1.5 my-2 border-b-4 border-transparent bg-transparent py-3 px-5 text-[1rem] md:text-[1.2rem] font-bold text-white outline-none transition-all duration-200 hover:border-white">
-      Past
-    </button>
+  <div className="relative z-20 bg-gradient-to-r from-[#b0123a] to-[#E11D48] px-4 sm:px-6 lg:px-12 py-4">
+    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
+        Upcoming
+      </button>
+      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
+        Ongoing
+      </button>
+      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
+        Past
+      </button>
+    </div>
   </div>
 );
 
 // --- TournamentCard Component ---
 const TournamentCard = ({ card }) => {
   return (
-    <div className="bg-[#0a141d] p-3 rounded-lg border-2 border-[#fc4e5b] flex flex-col">
+    <div className="bg-[#0a141d]/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-white/10 hover:border-[#FC4E5B]/50 hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 flex flex-col h-full group">
       {/* Image */}
-      <div className="h-48 md:h-64 overflow-hidden rounded-lg">
+      <div className="h-48 sm:h-52 md:h-56 lg:h-64 overflow-hidden rounded-xl mb-4">
         <img
           src={card.image}
           alt={card.title}
-          className="h-full w-full object-cover rounded-lg hover:scale-105 transition-transform duration-300"
+          className="h-full w-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500 ease-out"
         />
       </div>
 
       {/* Content */}
-      <div className="p-3 text-white font-['Lexend',_sans-serif] flex flex-col flex-grow">
-        <h3 className="text-xl md:text-2xl font-bold line-clamp-2">{card.title}</h3>
-        <div className="flex justify-between font-semibold mt-3 text-sm md:text-base">
-          <span>Entry:</span>
-          <span>₹{card.entry_amount}</span>
-        </div>
-        <div className="flex justify-between font-semibold text-sm md:text-base">
-          <span>Prize:</span>
-          <span>₹{card.price_pool}</span>
-        </div>
-        <div className="flex justify-between font-semibold text-sm md:text-base">
-          <span>Room ID:</span>
-          <span>{card.room_id}</span>
-        </div>
-        <div className="flex justify-between font-semibold mb-4 text-sm md:text-base">
-          <span>Players:</span>
-          <span>{card.participants}</span>
+      <div className="flex flex-col flex-grow text-white font-Lex">
+        <h3 className="text-lg sm:text-xl md:text-2xl font-bold line-clamp-2 mb-3 tracking-tight group-hover:text-[#FC4E5B] transition-colors duration-300">
+          {card.title}
+        </h3>
+        
+        <div className="space-y-2 mb-4">
+          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+            <span className="text-gray-300">Entry:</span>
+            <span className="text-[#E11D48] font-bold">₹{card.entry_amount}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+            <span className="text-gray-300">Prize:</span>
+            <span className="text-[#FC4E5B] font-bold">₹{card.price_pool.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+            <span className="text-gray-300">Room ID:</span>
+            <span className="font-mono text-white/80">{card.room_id}</span>
+          </div>
+          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+            <span className="text-gray-300">Players:</span>
+            <span className="text-yellow-400">{card.participants}</span>
+          </div>
         </div>
 
-        {/* Button */}
-        <div className="mt-auto">
-          <Button_2 content="Join Now" />
+        {/* Button - Sticky to bottom */}
+        <div className="mt-auto pt-2">
+          <Button_2 
+            content="Join Now" 
+            className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm sm:text-base"
+          />
         </div>
       </div>
     </div>
@@ -136,11 +148,11 @@ const TournamentCard = ({ card }) => {
 // --- Main Page Content ---
 const TournamentsPageContent = () => {
   return (
-    <main className="bg-black text-white font-['Lexend',_sans-serif]">
+    <main className="bg-black/95 text-white font-Lex relative">
       <Banner />
       <FilterBar />
-      <section className="px-4 md:px-12 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+      <section className="px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {tournamentsData.map((cardData) => (
             <TournamentCard key={cardData.id} card={cardData} />
           ))}

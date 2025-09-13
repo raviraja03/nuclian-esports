@@ -4,18 +4,18 @@ import { TbCircleDashedNumber1, TbCircleDashedNumber2, TbCircleDashedNumber3 } f
 
 const Step = () => {
   return (
-    <section className="font-Lex">
+    <section className="font-Lex bg-black py-12">
       <div className="max-w-7xl mx-auto px-6 py-10 text-white">
         {/* Heading */}
-        <Heading highlight="Steps" nohighlight="to join" />
+        <Heading highlight="Steps" nohighlight="to Join" />
 
         {/* Content */}
         <div className="flex flex-col md:flex-row md:items-center gap-8 mt-12">
-          <h3 className="text-2xl font-bold md:w-1/2">
+          <h3 className="text-2xl sm:text-3xl font-bold md:w-1/2">
             Join the Exciting World of eSports Tournaments with{" "}
             <span className="text-[#E11D48]">NuclianEsports</span>
           </h3>
-          <p className="font-semibold md:w-1/2 text-gray-300">
+          <p className="font-semibold md:w-1/2 text-gray-300 text-base sm:text-lg">
             Participating in eSports tournaments has never been easier. Follow
             our simple steps to register, compete, and win. Get ready to
             showcase your skills and join the action!
@@ -25,12 +25,12 @@ const Step = () => {
         {/* Steps Cards */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Card-1 */}
-          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl hover:scale-105 transition-all duration-200 ease-linear">
-            <span className="flex justify-center items-center bg-yellow-500 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
+          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 ease-out backdrop-blur-sm border border-white/10">
+            <span className="flex justify-center items-center bg-yellow-400 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
               <TbCircleDashedNumber1 />
             </span>
             <div>
-              <h3 className="text-xl md:text-2xl font-semibold">
+              <h3 className="text-xl md:text-2xl font-semibold tracking-tight">
                 Step 1: Create Your Account
               </h3>
               <p className="text-base md:text-lg mt-3 mb-4 text-gray-300">
@@ -43,12 +43,12 @@ const Step = () => {
           </div>
 
           {/* Card-2 */}
-          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl hover:scale-105 transition-all duration-200 ease-linear">
-            <span className="flex justify-center items-center bg-yellow-500 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
+          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 ease-out backdrop-blur-sm border border-white/10">
+            <span className="flex justify-center items-center bg-yellow-400 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
               <TbCircleDashedNumber2 />
             </span>
             <div>
-              <h3 className="text-xl md:text-2xl font-semibold">
+              <h3 className="text-xl md:text-2xl font-semibold tracking-tight">
                 Step 2: Browse and Select Tournaments
               </h3>
               <p className="text-base md:text-lg mt-3 mb-4 text-gray-300">
@@ -62,12 +62,12 @@ const Step = () => {
           </div>
 
           {/* Card-3 */}
-          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl hover:scale-105 transition-all duration-200 ease-linear">
-            <span className="flex justify-center items-center bg-yellow-500 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
+          <div className="flex bg-[#0a141d]/80 flex-col sm:flex-row p-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 ease-out backdrop-blur-sm border border-white/10">
+            <span className="flex justify-center items-center bg-yellow-400 w-12 h-12 rounded-lg text-black text-3xl mr-0 sm:mr-4 mb-4 sm:mb-0">
               <TbCircleDashedNumber3 />
             </span>
             <div>
-              <h3 className="text-xl md:text-2xl font-semibold">
+              <h3 className="text-xl md:text-2xl font-semibold tracking-tight">
                 Step 3: Join and Compete
               </h3>
               <p className="text-base md:text-lg mt-3 mb-4 text-gray-300">

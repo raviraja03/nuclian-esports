@@ -1,6 +1,6 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, Autoplay } from "swiper/modules";
 import Heading from "../Heading/Heading";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import Customer1 from "../../assets/profile_img_1.jpg";
@@ -8,60 +8,80 @@ import Customer2 from "../../assets/profile_img_2.jpg";
 import Customer3 from "../../assets/profile_img_3.jpg";
 import Customer4 from "../../assets/profile_img_4.jpg";
 import Customer5 from "../../assets/profile_img_5.jpg";
-import 'swiper/css';
-import 'swiper/css/navigation';
+import "swiper/css";
+import "swiper/css/navigation";
 import { FaStar } from "react-icons/fa";
 
 const Testimonials = () => {
   return (
-    <section>
-      <div className="max-w-full mx-auto px-15 py-10 text-white font-Lex">
+    <section className="bg-black/90 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-white font-Lex">
         <Heading highlight="Players" nohighlight="Reviews" />
 
         {/* Navigation Buttons */}
-        <div className="flex justify-end py-5 gap-x-3 mt-7">
-          <button className="custom-prev text-2xl rounded-lg w-11 h-11 text-black bg-zinc-100 flex justify-center items-center hover:bg-gradient-to-b hover:from-[#e11d48] hover:to-[#fc4e5b] hover:text-white cursor-pointer">
+        <div className="flex justify-end py-4 sm:py-5 gap-x-3 mt-6 sm:mt-7">
+          <button className="custom-prev text-xl sm:text-2xl rounded-xl w-10 h-10 sm:w-11 sm:h-11 text-black bg-white flex justify-center items-center hover:bg-gradient-to-b hover:from-[#e11d48] hover:to-[#fc4e5b] hover:text-white cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
             <IoIosArrowBack />
           </button>
-          <button className="custom-next text-2xl rounded-lg w-11 h-11 text-black bg-zinc-100 flex justify-center items-center hover:bg-gradient-to-b hover:from-[#e11d48] hover:to-[#fc4e5b] hover:text-white cursor-pointer">
+          <button className="custom-next text-xl sm:text-2xl rounded-xl w-10 h-10 sm:w-11 sm:h-11 text-black bg-white flex justify-center items-center hover:bg-gradient-to-b hover:from-[#e11d48] hover:to-[#fc4e5b] hover:text-white cursor-pointer transition-all duration-300 shadow-md hover:shadow-lg">
             <IoIosArrowForward />
           </button>
         </div>
 
         {/* Swiper */}
-        <Swiper 
+        <Swiper
           navigation={{
             nextEl: ".custom-next",
-            prevEl: ".custom-prev"
-          }} 
+            prevEl: ".custom-prev",
+          }}
           loop={true}
+          autoplay={{
+            delay: 5000,
+            disableOnInteraction: false,
+          }}
           breakpoints={{
+            320: { slidesPerView: 1, spaceBetween: 16 },
             640: { slidesPerView: 1, spaceBetween: 20 },
             768: { slidesPerView: 2, spaceBetween: 20 },
-            1024: { slidesPerView: 3, spaceBetween: 20 }
+            1024: { slidesPerView: 3, spaceBetween: 30 },
+            1200: { slidesPerView: 3, spaceBetween: 40 },
           }}
-          modules={[Navigation]} 
+          modules={[Navigation, Autoplay]}
           className="mySwiper"
+          speed={800}
         >
           {review.map((item) => (
-            <SwiperSlide key={item.id} className="bg-white/90 rounded-lg p-5 hover:scale-105 transition-transform duration-300 ease-in-out shadow-lg">
-              <div className="flex gap-5 items-center">
-                <div className="w-16 h-16 rounded-full outline-2 outline-[#e11d48] outline-offset-4 overflow-hidden">
-                  <img src={item.image} alt={item.name} className="w-full h-full object-cover"/>
+            <SwiperSlide
+              key={item.id}
+              className="pb-4"
+            >
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 sm:p-6 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ease-in-out border border-white/10 min-h-[280px] flex flex-col">
+                <div className="flex gap-4 items-start sm:gap-5">
+                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full outline-2 outline-[#e11d48] outline-offset-4 overflow-hidden transition-all duration-500 hover:scale-110">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h5 className="text-lg sm:text-xl font-bold text-white truncate transition-all duration-500 hover:text-[#e11d48]">
+                      {item.name}
+                    </h5>
+                    <p className="text-white/80 font-medium text-sm sm:text-base">{item.profession}</p>
+                    <span className="flex text-yellow-400 mt-2 text-lg sm:text-xl gap-1">
+                      {Array.from({ length: item.rating }, (_, index) => (
+                        <FaStar key={index} />
+                      ))}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <h5 className="text-xl font-bold text-black">{item.name}</h5>
-                  <p className="text-black">{item.profession}</p>
-                  <span className="flex text-yellow-400 mt-2 text-xl gap-1">
-                    {Array.from({length: item.rating}, (_, index) => (
-                      <FaStar key={index}/>
-                    ))}
-                  </span>
-                </div>
-              </div>
 
-              <div className="mt-7 min-h-[15vh]">
-                <p className="text-black">{item.para}</p>
+                <div className="mt-4 sm:mt-6 flex-1 min-h-[12vh] flex items-end">
+                  <p className="text-white/90 text-sm sm:text-base leading-relaxed transition-opacity duration-500 hover:opacity-100 line-clamp-4">
+                    {item.para}
+                  </p>
+                </div>
               </div>
             </SwiperSlide>
           ))}
