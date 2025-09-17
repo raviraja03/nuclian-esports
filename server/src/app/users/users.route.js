@@ -1,43 +1,64 @@
-const router = require("express").Router();
+const userRouter = require("express").Router();
 const {
   register,
   login,
+  logout,
   getUsers,
   getUserById,
   updateUser,
   deleteUser,
   getProfile,
-  updateProfile
-} = require('./users.controller');
-const { protect, authorize } = require('../../middleware/auth');
+  updateProfile,
+} = require("./users.controller");
+const { protect, authorize } = require("../../middleware/auth");
 const {
   registerValidation,
   loginValidation,
   updateUserValidation,
   paginationValidation,
-  userIdValidation
-} = require('../../utils/validation');
-const { validateRequest } = require('../../middleware/error');
+  userIdValidation,
+} = require("../../utils/validation");
+const { validate } = require("../../middleware/zodMiddleware");
+const { registerSchema, loginSchema } = require("../../middleware/schemas");
 
 // Public routes
-router.post('/users/register', registerValidation, validateRequest, register);
-router.post('/users/login', loginValidation, validateRequest, login);
+userRouter.post("/users/register", validate(registerSchema), register);
+userRouter.post("/users/login", validate(loginSchema), login);
+userRouter.post("/users/logout", logout);
 
 // Protected routes
-router.use(protect); // Apply authentication middleware to all routes below
+userRouter.use(protect); // Apply authentication middleware to all routes below
 
 // User profile routes
-router.route('/profile')
+userRouter
+  .route("/users/profile")
   .get(getProfile)
-  .put(updateUserValidation, validateRequest, updateProfile);
+  .put(updateUserValidation, updateProfile);
 
 // Admin only routes
-router.route('/')
-  .get(authorize('admin', 'superadmin'), paginationValidation, validateRequest, getUsers);
+userRouter
+  .route("/")
+  .get(authorize("admin", "superadmin"), paginationValidation, getUsers);
 
-router.route('/:id')
-  .get(authorize('admin', 'superadmin'), userIdValidation, validateRequest, getUserById)
-  .put(authorize('admin', 'superadmin'), [...userIdValidation, ...updateUserValidation], validateRequest, updateUser)
-  .delete(authorize('admin', 'superadmin'), userIdValidation, validateRequest, deleteUser);
+userRouter
+  .route("/:id")
+  .get(
+    authorize("admin", "superadmin"),
+    userIdValidation,
 
-module.exports = router;
+    getUserById
+  )
+  .put(
+    authorize("admin", "superadmin"),
+    [...userIdValidation, ...updateUserValidation],
+
+    updateUser
+  )
+  .delete(
+    authorize("admin", "superadmin"),
+    userIdValidation,
+
+    deleteUser
+  );
+
+module.exports = userRouter;

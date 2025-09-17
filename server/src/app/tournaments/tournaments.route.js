@@ -1,5 +1,5 @@
 const express = require('express');
-const controller = require('./tournament.controller');
+const controller = require('./tournaments.controller');
 const {
   requireAuth,
   validateObjectId,
@@ -7,23 +7,23 @@ const {
   isParticipant
 } = require('../../middleware/tournamentMiddleware');
 
-const router = express.Router();
+const tournamentRouter = express.Router();
 
 // GET /api/v1/tournaments
-router.get(
+tournamentRouter.get(
   '/',
   asyncHandler(controller.getAllTournaments)
 );
 
 // GET /api/v1/tournaments/:id
-router.get(
+tournamentRouter.get(
   '/:id',
   validateObjectId('id'),
   asyncHandler(controller.getTournamentById)
 );
 
 // POST /api/v1/tournaments/:id/register
-router.post(
+tournamentRouter.post(
   '/:id/register',
   requireAuth,
   validateObjectId('id'),
@@ -31,7 +31,7 @@ router.post(
 );
 
 // POST /api/v1/tournaments/:id/check-in
-router.post(
+tournamentRouter.post(
   '/:id/check-in',
   requireAuth,
   validateObjectId('id'),
@@ -40,7 +40,7 @@ router.post(
 );
 
 // GET /api/v1/tournaments/my/all
-router.get(
+tournamentRouter.get(
   '/my/all',
   requireAuth,
   asyncHandler(controller.getMyTournaments)
@@ -48,7 +48,7 @@ router.get(
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId
 // This route is for user withdrawal only. Admin removal should be in admin.route.js if needed.
-router.delete(
+tournamentRouter.delete(
   '/:tournamentId/participants/:participantId',
   requireAuth,
   validateObjectId('tournamentId'),
@@ -57,7 +57,7 @@ router.delete(
 );
 
 // GET /api/tournaments/:tournamentId/matches/:matchId
-router.get(
+tournamentRouter.get(
   '/:tournamentId/matches/:matchId',
   validateObjectId('tournamentId'),
   validateObjectId('matchId'),
@@ -65,14 +65,14 @@ router.get(
 );
 
 // GET /api/tournaments/:tournamentId/leaderboard
-router.get(
+tournamentRouter.get(
   '/:tournamentId/leaderboard',
   validateObjectId('tournamentId'),
   asyncHandler(controller.getLeaderboard)
 );
 
 // GET /api/tournaments/:tournamentId/stats/:playerOrTeamId
-router.get(
+tournamentRouter.get(
   '/:tournamentId/stats/:playerOrTeamId',
   validateObjectId('tournamentId'),
   validateObjectId('playerOrTeamId'),
@@ -80,4 +80,4 @@ router.get(
   asyncHandler(controller.getPlayerOrTeamStats)
 );
 
-module.exports = router;
+module.exports = tournamentRouter;

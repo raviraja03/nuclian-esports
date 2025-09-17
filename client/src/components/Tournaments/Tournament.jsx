@@ -1,15 +1,18 @@
-import React from 'react';
+import React from "react";
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
 import Freefire from "../../assets/ff_game_poster.jpg";
 import herobg from "../../assets/hero_image_3.png";
-import Button_2 from '../Button/Button_2';
-import Coins from '../Coins/Coins';
+import Button_2 from "../Button/Button_2";
+import Coins from "../Coins/Coins";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 // --- Tournament Data ---
 const tournamentsData = [
   {
+    type:"5v5",
     id: 1,
     title: "Valorant 5 GWB3",
     image: Valo,
@@ -19,6 +22,7 @@ const tournamentsData = [
     participants: "88 / 100",
   },
   {
+      type:"4v4",
     id: 2,
     title: "BGMI Championship",
     image: Bgmi,
@@ -28,6 +32,7 @@ const tournamentsData = [
     participants: "68 / 100",
   },
   {
+      type:"4v4",
     id: 3,
     title: "COD: Mobile Summer Cup",
     image: Cod,
@@ -37,6 +42,7 @@ const tournamentsData = [
     participants: "28 / 100",
   },
   {
+      type:"3v3",
     id: 4,
     title: "Apex Legends Showdown",
     image: Freefire,
@@ -46,6 +52,7 @@ const tournamentsData = [
     participants: "50 / 60",
   },
   {
+      type:"solo",
     id: 5,
     title: "Fortnite Elite Clash",
     image: Bgmi,
@@ -55,6 +62,7 @@ const tournamentsData = [
     participants: "95 / 100",
   },
   {
+      type:"5v5",
     id: 6,
     title: "League of Legends Finals",
     image: Valo,
@@ -64,6 +72,10 @@ const tournamentsData = [
     participants: "12 / 16",
   },
 ];
+
+
+
+
 
 // --- Banner Component ---
 const Banner = () => (
@@ -100,12 +112,20 @@ const TournamentCard = ({ card }) => {
   return (
     <div className="bg-[#0a141d]/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-white/10 hover:border-[#FC4E5B]/50 hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 flex flex-col h-full group">
       {/* Image */}
-      <div className="h-48 sm:h-52 md:h-56 lg:h-64 overflow-hidden rounded-xl mb-4">
+      <div className="h-48 sm:h-52 md:h-56 lg:h-64 overflow-hidden rounded-xl mb-4 relative">
         <img
           src={card.image}
           alt={card.title}
           className="h-full w-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500 ease-out"
         />
+      
+          <span
+            className="absolute top-2 left-2 bg-[#E11D48]/80 text-white text-xs sm:text-sm font-Lex font-semibold px-2 py-1 rounded-md shadow-sm hover:bg-[#FC4E5B]/80 transition-colors duration-300"
+            aria-label={`Tournament type: ${card.type}`}
+          >
+            {card.type}
+          </span>
+      
       </div>
 
       {/* Content */}
@@ -113,19 +133,19 @@ const TournamentCard = ({ card }) => {
         <h3 className="text-lg sm:text-xl md:text-2xl font-bold line-clamp-2 mb-3 tracking-tight group-hover:text-[#FC4E5B] transition-colors duration-300">
           {card.title}
         </h3>
-        
+
         <div className="space-y-2 mb-4">
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Entry:</span>
-            <span className="text-[#E11D48] font-bold">₹{card.entry_amount}</span>
+            <span className="text-[#E11D48] font-bold">
+              ₹{card.entry_amount}
+            </span>
           </div>
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Prize:</span>
-            <span className="text-[#FC4E5B] font-bold">₹{card.price_pool.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
-            <span className="text-gray-300">Room ID:</span>
-            <span className="font-mono text-white/80">{card.room_id}</span>
+            <span className="text-[#FC4E5B] font-bold">
+              ₹{card.price_pool.toLocaleString()}
+            </span>
           </div>
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Players:</span>
@@ -135,10 +155,11 @@ const TournamentCard = ({ card }) => {
 
         {/* Button - Sticky to bottom */}
         <div className="mt-auto pt-2">
-          <Button_2 
-            content="Join Now" 
-            className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm sm:text-base"
-          />
+          <Link to={`/tournaments/${card.id}`}>
+            <Button_2
+              content="Join Now"
+            />
+          </Link>
         </div>
       </div>
     </div>

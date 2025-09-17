@@ -134,7 +134,7 @@ const BlogCard = ({ post, isFeatured }) => (
 // --- Main News Page Component ---
 const Blog = () => {
   return (
-    <section className="bg-black/95 text-white font-Lex pt-[10vh]">
+    <section className="bg-black/95 text-white font-Lex mt-[5vh]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
         {/* Hero Section */}
         <section className="border-b border-white/10 py-10 sm:py-12 lg:py-16">

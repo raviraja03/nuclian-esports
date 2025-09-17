@@ -14,7 +14,7 @@ const SiteFooter = () => {
           {/* Brand Info */}
           <div className="col-span-1">
             <div className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 tracking-tight">
-              Nuclian<span className="text-[#E11D48]">Esports</span>
+              TribeX<span className="text-[#E11D48]">eSports</span>
             </div>
             <div className="text-xs sm:text-sm opacity-70 mb-3 sm:mb-4 tracking-wide">EST. 2025</div>
             <p className="text-sm sm:text-base leading-relaxed opacity-80 mb-4 sm:mb-6 max-w-md">

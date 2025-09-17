@@ -5,7 +5,9 @@ const path = require("path");
 
 const loadRoutesAndMiddleware = function (app, apiVersion = "v1") {
     const modulesPath = path.join(__dirname, "../app", apiVersion).replace("v1", "");
+    console.log(modulesPath)
     const modules = fs.readdirSync(modulesPath);
+    console.log(modules)
     modules.forEach((folderName) => {
         const preFix = `/api/${apiVersion}`;
         if (folderName === "v2") {

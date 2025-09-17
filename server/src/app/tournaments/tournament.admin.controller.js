@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const Tournament = require('../../models/Tournament');
+const Tournament = require('../../models/tournament.model');
+
 
 // GET /tournaments - Get all tournaments with pagination and filters
 exports.getAllTournaments = async (req, res, next) => {

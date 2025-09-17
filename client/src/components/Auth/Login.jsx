@@ -1,54 +1,73 @@
-import React, { useState } from 'react';
-import { FaGoogle } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
-
+import { FaGoogle } from "react-icons/fa";
+import { Link,useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "../../globalState/slices/auth";
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (email && password) {
-      setIsLoading(true);
-      setTimeout(() => {
-        toast.success('Login successful! Redirecting to dashboard...', {
-          style: {
-            background: '#0a141d',
-            color: '#fff',
-            border: '1px solid #FC4E5B',
-            borderRadius: '8px',
-            padding: '12px',
-          },
-          iconTheme: {
-            primary: '#E11D48',
-            secondary: '#fff',
-          },
-        });
-        setIsLoading(false);
-      }, 1500);
-    } else {
-      toast.error('Please fill in both email and password', {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    try {
+      // Simulate API call
+      const response = await axios.post(
+        "http://localhost:5001/api/v1/users/login",
+        {
+          email: data.email,
+          password: data.password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast.success("Login successful!", {
         style: {
-          background: '#0a141d',
-          color: '#fff',
-          border: '1px solid #FC4E5B',
-          borderRadius: '8px',
-          padding: '12px',
+          background: "#0a141d",
+          color: "#fff",
+          border: "1px solid #FC4E5B",
+          borderRadius: "8px",
+          padding: "12px",
         },
         iconTheme: {
-          primary: '#E11D48',
-          secondary: '#fff',
+          primary: "#E11D48",
+          secondary: "#fff",
         },
       });
+      dispatch(setCredentials({ user: response.data.data }));
+      navigate("/", { replace: true });
+    } catch (error) {
+      toast.error(
+        error.response.data.message || "An error occurred. Please try again.",
+        {
+          style: {
+            background: "#0a141d",
+            color: "#fff",
+            border: "1px solid #FC4E5B",
+            borderRadius: "8px",
+            padding: "12px",
+          },
+          iconTheme: {
+            primary: "#E11D48",
+            secondary: "#fff",
+          },
+        }
+      );
     }
   };
 
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div className="font-Lex flex min-h-screen items-center justify-center bg-black/95 text-white pt-[10vh] px-4 sm:px-6 lg:px-12">
+      <div className="font-Lex flex min-h-screen items-center justify-center bg-black/95 text-white  px-4 sm:px-6 lg:px-12">
         <div className="relative z-10 w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="form-container overflow-hidden rounded-2xl bg-[#0a141d]/80 backdrop-blur-sm border border-white/10 p-6 sm:p-8 shadow-2xl transition-all duration-500 ease-in-out">
             <div className="mb-6 sm:mb-8 text-center">
@@ -59,68 +78,100 @@ const Login = () => {
                 Join the ultimate gaming experience
               </p>
             </div>
-            
-            <form onSubmit={handleSubmit}>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-5 sm:space-y-6">
                 {/* Email Input */}
                 <div className="relative">
-                  <label htmlFor="login-email" className="sr-only">Email</label>
-                  <input 
-                    type="email" 
-                    id="login-email" 
-                    className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300"
+                  <label htmlFor="login-email" className="sr-only">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="login-email"
+                    className={`w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300 ${
+                      errors.email ? "border-[#FC4E5B]" : ""
+                    }`}
                     placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required 
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value:
+                          /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                        message: "Invalid email address",
+                      },
+                    })}
                   />
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-[#FC4E5B]">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
-                
+
                 {/* Password Input */}
                 <div className="relative">
-                  <label htmlFor="login-password" className="sr-only">Password</label>
-                  <input 
-                    type="password" 
-                    id="login-password" 
-                    className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300"
+                  <label htmlFor="login-password" className="sr-only">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="login-password"
+                    className={`w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300 ${
+                      errors.password ? "border-[#FC4E5B]" : ""
+                    }`}
                     placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required 
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: {
+                        value: 6,
+                        message: "Password must be at least 6 characters",
+                      },
+                    })}
                   />
+                  {errors.password && (
+                    <p className="mt-1 text-xs text-[#FC4E5B]">
+                      {errors.password.message}
+                    </p>
+                  )}
                   <div className="mt-1 text-right">
-                    <a href="#" className="text-xs sm:text-sm text-gray-400 hover:text-[#FC4E5B] transition-colors duration-300">
+                    <a
+                      href="#"
+                      className="text-xs sm:text-sm text-gray-400 hover:text-[#FC4E5B] transition-colors duration-300"
+                    >
                       Forgot password?
                     </a>
                   </div>
                 </div>
-                
-                <button 
-                  type="submit" 
-                  disabled={isLoading}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
                   className="w-full rounded-lg bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] py-3 px-4 font-semibold text-white shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#E11D48]/50"
                 >
-                  {isLoading ? 'Logging in...' : 'Login'}
+                  {isSubmitting ? "Logging in..." : "Login"}
                 </button>
-                
+
                 <div className="my-4 flex items-center">
                   <div className="flex-1 border-t border-white/20"></div>
-                  <span className="px-3 sm:px-4 text-xs sm:text-sm text-gray-400">OR</span>
+                  <span className="px-3 sm:px-4 text-xs sm:text-sm text-gray-400">
+                    OR
+                  </span>
                   <div className="flex-1 border-t border-white/20"></div>
                 </div>
-                
-                <button 
-                  type="button" 
+
+                <button
+                  type="button"
                   className="flex w-full items-center justify-center space-x-2 rounded-lg bg-white/90 py-3 px-4 font-semibold text-[#4285F4] shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#4285F4]/50"
                 >
                   <FaGoogle />
                   <span>Continue with Google</span>
                 </button>
-                
+
                 <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
-                  Don't have an account? 
-                  <Link 
-                    to="/signup" 
+                  Don't have an account?
+                  <Link
+                    to="/signup"
                     className="group relative ml-1 font-semibold text-[#E11D48] transition-colors duration-300 hover:text-[#FC4E5B]"
                   >
                     Sign up
