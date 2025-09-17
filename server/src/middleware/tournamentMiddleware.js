@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Middleware: requireAuth
-exports.requireAuth = (req, res, next) => {
+export const requireAuth = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
@@ -9,7 +9,7 @@ exports.requireAuth = (req, res, next) => {
 };
 
 // Middleware: validateObjectId(param)
-exports.validateObjectId = (param) => (req, res, next) => {
+export const validateObjectId = (param) => (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params[param])) {
     return res.status(400).json({ message: `Invalid ObjectId for ${param}` });
   }
@@ -17,20 +17,20 @@ exports.validateObjectId = (param) => (req, res, next) => {
 };
 
 // Middleware: asyncHandler
-exports.asyncHandler = (fn) => (req, res, next) => {
+export const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 // Middleware: isParticipant (for user endpoints only)
-exports.isParticipant = async (req, res, next) => {
-  const Tournament = require('../models/Tournament');
+export const isParticipant = async (req, res, next) => {
+  const Tournament = await import('../models/tournament.model.js');
   const tournamentId = req.params.id || req.params.tournamentId;
   const userId = req.user && req.user._id;
   if (!tournamentId || !userId) {
     return res.status(400).json({ message: 'Missing tournament or user' });
   }
   // Only check visible tournaments for user endpoints
-  const tournament = await Tournament.findOne({ _id: tournamentId, isVisible: true });
+  const tournament = await Tournament.default.findOne({ _id: tournamentId, isVisible: true });
   if (!tournament) {
     return res.status(404).json({ message: 'Tournament not found or not visible' });
   }
@@ -44,14 +44,14 @@ exports.isParticipant = async (req, res, next) => {
 };
 
 // Admin middleware: isAdminParticipant (for admin endpoints)
-exports.isAdminParticipant = async (req, res, next) => {
-  const Tournament = require('../models/Tournament');
+export const isAdminParticipant = async (req, res, next) => {
+  const Tournament = await import('../models/tournament.model.js');
   const tournamentId = req.params.id || req.params.tournamentId;
   const userId = req.params.userId || req.params.participantId;
   if (!tournamentId || !userId) {
     return res.status(400).json({ message: 'Missing tournament or user' });
   }
-  const tournament = await Tournament.findById(tournamentId);
+  const tournament = await Tournament.default.findById(tournamentId);
   if (!tournament) {
     return res.status(404).json({ message: 'Tournament not found' });
   }

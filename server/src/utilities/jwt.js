@@ -1,5 +1,5 @@
 // Handles JWT token generation and verification
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "Secreet";
 
@@ -14,4 +14,4 @@ function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
-module.exports = { generateToken, verifyToken };
+export { generateToken, verifyToken };

@@ -1,5 +1,5 @@
-const swaggerJsdoc = require("swagger-jsdoc");
-const swaggerUi = require("swagger-ui-express");
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const { APP_NAME } = process.env;
 
@@ -41,4 +41,4 @@ function swaggerDocs(app) {
     });
 }
 
-module.exports = swaggerDocs;
+export default swaggerDocs;

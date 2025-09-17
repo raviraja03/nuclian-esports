@@ -1,5 +1,6 @@
-const router = require("express").Router();
-const {
+import express from "express";
+const router = express.Router();
+import {
   register,
   login,
   getUsers,
@@ -8,16 +9,16 @@ const {
   deleteUser,
   getProfile,
   updateProfile
-} = require('./users.controller');
-const { protect, authorize } = require('../../middleware/auth');
-const {
+} from './users.controller.js';
+import { protect, authorize } from '../../middleware/auth.js';
+import {
   registerValidation,
   loginValidation,
   updateUserValidation,
   paginationValidation,
   userIdValidation
-} = require('../../utils/validation');
-const { validateRequest } = require('../../middleware/error');
+} from '../../utils/validation.js';
+import { validateRequest } from '../../middleware/error.js';
 
 // Public routes
 router.post('/users/register', registerValidation, validateRequest, register);
@@ -40,4 +41,4 @@ router.route('/:id')
   .put(authorize('admin', 'superadmin'), [...userIdValidation, ...updateUserValidation], validateRequest, updateUser)
   .delete(authorize('admin', 'superadmin'), userIdValidation, validateRequest, deleteUser);
 
-module.exports = router;
+export default router;

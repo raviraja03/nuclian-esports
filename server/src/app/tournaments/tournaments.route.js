@@ -1,11 +1,11 @@
-const express = require('express');
-const controller = require('./tournament.controller');
-const {
+import express from 'express';
+import * as controller from './tournaments.controller.js';
+import {
   requireAuth,
   validateObjectId,
   asyncHandler,
   isParticipant
-} = require('../../middleware/tournamentMiddleware');
+} from '../../middleware/tournamentMiddleware.js';
 
 const router = express.Router();
 
@@ -80,4 +80,4 @@ router.get(
   asyncHandler(controller.getPlayerOrTeamStats)
 );
 
-module.exports = router;
+export default router;

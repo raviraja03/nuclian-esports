@@ -1,11 +1,11 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
-const userRoutes = require('./routes/userRoutes');
-const {loadRoutesAndMiddleware} = require("./utilities/server-utils");
-const swaggerAPIDoc = require("./swagger");
-const { errorHandler } = require('./middleware/errorMiddleware');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import userRoutes from './routes/userRoutes.js';
+import {loadRoutesAndMiddleware} from "./utilities/server-utils.js";
+import swaggerAPIDoc from "./swagger.js";
+import { errorHandler } from './middleware/errorMiddleware.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,13 +36,13 @@ const connectDB = async () => {
 // Error handling middleware
 app.use(errorHandler);
 
-// load routes and controllers files
-loadRoutesAndMiddleware(app);
-
 // Start server
 const PORT = process.env.PORT || 5001;
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  // load routes and controllers files
+  await loadRoutesAndMiddleware(app);
+  
   app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });

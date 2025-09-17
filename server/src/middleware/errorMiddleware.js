@@ -1,5 +1,4 @@
-
-const { verifyToken } = require('../utilities/jwt');
+import { verifyToken } from '../utilities/jwt.js';
 
 function authMiddleware(req, res, next) {
   // Checks for JWT token in Authorization header
@@ -24,4 +23,4 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-module.exports = { authMiddleware, errorHandler };
+export { authMiddleware, errorHandler };

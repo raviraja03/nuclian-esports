@@ -1,9 +1,9 @@
-const Tournament = require('../../models/Tournament');
-const mongoose = require('mongoose');
+import Tournament from '../../models/tournament.model.js';
+import mongoose from 'mongoose';
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-exports.getAllTournaments = async (req, res) => {
+export const getAllTournaments = async (req, res) => {
   const { page = 1, limit = 20, game, status } = req.query;
   const filter = { isVisible: true };
   if (game) filter.game = game;
@@ -17,7 +17,7 @@ exports.getAllTournaments = async (req, res) => {
 };
 
 // GET /api/v1/tournaments/:id - Get single tournament details
-exports.getTournamentById = async (req, res) => {
+export const getTournamentById = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: 'Invalid tournament ID' });
@@ -30,7 +30,7 @@ exports.getTournamentById = async (req, res) => {
 };
 
 // POST /api/v1/tournaments/:id/register - Register a user for a tournament
-exports.registerForTournament = async (req, res) => {
+export const registerForTournament = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -55,7 +55,7 @@ exports.registerForTournament = async (req, res) => {
 };
 
 // POST /api/v1/tournaments/:id/check-in - Check in a user for a tournament
-exports.checkInToTournament = async (req, res) => {
+export const checkInToTournament = async (req, res) => {
   const tournament = req.tournament;
   const participant = req.participant;
   const now = new Date();
@@ -71,7 +71,7 @@ exports.checkInToTournament = async (req, res) => {
 };
 
 // GET /api/v1/tournaments/my/all - Get tournaments the logged-in user is registered in
-exports.getMyTournaments = async (req, res) => {
+export const getMyTournaments = async (req, res) => {
   const userId = req.user._id;
   const tournaments = await Tournament.find({
     isVisible: true,
@@ -81,7 +81,7 @@ exports.getMyTournaments = async (req, res) => {
 };
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId - Withdraw a user from a tournament
-exports.withdrawFromTournament = async (req, res) => {
+export const withdrawFromTournament = async (req, res) => {
   const { tournamentId, participantId } = req.params;
   const userId = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(tournamentId) || !mongoose.Types.ObjectId.isValid(participantId)) {
@@ -107,13 +107,13 @@ exports.withdrawFromTournament = async (req, res) => {
 };
 
 // GET /api/tournaments/:tournamentId/matches/:matchId - Get specific match details
-exports.getMatchDetails = async (req, res) => {
+export const getMatchDetails = async (req, res) => {
   // Placeholder: Implement match details logic as per your match schema
   res.status(501).json({ message: 'Match details not implemented' });
 };
 
 // GET /api/tournaments/:tournamentId/leaderboard - Get tournament leaderboard
-exports.getLeaderboard = async (req, res) => {
+export const getLeaderboard = async (req, res) => {
   const { tournamentId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
     return res.status(400).json({ message: 'Invalid tournament ID' });
@@ -129,7 +129,7 @@ exports.getLeaderboard = async (req, res) => {
 };
 
 // GET /api/tournaments/:tournamentId/stats/:playerOrTeamId - Get stats of a player/team in the tournament
-exports.getPlayerOrTeamStats = async (req, res) => {
+export const getPlayerOrTeamStats = async (req, res) => {
   const { tournamentId, playerOrTeamId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
     return res.status(400).json({ message: 'Invalid tournament ID' });

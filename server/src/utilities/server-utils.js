@@ -1,26 +1,33 @@
 /* eslint-disable import/no-dynamic-require */
 /* eslint-disable global-require */
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath, pathToFileURL } from "url";
 
-const loadRoutesAndMiddleware = function (app, apiVersion = "v1") {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const loadRoutesAndMiddleware = async function (app, apiVersion = "v1") {
     const modulesPath = path.join(__dirname, "../app", apiVersion).replace("v1", "");
     const modules = fs.readdirSync(modulesPath);
-    modules.forEach((folderName) => {
+    
+    for (const folderName of modules) {
         const preFix = `/api/${apiVersion}`;
         if (folderName === "v2") {
-            return loadRoutesAndMiddleware(app, folderName);
+            await loadRoutesAndMiddleware(app, folderName);
+            continue;
         }
         const fileName = modulesPath.includes("v2") ? "route.js" : `${folderName}.route.js`;
         const routeFileName = path.join(modulesPath, folderName, fileName);
         if (fs.existsSync(routeFileName)) {
             try {
-                app.use(preFix, require(routeFileName));
+                const routeModule = await import(pathToFileURL(routeFileName).href);
+                app.use(preFix, routeModule.default);
             } catch (error) {
                 console.error(`Error loading route ${routeFileName}:`, error);
             }
         }
-    });
+    }
 };
 
 // const loadRoutesAndMiddleware = function (app, apiVersion = "v1") {
@@ -61,6 +68,6 @@ const loadRoutesAndMiddleware = function (app, apiVersion = "v1") {
 //     });
 // };
 
-module.exports = {
+export {
     loadRoutesAndMiddleware
 };
