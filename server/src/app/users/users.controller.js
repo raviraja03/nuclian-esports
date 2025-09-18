@@ -1,6 +1,6 @@
-const bcrypt = require('bcryptjs');
-const User = require('../../models/user.model');
-const { generateToken } = require('../../middleware/auth');
+import bcrypt from 'bcryptjs';
+import User from '../../models/user.model.js';
+import { generateToken } from '../../middleware/auth.js';
 
 // @desc    Register new user
 // @route   POST /api/users/register
@@ -294,7 +294,7 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   register,
   login,
   getUsers,

@@ -1,4 +1,4 @@
-const { body, param, query } = require('express-validator');
+import { body, param, query } from 'express-validator';
 
 const registerValidation = [
   body('name')
@@ -93,7 +93,7 @@ const userIdValidation = [
     .withMessage('Invalid user ID format'),
 ];
 
-module.exports = {
+export {
   registerValidation,
   loginValidation,
   updateUserValidation,

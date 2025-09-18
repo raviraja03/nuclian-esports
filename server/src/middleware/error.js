@@ -1,4 +1,4 @@
-const { validationResult } = require('express-validator');
+import { validationResult } from 'express-validator';
 
 // Validation error handler middleware
 const validateRequest = (req, res, next) => {
@@ -71,7 +71,7 @@ const notFound = (req, res) => {
   });
 };
 
-module.exports = {
+export {
   validateRequest,
   errorHandler,
   notFound
