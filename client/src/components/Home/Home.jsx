@@ -20,8 +20,8 @@ const Home = () => {
         <Category />
         <Step />
         <Games />
-        <Coins />
-        <Achievement />
+        {/* <Coins /> */}
+        {/* <Achievement /> */}
         <CommunitySection />
         <Testimonials />
     </div>

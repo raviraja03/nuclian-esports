@@ -25,7 +25,7 @@ const app = express();
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173","http://localhost:4173", "http://127.0.0.1:4173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials:true
   })
@@ -48,7 +48,7 @@ const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 // Loadding Swagger API Doc
 
 
-swaggerAPIDoc(app);
+// swaggerAPIDoc(app);
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -64,9 +64,9 @@ const connectDB = async () => {
 };
 
 // Routes
-app.use('/api/v1', userRouter);
-app.use('/api/v1', tournamentRouter);
-app.use('/api/v1/admin', tournamentAdminRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/tournaments', tournamentRouter);
+app.use('/api/v1/admin/tournaments', tournamentAdminRouter);
 app.use('/api/v1/payments', paymentRouter);
 
 app.all("*", (req, res, next) => {
@@ -95,82 +95,156 @@ app.use(errorMiddleware);
 
 async function seed() {
   await Tournament.deleteMany({});
-  await Tournament.insertMany([
-
+  await Tournament.insertMany(
+[
   {
-    title: "BGMI Solo Championship",
-    description: "Solo BGMI tournament with prize pool rewards.",
+    title: "BGMI Battle Royale",
+    description: "Classic BGMI solo tournament with cash prizes.",
     type: "solo",
     game: "BGMI",
-    // gameId: "bgmi-001",
     platform: "mobile",
     schedule: {
-      startTime: new Date("2025-09-20T18:00:00Z"),
-      endTime: new Date("2025-09-20T20:00:00Z"),
-      checkInStart: new Date("2025-09-20T17:00:00Z"),
-      checkInEnd: new Date("2025-09-20T17:45:00Z"),
+      startTime: new Date("2025-09-28T18:00:00Z"),
+      endTime: new Date("2025-09-28T20:00:00Z"),
+      checkInStart: new Date("2025-09-28T17:00:00Z"),
+      checkInEnd: new Date("2025-09-28T17:45:00Z"),
     },
-    // participants: [],
     maxParticipants: 100,
-    minParticipants: 10,
-    entryFee: {
-      coins: 0,
-      currency: 50, // ₹50 entry fee
-    },
+    entryFee: { coins: 0, amount: 0 }, // free
     prizePool: {
       distribution: [
-        { position: 1, currency: 500 },
-        { position: 2, currency: 300 },
-        { position: 3, currency: 200 }
+        { position: 1, rewardType: "currency", amount: 3000 },
+        { position: 2, rewardType: "currency", amount: 1500 },
       ],
       totalCoins: 0,
-      totalCurrency: 1000
+      totalCurrency: 4500,
     },
-    rules: ["No cheating", "Follow fair play", "Only mobile devices allowed"],
+    rules: ["No emulator players", "Only classic mode", "Report hackers immediately"],
     status: "registration-open",
-    // createdBy: "64f8a1b4d0a7c45a7b9e1d23", // sample user ObjectId
-    // region: "India",
-    streamLink: "https://youtube.com/bgmi-solo",
-    isVisible: true
+    streamLink: "https://youtube.com/bgmibattle",
+    discordLink: "https://discord.gg/bgmi",
+    metadata: { region: "India", mode: "TPP" },
+    isVisible: true,
   },
   {
-    title: "CODM Squad Battle",
-    description: "Call of Duty Mobile Squad tournament.",
+    title: "Call of Duty Mobile Clash",
+    description: "CODM 5v5 multiplayer tournament with prize pool in INR.",
     type: "squad",
-    game: "CODM",
-    // gameId: "codm-001",
+    game: "Call of Duty Mobile",
     platform: "mobile",
     schedule: {
-      startTime: new Date("2025-09-25T15:00:00Z"),
-      endTime: new Date("2025-09-25T18:00:00Z"),
-      checkInStart: new Date("2025-09-25T14:00:00Z"),
-      checkInEnd: new Date("2025-09-25T14:45:00Z"),
+      startTime: new Date("2025-09-30T14:00:00Z"),
+      endTime: new Date("2025-09-30T18:00:00Z"),
+      checkInStart: new Date("2025-09-30T13:00:00Z"),
+      checkInEnd: new Date("2025-09-30T13:45:00Z"),
     },
-    // participants: [],
-    maxParticipants: 50,
-    minParticipants: 5,
-    entryFee: {
-      coins: 0,
-      currency: 100, // ₹100 entry fee
-    },
+    maxParticipants: 32,
+    entryFee: { coins: 0, amount: 250 }, // paid ₹250
     prizePool: {
       distribution: [
-        { position: 1, currency: 2000 },
-        { position: 2, currency: 1000 },
-        { position: 3, currency: 500 }
+        { position: 1, rewardType: "currency", amount: 5000 },
+        { position: 2, rewardType: "currency", amount: 2500 },
       ],
       totalCoins: 0,
-      totalCurrency: 3500
+      totalCurrency: 7500,
     },
-    rules: ["Squads only", "No emulators", "Follow CODM rules"],
+    rules: ["Only mobile players", "Bo3 matches", "Server: Asia"],
+    status: "registration-open",
+    streamLink: "https://twitch.tv/codmclash",
+    discordLink: "https://discord.gg/codm",
+    metadata: { format: "Bo3", mapPool: "Firing Range, Nuketown" },
+    isVisible: true,
+  },
+  {
+    title: "Clash Royale King’s Cup",
+    description: "1v1 Clash Royale tournament for mobile gamers.",
+    type: "solo",
+    game: "Clash Royale",
+    platform: "mobile",
+    schedule: {
+      startTime: new Date("2025-10-02T12:00:00Z"),
+      endTime: new Date("2025-10-02T15:00:00Z"),
+      checkInStart: new Date("2025-10-02T11:00:00Z"),
+      checkInEnd: new Date("2025-10-02T11:45:00Z"),
+    },
+    maxParticipants: 64,
+    entryFee: { coins: 0, amount: 100 }, // paid ₹100
+    prizePool: {
+      distribution: [
+        { position: 1, rewardType: "currency", amount: 3000 },
+        { position: 2, rewardType: "currency", amount: 1000 },
+      ],
+      totalCoins: 0,
+      totalCurrency: 4000,
+    },
+    rules: ["Single elimination", "Custom tournament code provided"],
     status: "published",
-    // createdBy: "64f8a1b4d0a7c45a7b9e1d23",
-    // region: "India",
-    discordLink: "https://discord.gg/codm-tournament",
-    isVisible: true
+    streamLink: "https://youtube.com/clashroyalecup",
+    discordLink: "https://discord.gg/clashroyale",
+    metadata: { format: "Single Elimination", mode: "Tournament Standard" },
+    isVisible: true,
+  },
+  {
+    title: "CS:GO 1v1 Sniper Cup",
+    description: "Competitive CS:GO tournament for solo snipers.",
+    type: "solo",
+    game: "CS:GO",
+    platform: "pc",
+    schedule: {
+      startTime: new Date("2025-10-05T16:00:00Z"),
+      endTime: new Date("2025-10-05T19:00:00Z"),
+      checkInStart: new Date("2025-10-05T15:00:00Z"),
+      checkInEnd: new Date("2025-10-05T15:45:00Z"),
+    },
+    maxParticipants: 32,
+    entryFee: { coins: 0, amount: 150 }, // paid ₹150
+    prizePool: {
+      distribution: [
+        { position: 1, rewardType: "currency", amount: 4000 },
+        { position: 2, rewardType: "currency", amount: 2000 },
+      ],
+      totalCoins: 0,
+      totalCurrency: 6000,
+    },
+    rules: ["AWP-only matches", "Best of 3", "Anti-cheat mandatory"],
+    status: "registration-open",
+    streamLink: "https://twitch.tv/csgo1v1",
+    discordLink: "https://discord.gg/csgo",
+    metadata: { map: "awp_lego", format: "Bo3" },
+    isVisible: true,
+  },
+  {
+    title: "Rocket League 2v2 Cup",
+    description: "Fast-paced Rocket League tournament with duos.",
+    type: "duo",
+    game: "Rocket League",
+    platform: "cross-platform",
+    schedule: {
+      startTime: new Date("2025-10-07T13:00:00Z"),
+      endTime: new Date("2025-10-07T16:00:00Z"),
+      checkInStart: new Date("2025-10-07T12:00:00Z"),
+      checkInEnd: new Date("2025-10-07T12:45:00Z"),
+    },
+    maxParticipants: 32,
+    entryFee: { coins: 0, amount: 200 }, // paid ₹200
+    prizePool: {
+      distribution: [
+        { position: 1, rewardType: "currency", amount: 3500 },
+        { position: 2, rewardType: "currency", amount: 1500 },
+      ],
+      totalCoins: 0,
+      totalCurrency: 5000,
+    },
+    rules: ["Crossplay enabled", "Best of 3 series", "No toxic behavior"],
+    status: "registration-open",
+    streamLink: "https://youtube.com/rocketleaguecup",
+    discordLink: "https://discord.gg/rocketleague",
+    metadata: { mode: "Soccar", format: "Bo3" },
+    isVisible: true,
   }
+]
 
-  ]);
+);
   console.log("Tournaments seeded ✅");
   process.exit();
 }

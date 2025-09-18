@@ -1,7 +1,7 @@
 import React from "react";
 import Heading from "../Heading/Heading";
 import { TbCircleDashedNumber1, TbCircleDashedNumber2, TbCircleDashedNumber3 } from "react-icons/tb";
-
+import {Link} from 'react-router-dom'
 const Step = () => {
   return (
     <section className="font-Lex bg-black py-12">
@@ -13,7 +13,7 @@ const Step = () => {
         <div className="flex flex-col md:flex-row md:items-center gap-8 mt-12">
           <h3 className="text-2xl sm:text-3xl font-bold md:w-1/2">
             Join the Exciting World of eSports Tournaments with{" "}
-            <span className="text-[#E11D48]">NuclianEsports</span>
+            <span className="text-[#E11D48]">TribeXeSports</span>
           </h3>
           <p className="font-semibold md:w-1/2 text-gray-300 text-base sm:text-lg">
             Participating in eSports tournaments has never been easier. Follow
@@ -36,9 +36,9 @@ const Step = () => {
               <p className="text-base md:text-lg mt-3 mb-4 text-gray-300">
                 Sign up quickly and easily to start your journey.
               </p>
-              <a href="#" className="text-[#E11D48] font-bold hover:underline">
+              <Link to="/signup" className="text-[#E11D48] font-bold hover:underline">
                 Sign Up
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -55,9 +55,9 @@ const Step = () => {
                 Use our filters to find tournaments that suit your game and
                 preferences.
               </p>
-              <a href="#" className="text-[#E11D48] font-bold hover:underline">
+              <Link to="/tournaments" className="text-[#E11D48] font-bold hover:underline">
                 Explore
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -73,9 +73,9 @@ const Step = () => {
               <p className="text-base md:text-lg mt-3 mb-4 text-gray-300">
                 Click 'Join Now' to enter the tournament and start competing!
               </p>
-              <a href="#" className="text-[#E11D48] font-bold hover:underline">
+              <Link to="/tournaments" className="text-[#E11D48] font-bold hover:underline">
                 Join Now
-              </a>
+              </Link>
             </div>
           </div>
         </div>

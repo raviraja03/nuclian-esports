@@ -53,11 +53,10 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   }
 
 if (tournamentDoc.entryFee.amount === 0) {
-  // Free tournament → direct registration
   const registration = await Registration.create({
     user: req.user._id,
     tournament,
-    status: "paid", // mark as paid since no payment needed
+    status: "free", 
     payment: null,  // no payment record needed
   });
 

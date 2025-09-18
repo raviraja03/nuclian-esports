@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -34,11 +34,12 @@ const PaymentSuccess = React.lazy(() =>
 const UnderDevelopment = React.lazy(() =>
   import("./components/shared/UnderDevelopment")
 );
-
+import Auth from "./Auth";
 
 const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
+  const user = useSelector((state) => state.auth.user);
 
   React.useEffect(() => {
     axios
@@ -49,82 +50,71 @@ const App = () => {
         // console.log("User data fetched:", response.data.data);
         dispatch(setCredentials({ user: response.data.data }));
       })
-      .catch((error) => {
-        console.error("Error fetching user data:", error);
+      .catch(() => {
         dispatch(clearCredentials());
       });
   }, [dispatch]);
+
+  const protectedRoutes = [
+    { path: "profile", element: <Profile /> },
+    { path: "payment", element: <PaymentPage /> },
+    { path: "payment-success", element: <PaymentSuccess /> },
+  ];
+
+  const publicRoutes = [
+    { path: "/", element: <Home /> },
+    { path: "login", element: <Login /> },
+    { path: "signup", element: <Signup /> },
+    { path: "tournaments", element: <Tournament /> },
+    { path: "tournaments/:id", element: <TournamentDetails /> },
+    { path: "leaderboard", element: <UnderDevelopment /> },
+    { path: "matches", element: <UnderDevelopment /> },
+    { path: "blog", element: <Blog /> },
+    { path: "walletpage", element: <WalletPage /> },
+    { path: "contact", element: <Contact /> },
+  ];
 
   if (loading) {
     return <LoadingScreen />;
   }
 
-  const router = createBrowserRouter([
-    {
-      path: "/",
-      element: (
-        <React.Suspense fallback={<LoadingScreen />}>
-          <Layout />
-        </React.Suspense>
-      ),
-      children: [
-        {
-          path: "/",
-          element: <Home />,
-        },
-        {
-          path: "/tournaments",
-          element: <Tournament />,
-        },
-        {
-          path: "/tournaments/:id",
-          element: <TournamentDetails />,
-        },
-        {
-          path: "/leaderboard",
-          element: <UnderDevelopment />,
-        },
-        {
-          path: "/matches",
-          element: <UnderDevelopment />,
-        },
-        {
-          path: "/login",
-          element: <Login />,
-        },
-        {
-          path: "/contact",
-          element: <Contact />,
-        },
-        {
-          path: "/blog",
-          element: <Blog />,
-        },
-        {
-          path: "/walletpage",
-          element: <WalletPage />,
-        },
-        {
-          path: "/signup",
-          element: <Signup />,
-        },
-        {
-          path: "/profile",
-          element: <Profile />,
-        },
-        {
-          path: "/payment",
-          element: <PaymentPage />,
-        },
-        {
-          path: "/payment-success",
-          element: <PaymentSuccess />,
-        },
-      ],
-    },
-  ]);
+  return (
+    <>
+      <React.Suspense fallback={<LoadingScreen />}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              {/* 🔒 Protected routes */}
+              {protectedRoutes.map(({ path, element }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<Auth user={user}>{element}</Auth>}
+                />
+              ))}
 
-  return <RouterProvider router={router} />;
+              {/* 🌐 Public routes */}
+              {publicRoutes.map(({ path, element }) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    path === "login" || path === "signup" ? (
+                      <Auth user={user} onlyPublic redirect="/">
+                        {element}
+                      </Auth>
+                    ) : (
+                      element
+                    )
+                  }
+                />
+              ))}
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </React.Suspense>
+    </>
+  );
 };
 
 export default App;

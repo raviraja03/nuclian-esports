@@ -5,9 +5,11 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../globalState/slices/auth";
+import {useLoginMutation} from "../../globalState/api/authApi"
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+    const [login] = useLoginMutation();
 
   const {
     register,
@@ -17,17 +19,7 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      const response = await axios.post(
-        "http://localhost:5001/api/v1/users/login",
-        {
-          email: data.email,
-          password: data.password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await login({ email: data.email, password: data.password }).unwrap();
 
       toast.success("Login successful!", {
         style: {
@@ -42,11 +34,12 @@ const Login = () => {
           secondary: "#fff",
         },
       });
-      dispatch(setCredentials({ user: response.data.data }));
+      dispatch(setCredentials({ user: response.data }));
       navigate("/", { replace: true });
     } catch (error) {
+      console.error("Login error:", error);
       toast.error(
-        error.response.data.message || "An error occurred. Please try again.",
+        error.data.message || "An error occurred. Please try again.",
         {
           style: {
             background: "#0a141d",
@@ -72,7 +65,7 @@ const Login = () => {
           <div className="form-container overflow-hidden rounded-2xl bg-[#0a141d]/80 backdrop-blur-sm border border-white/10 p-6 sm:p-8 shadow-2xl transition-all duration-500 ease-in-out">
             <div className="mb-6 sm:mb-8 text-center">
               <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#E11D48] shadow-md shadow-[#E11D48]/20">
-                Nuclian<span className="text-white">Esports</span>
+                TribeX<span className="text-white">eSports</span>
               </h1>
               <p className="text-sm sm:text-base text-gray-300 mt-2">
                 Join the ultimate gaming experience

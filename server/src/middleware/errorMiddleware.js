@@ -20,6 +20,7 @@ function authMiddleware(req, res, next) {
  class CustomError extends Error {
   constructor(message, statusCode) {
     super(message);
+
     this.statusCode = statusCode;
     this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
     this.isOperational = true;
@@ -47,6 +48,7 @@ function authMiddleware(req, res, next) {
       409
     );
   }
+ 
 
   if (err.name === "JsonWebTokenError") {
     err = new CustomError("Invalid token", 401);
@@ -74,7 +76,7 @@ function authMiddleware(req, res, next) {
         success: false,
         status: err.status,
         message: err.message,
-        errors: err.errors || null,
+        // errors: err.errors || null,
       });
     }
 

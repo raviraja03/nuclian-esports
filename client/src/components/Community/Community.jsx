@@ -29,19 +29,27 @@ const CommunitySection = () => {
             {/* Left Side: Text and Button */}
             <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight mb-4">
-                JOIN THE NUCLIANESPORTS
+                JOIN THE TribeXeSports
                 <br className="hidden sm:block" />
                 <span className="text-[#17A448]">COMMUNITY</span>
               </h2>
               <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-md mb-6">
-                Connect with fellow gamers and stay updated on all things Nuclianesports. Join us now!
+                Connect with fellow gamers and stay updated on all things TribeXeSports. Join us now!
               </p>
+              <div className="flex flex-col sm:flex-row gap-4">
               <a
-                href="#"
+                href=""
                 className="inline-block py-3 px-6 bg-[#17A448] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#17A448]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#17A448]/70 focus:outline-none focus:ring-2 focus:ring-[#17A448]/50"
               >
-                Join Community
+                Join Whatsapp
               </a>
+              <a
+                href=""
+                className="inline-block py-3 px-6 bg-[#1769a4] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#1769a4]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1769a4]/70 focus:outline-none focus:ring-2 focus:ring-[#1769a4]/50"
+              >
+                Join Discord
+              </a>
+              </div>
             </div>
 
             {/* Right Side: Feature Cards */}

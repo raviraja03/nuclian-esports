@@ -22,16 +22,16 @@ const { validate } = require("../../middleware/zodMiddleware");
 const { registerSchema, loginSchema } = require("../../middleware/schemas");
 
 // Public routes
-userRouter.post("/users/register", validate(registerSchema), register);
-userRouter.post("/users/login", validate(loginSchema), login);
-userRouter.post("/users/logout", logout);
+userRouter.post("/register", validate(registerSchema), register);
+userRouter.post("/login", validate(loginSchema), login);
+userRouter.post("/logout", logout);
 
 // Protected routes
 userRouter.use(protect); // Apply authentication middleware to all routes below
 
 // User profile routes
 userRouter
-  .route("/users/profile")
+  .route("/profile")
   .get(getProfile)
   .put(updateUserValidation, updateProfile);
 

@@ -1,46 +1,46 @@
 const mongoose = require("mongoose");
 const { CustomError } = require("../middleware/errorMiddleware");
 
-const tournamentParticipantSchema = new mongoose.Schema(
-  {
-    tournamentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tournament",
-      required: true,
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
+// const tournamentParticipantSchema = new mongoose.Schema(
+//   {
+//     tournamentId: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "Tournament",
+//       required: true,
+//     },
+//     userId: {
+//       type: mongoose.Schema.Types.ObjectId,
+//       ref: "User",
+//       required: true,
+//     },
 
-    registeredAt: { type: Date, default: Date.now },
+//     registeredAt: { type: Date, default: Date.now },
 
-    status: {
-      type: String,
-      enum: ["registered", "checked-in", "playing", "eliminated", "winner"],
-      default: "registered",
-    },
+//     status: {
+//       type: String,
+//       enum: ["registered", "checked-in", "playing", "eliminated", "winner"],
+//       default: "registered",
+//     },
 
-    teamName: { type: String, trim: true },
-    position: { type: Number },
+//     teamName: { type: String, trim: true },
+//     position: { type: Number },
 
-    metadata: { type: Map, of: String },
-  },
-  { timestamps: true }
-);
+//     metadata: { type: Map, of: String },
+//   },
+//   { timestamps: true }
+// );
 
-// Prevent duplicate registrations
-tournamentParticipantSchema.index(
-  { tournamentId: 1, userId: 1 },
-  { unique: true }
-);
+// // Prevent duplicate registrations
+// tournamentParticipantSchema.index(
+//   { tournamentId: 1, userId: 1 },
+//   { unique: true }
+// );
 
-const TournamentParticipant = mongoose.model(
-  "TournamentParticipant",
-  tournamentParticipantSchema
-);
-module.exports = { TournamentParticipant };
+// const TournamentParticipant = mongoose.model(
+//   "TournamentParticipant",
+//   tournamentParticipantSchema
+// );
+// module.exports = { TournamentParticipant };
 
 
 
@@ -70,7 +70,7 @@ const tournamentSchema = new mongoose.Schema(
     },
 
     maxParticipants: { type: Number, required: true },
-    minParticipants: { type: Number, required: true, default: 2 },
+    // minParticipants: { type: Number, required: true, default: 2 },
 
     entryFee: {
       coins: { type: Number, default: 0, min: 0 },
@@ -83,17 +83,15 @@ const tournamentSchema = new mongoose.Schema(
           position: { type: Number, required: true },
           rewardType: {
             type: String,
-            enum: ["coins", "currency", "item"],
+            enum: ["coins", "currency"],
             default: "currency",
           },
           amount: { type: Number, min: 0 },
-          itemId: String,
         },
       ],
       totalCoins: { type: Number, min: 0 },
       totalCurrency: { type: Number, min: 0 },
     },
-
     rules: [String],
 
     status: {
@@ -116,16 +114,20 @@ const tournamentSchema = new mongoose.Schema(
     //   ref: "User",
     //   required: true,
     // },
-
     // region: { type: String, required: true },
+
+
     streamLink: { type: String, trim: true },
     discordLink: { type: String, trim: true },
 
     metadata: { type: Map, of: String },
 
     isVisible: { type: Boolean, default: true },
+    
   },
   { timestamps: true }
+
+
 );
 
 // Indexes for performance

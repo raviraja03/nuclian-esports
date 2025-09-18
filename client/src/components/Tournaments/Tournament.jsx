@@ -1,113 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
 import Freefire from "../../assets/ff_game_poster.jpg";
-import herobg from "../../assets/hero_image_3.png";
 import Button_2 from "../Button/Button_2";
 import Coins from "../Coins/Coins";
-import axios from "axios";
 import { Link } from "react-router-dom";
-
-// --- Tournament Data ---
-const tournamentsData = [
-  {
-    type:"5v5",
-    id: 1,
-    title: "Valorant 5 GWB3",
-    image: Valo,
-    entry_amount: 200,
-    price_pool: 70000,
-    room_id: "valoi_2025_1",
-    participants: "88 / 100",
-  },
-  {
-      type:"4v4",
-    id: 2,
-    title: "BGMI Championship",
-    image: Bgmi,
-    entry_amount: 150,
-    price_pool: 75000,
-    room_id: "bgmit_2025_2",
-    participants: "68 / 100",
-  },
-  {
-      type:"4v4",
-    id: 3,
-    title: "COD: Mobile Summer Cup",
-    image: Cod,
-    entry_amount: 250,
-    price_pool: 15000,
-    room_id: "codt_2025_3",
-    participants: "28 / 100",
-  },
-  {
-      type:"3v3",
-    id: 4,
-    title: "Apex Legends Showdown",
-    image: Freefire,
-    entry_amount: 300,
-    price_pool: 100000,
-    room_id: "apex_2025_1",
-    participants: "50 / 60",
-  },
-  {
-      type:"solo",
-    id: 5,
-    title: "Fortnite Elite Clash",
-    image: Bgmi,
-    entry_amount: 100,
-    price_pool: 50000,
-    room_id: "fort_2025_5",
-    participants: "95 / 100",
-  },
-  {
-      type:"5v5",
-    id: 6,
-    title: "League of Legends Finals",
-    image: Valo,
-    entry_amount: 500,
-    price_pool: 250000,
-    room_id: "lol_2025_9",
-    participants: "12 / 16",
-  },
-];
+import { useGetTournamentsQuery } from "../../globalState/api/tournamentApi";
+import LoadingScreen from "../shared/LoadingScreen";
 
 
-
-
-
-// --- Banner Component ---
-const Banner = () => (
-  <section className="relative overflow-hidden">
-    <div
-      className="min-h-[55vh] sm:min-h-[60vh] bg-cover bg-center bg-no-repeat transform transition-transform duration-300"
-      style={{ backgroundImage: `url(${herobg})` }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80 backdrop-blur-sm"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-[#E11D48]/10 via-transparent to-[#FC4E5B]/10"></div>
-    </div>
-  </section>
-);
-
-// --- Filter Bar Component ---
-const FilterBar = () => (
-  <div className="relative z-20 bg-gradient-to-r from-[#b0123a] to-[#E11D48] px-4 sm:px-6 lg:px-12 py-4">
-    <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
-        Upcoming
-      </button>
-      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
-        Ongoing
-      </button>
-      <button className="border-b-2 border-transparent bg-transparent py-2 px-4 sm:px-6 text-sm sm:text-base lg:text-lg font-bold text-white outline-none transition-all duration-300 hover:border-white/80 hover:-translate-y-0.5 rounded-md">
-        Past
-      </button>
-    </div>
-  </div>
-);
-
-// --- TournamentCard Component ---
+// --- TournamentCard Component (Unchanged) ---
 const TournamentCard = ({ card }) => {
   return (
     <div className="bg-[#0a141d]/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-white/10 hover:border-[#FC4E5B]/50 hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 flex flex-col h-full group">
@@ -118,14 +21,12 @@ const TournamentCard = ({ card }) => {
           alt={card.title}
           className="h-full w-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500 ease-out"
         />
-      
-          <span
-            className="absolute top-2 left-2 bg-[#E11D48]/80 text-white text-xs sm:text-sm font-Lex font-semibold px-2 py-1 rounded-md shadow-sm hover:bg-[#FC4E5B]/80 transition-colors duration-300"
-            aria-label={`Tournament type: ${card.type}`}
-          >
-            {card.type}
-          </span>
-      
+        <span
+          className="absolute top-2 left-2 bg-[#E11D48]/80 text-white text-xs sm:text-sm font-Lex font-semibold px-2 py-1 rounded-md shadow-sm hover:bg-[#FC4E5B]/80 transition-colors duration-300"
+          aria-label={`Tournament type: ${card.type}`}
+        >
+          {card.type}
+        </span>
       </div>
 
       {/* Content */}
@@ -137,28 +38,26 @@ const TournamentCard = ({ card }) => {
         <div className="space-y-2 mb-4">
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Entry:</span>
-            <span className="text-[#E11D48] font-bold">
-              ₹{card.entry_amount}
-            </span>
+            <span className="text-[#E11D48] font-bold">₹{card.entryFee.amount}</span>
           </div>
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Prize:</span>
-            <span className="text-[#FC4E5B] font-bold">
-              ₹{card.price_pool.toLocaleString()}
-            </span>
+            <span className="text-[#FC4E5B] font-bold">₹{card.prizePool.totalCurrency}</span>
           </div>
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Players:</span>
-            <span className="text-yellow-400">{card.participants}</span>
+            <span className="text-yellow-400">{`${card.registeredPlayersCount}/${card.maxParticipants}`}</span>
           </div>
         </div>
 
         {/* Button - Sticky to bottom */}
         <div className="mt-auto pt-2">
-          <Link to={`/tournaments/${card.id}`}>
-            <Button_2
-              content="Join Now"
-            />
+          <Link to={`/tournaments/${card._id}`}>
+            <button
+              className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm sm:text-base border border-[#E11D48]/50 animate-pulse-hover"
+            >
+              {card.entryFee.amount === 0 ? "Join For Free" : "Join Now"}
+            </button>
           </Link>
         </div>
       </div>
@@ -168,18 +67,138 @@ const TournamentCard = ({ card }) => {
 
 // --- Main Page Content ---
 const TournamentsPageContent = () => {
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
+
+  const {
+    data:tournamentsResponse={} ,
+    isLoading,
+    isError,
+
+  } = useGetTournamentsQuery({ page, limit: 6 });
+
+  console.log(tournamentsResponse);
+
+  const { data: tournamentsDatas = [], pagination } = tournamentsResponse;
+// console.log(tournamentsDatas);
+  // Filter tournaments based on status
+  const filteredTournaments = tournamentsDatas.filter((tournament) => {
+    if (filter === "all") return true;
+    return tournament.status === filter;
+  });
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPage(newPage);
+    }
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-screen bg-black/95 text-white font-Lex items-center justify-center">
+        <p className="text-red-500 text-center text-lg sm:text-xl">
+          Failed to load tournaments. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <main className="bg-black/95 text-white font-Lex relative">
-      <Banner />
-      <FilterBar />
-      <section className="px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {tournamentsData.map((cardData) => (
-            <TournamentCard key={cardData.id} card={cardData} />
-          ))}
-        </div>
+    <main className="bg-black/95 text-white font-Lex relative min-h-screen mt-[12vh] px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
+      {/* Dropdown Filter */}
+      <div className="mb-6 sm:mb-8">
+        <select
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full sm:w-64 bg-[#0a141d]/60 backdrop-blur-md border border-white/20 text-white rounded-lg px-4 py-3 text-sm sm:text-base font-Lex focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300 hover:border-[#FC4E5B]/50"
+          aria-label="Filter tournaments by status"
+        >
+          <option value="all">All Tournaments</option>
+          <option value="registration-open">Upcoming</option>
+          <option value="in-progress">Ongoing</option>
+          <option value="completed">Past</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Tournament Grid */}
+      <section className="relative z-10">
+        {filteredTournaments.length === 0 ? (
+          <p
+            className="text-gray-300 text-sm sm:text-base text-center"
+            aria-live="polite"
+          >
+            No tournaments found for this filter.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            {filteredTournaments.map((cardData, index) => (
+              <TournamentCard key={cardData.id || index} card={cardData} />
+            ))}
+          </div>
+        )}
       </section>
-      <Coins />
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="mt-8 sm:mt-10 flex justify-center">
+          <nav
+            className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-lg p-3 sm:p-4 flex items-center gap-2 sm:gap-3"
+            aria-label="Pagination"
+          >
+            {/* Previous Button */}
+            <button
+              onClick={() => handlePageChange(page - 1)}
+              disabled={!pagination.hasPrevPage}
+              className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex text-white rounded-md border border-white/20 hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#E11D48] ${
+                !pagination.hasPrevPage ? "bg-gray-700/50" : "bg-[#0a141d]/80"
+              }`}
+              aria-label="Previous page"
+            >
+              Previous
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex gap-1 sm:gap-2">
+              {[...Array(pagination.totalPages)].map((_, index) => {
+                const pageNum = index + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => handlePageChange(pageNum)}
+                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex rounded-md border border-white/20 transition-all duration-300 ${
+                      pageNum === page
+                        ? "bg-[#E11D48] text-white border-[#FC4E5B]"
+                        : "bg-[#0a141d]/80 text-white hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5"
+                    } focus:outline-none focus:ring-2 focus:ring-[#E11D48]`}
+                    aria-current={pageNum === page ? "page" : undefined}
+                    aria-label={`Page ${pageNum}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => handlePageChange(page + 1)}
+              disabled={!pagination.hasNextPage}
+              className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex text-white rounded-md border border-white/20 hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#E11D48] ${
+                !pagination.hasNextPage ? "bg-gray-700/50" : "bg-[#0a141d]/80"
+              }`}
+              aria-label="Next page"
+            >
+              Next
+            </button>
+          </nav>
+        </div>
+      )}
     </main>
   );
 };
