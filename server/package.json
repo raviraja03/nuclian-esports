@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Backend server for Nuclian Esports using ES Modules",
   "main": "src/index.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",

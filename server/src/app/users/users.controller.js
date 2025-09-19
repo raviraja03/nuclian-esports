@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 const User = require("../../models/user.model");
 const { generateToken } = require("../../middleware/auth");
 const {
@@ -96,7 +97,7 @@ const login = GlobalErrorHandler(async (req, res, next) => {
       phoneNumber: user.phoneNumber,
       role: user.role,
       userProfileImage: user.userProfileImage,
-      // token,
+      token,
     },
   });
 });
@@ -266,7 +267,152 @@ const updateProfile = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
+// Helper function to generate OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// @desc    Forgot password - Send OTPs
+// @route   POST /api/users/forgot-password
+// @access  Public
+const forgotPassword = GlobalErrorHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  // Find user by email and phone
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new CustomError("No user found with this email", 404));
+  }
+
+  // Generate OTPs
+  const emailOtp = generateOTP();
+
+  // Save OTPs with expiry (10 minutes)
+  user.otp = {
+    code: emailOtp,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+  };
+  user.verifyOtp = {
+    code: emailOtp,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+  };
+
+  await user.save();
+
+  try {
+    // TODO: Implement actual email and SMS sending
+    // For development, return OTPs in response
+    res.json({
+      success: true,
+      message: "OTPs sent to email",
+      debug: {
+        emailOtp,
+      }
+    });
+  } catch (error) {
+    user.otp = undefined;
+    user.verifyOtp = undefined;
+    await user.save();
+
+    return next(new CustomError("Failed to send OTPs", 500));
+  }
+});
+
+// @desc    Verify OTPs and Reset Password
+// @route   POST /api/users/verify-otp
+// @access  Public
+const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
+  const { email, emailOtp, newPassword } = req.body;
+
+  // Find user
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new CustomError("User not found", 404));
+  }
+
+  // Check if OTPs exist and are valid
+  if (!user.otp?.code || !user.verifyOtp?.code) {
+    return next(new CustomError("OTPs have not been generated. Please request new OTPs", 400));
+  }
+
+  // Check if OTPs have expired
+  if (user.otp.expiresAt < Date.now() || user.verifyOtp.expiresAt < Date.now()) {
+    return next(new CustomError("OTPs have expired. Please request new OTPs", 400));
+  }
+
+  // Verify OTPs
+  if (user.otp.code !== emailOtp || user.verifyOtp.code !== emailOtp) {
+    return next(new CustomError("Invalid OTPs. Please try again", 400));
+  }
+
+  // Update password
+  user.password = newPassword;
+  user.otp = undefined;
+  user.verifyOtp = undefined;
+  await user.save();
+
+  res.json({
+    success: true,
+    message: "Password reset successful"
+  });
+});
+
+// @desc    Resend OTP to email
+// @route   POST /api/users/resend-otp
+// @access  Public
+const resendOtp = GlobalErrorHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  // Find user by email
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new CustomError("No user found with this email", 404));
+  }
+
+  // Check if previous OTP request was made within last 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+  if (user.otp?.expiresAt && new Date(user.otp.expiresAt) > oneMinuteAgo) {
+    return next(new CustomError("Please wait 1 minute before requesting a new OTP", 429));
+  }
+
+  // Generate new OTP
+  const emailOtp = generateOTP();
+
+  // Save OTP with expiry (10 minutes)
+  user.otp = {
+    code: emailOtp,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+  };
+  user.verifyOtp = {
+    code: emailOtp,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+  };
+
+  await user.save();
+
+  try {
+    // TODO: Implement actual email sending
+    // For development, return OTP in response
+    res.json({
+      success: true,
+      message: "New OTP sent to email",
+      debug: {
+        emailOtp
+      }
+    });
+  } catch (error) {
+    user.otp = undefined;
+    user.verifyOtp = undefined;
+    await user.save();
+
+    return next(new CustomError("Failed to send OTP", 500));
+  }
+});
+
 module.exports = {
+  forgotPassword,
+  verifyOtpAndResetPassword,
+  resendOtp,
   register,
   login,
   logout,

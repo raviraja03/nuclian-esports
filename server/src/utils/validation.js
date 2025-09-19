@@ -93,7 +93,60 @@ const userIdValidation = [
     .withMessage('Invalid user ID format'),
 ];
 
+const forgotPasswordValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+  body('phoneNumber')
+    .trim()
+    .notEmpty()
+    .withMessage('Phone number is required')
+    .matches(/^[+]?[(]?[0-9]{3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4,6}$/)
+    .withMessage('Please enter a valid phone number'),
+];
+
+const verifyOtpValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+  body('emailOtp')
+    .trim()
+    .notEmpty()
+    .withMessage('Email OTP is required')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Email OTP must be 6 digits')
+    .isNumeric()
+    .withMessage('Email OTP must contain only numbers'),
+  body('newPassword')
+    .trim()
+    .notEmpty()
+    .withMessage('New password is required')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+];
+
+const resendOtpValidation = [
+  body('email')
+    .trim()
+    .notEmpty()
+    .withMessage('Email is required')
+    .isEmail()
+    .withMessage('Please enter a valid email')
+    .normalizeEmail(),
+];
+
 module.exports = {
+  forgotPasswordValidation,
+  verifyOtpValidation,
+  resendOtpValidation,
   registerValidation,
   loginValidation,
   updateUserValidation,

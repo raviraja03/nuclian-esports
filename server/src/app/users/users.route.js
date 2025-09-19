@@ -9,6 +9,9 @@ const {
   deleteUser,
   getProfile,
   updateProfile,
+  forgotPassword,
+  verifyOtpAndResetPassword,
+  resendOtp,
 } = require("./users.controller");
 const { protect, authorize } = require("../../middleware/auth");
 const {
@@ -17,6 +20,9 @@ const {
   updateUserValidation,
   paginationValidation,
   userIdValidation,
+  forgotPasswordValidation,
+  verifyOtpValidation,
+  resendOtpValidation,
 } = require("../../utils/validation");
 const { validate } = require("../../middleware/zodMiddleware");
 const { registerSchema, loginSchema } = require("../../middleware/schemas");
@@ -25,6 +31,9 @@ const { registerSchema, loginSchema } = require("../../middleware/schemas");
 userRouter.post("/register", validate(registerSchema), register);
 userRouter.post("/login", validate(loginSchema), login);
 userRouter.post("/logout", logout);
+userRouter.post("/forgot-password", forgotPasswordValidation, forgotPassword);
+userRouter.post("/verify-otp", verifyOtpValidation, verifyOtpAndResetPassword);
+userRouter.post("/resend-otp", resendOtpValidation, resendOtp);
 
 // Protected routes
 userRouter.use(protect); // Apply authentication middleware to all routes below
