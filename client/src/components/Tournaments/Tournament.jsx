@@ -17,7 +17,7 @@ const TournamentCard = ({ card }) => {
       {/* Image */}
       <div className="h-48 sm:h-52 md:h-56 lg:h-64 overflow-hidden rounded-xl mb-4 relative">
         <img
-          src={card.image}
+          src={images[card.game]}
           alt={card.title}
           className="h-full w-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500 ease-out"
         />
@@ -65,6 +65,12 @@ const TournamentCard = ({ card }) => {
   );
 };
 
+const images={
+  "Valorant":Valo,
+  "Battlegrounds Mobile India":Bgmi,
+  "Call of Duty":Cod,
+  "Free Fire":Freefire
+}
 // --- Main Page Content ---
 const TournamentsPageContent = () => {
   const [filter, setFilter] = useState("all");
@@ -77,11 +83,9 @@ const TournamentsPageContent = () => {
 
   } = useGetTournamentsQuery({ page, limit: 6 });
 
-  console.log(tournamentsResponse);
 
   const { data: tournamentsDatas = [], pagination } = tournamentsResponse;
-// console.log(tournamentsDatas);
-  // Filter tournaments based on status
+
   const filteredTournaments = tournamentsDatas.filter((tournament) => {
     if (filter === "all") return true;
     return tournament.status === filter;

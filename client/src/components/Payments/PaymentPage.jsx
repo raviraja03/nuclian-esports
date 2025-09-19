@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { load } from "@cashfreepayments/cashfree-js";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Button_2 from "../Button/Button_2"; // Assuming Button_2 is defined elsewhere
 
 function PaymentPage() {
@@ -65,7 +65,6 @@ function PaymentPage() {
   if (error) {
     return (
       <>
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <div className="font-Lex bg-black/95 text-white min-h-screen mt-[10vh] px-4 sm:px-6 lg:px-12 ">
           <div className="max-w-md mx-auto">
             {/* Back Link */}
@@ -127,7 +126,6 @@ function PaymentPage() {
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="font-Lex bg-black/95 text-white min-h-screen pt-[10vh] px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
         <div className="max-w-md mx-auto">
           {/* Back Link */}

@@ -62,8 +62,41 @@ const authorize = (...roles) => {
   };
 };
 
+const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
+  let token = req.cookies.sessionId;
+  if (!token) {
+    req.user = null; 
+    return next();
+  }
+
+ 
+  const decoded = jwt.verify(token, JWT_SECRET);
+
+  // Get user from token
+  const user = await User.findById(decoded.id);
+  if (!user) {
+    return next(new CustomError("This user no longer exist", 401));
+  }
+
+  if (user.isSuspended) {
+    return next(new CustomError("Your account has been suspended", 403));
+  }
+
+  if (user.isDeleted) {
+    return next(new CustomError("Your account has been deleted", 403));
+  }
+
+  req.user = user;
+  next();
+});
+
+
+
+
+
 module.exports = {
   generateToken,
   protect,
   authorize,
+  optionalAuth
 };

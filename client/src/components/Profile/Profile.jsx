@@ -1,54 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import Button_2 from '../Button/Button_2'; // Assuming Button_2 is defined elsewhere
+import { useGetMyPaymentsQuery } from "../../globalState/api/paymentApi";
 
 const Profile = () => {
   const user = useSelector((state) => state.auth.user);
   const [activeTab, setActiveTab] = useState('settings');
+    const { data:paymentData={}, isLoading, isError } = useGetMyPaymentsQuery();
+    const {data:paymentHistory}=paymentData
+    
 
-  // Mock payment history data
-  const paymentHistory = [
-    { id: 1, date: '2025-09-10', amount: 200, status: 'Success', method: 'Credit Card' },
-    { id: 2, date: '2025-09-05', amount: 150, status: 'Success', method: 'PayPal' },
-    { id: 3, date: '2025-08-30', amount: 250, status: 'Failed', method: 'Credit Card' },
-  ];
 
-  // Mock registered tournaments data
-  const registeredTournaments = [
-    {
-      id: 1,
-      title: "BGMI Solo Championship",
-      type: "solo",
-      game: "BGMI",
-      entryFee: { currency: 50 },
-      schedule: { checkInStart: new Date("2025-09-20T17:00:00Z") },
-      status: "registration-open",
-      roomId: "BGMI-12345",
-    },
-    {
-      id: 2,
-      title: "Valorant Duo Clash",
-      type: "duo",
-      game: "Valorant",
-      entryFee: { currency: 100 },
-      schedule: { checkInStart: new Date("2025-09-18T10:00:00Z") },
-      status: "ongoing",
-      roomId: "VALO-67890",
-    },
-    {
-      id: 3,
-      title: "Freefire Squad Showdown",
-      type: "squad",
-      game: "Freefire",
-      entryFee: { currency: 75 },
-      schedule: { checkInStart: new Date("2025-09-17T12:00:00Z") },
-      status: "completed",
-      roomId: "FF-54321",
-    },
-  ];
+
+
 
   // Profile Edit Form
   const { register: registerProfile, handleSubmit: handleProfileSubmit, formState: { errors: profileErrors, isSubmitting: isProfileSubmitting } } = useForm({
@@ -176,29 +143,12 @@ const Profile = () => {
     });
   };
 
-  // Countdown timer for room ID reveal
-  const getRoomIdStatus = (checkInStart) => {
-    const now = new Date();
-    const checkInTime = new Date(checkInStart);
-    if (now >= checkInTime) {
-      return { isAvailable: true, message: '' };
-    }
-    const diff = checkInTime - now;
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    return {
-      isAvailable: false,
-      message: `Available in ${minutes}m ${seconds}s`,
-    };
-  };
+
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="font-Lex bg-black/95 text-white min-h-screen mt-[10vh] px-4 sm:px-6 lg:px-12 ">
         <div className="max-w-4xl mx-auto">
-      
-
           {/* Tabs */}
           <div className="flex border-b border-white/10 mb-6 sm:mb-8">
             <button
@@ -220,16 +170,6 @@ const Profile = () => {
               } transition-colors duration-300`}
             >
               Payment History
-            </button>
-            <button
-              onClick={() => setActiveTab('tournaments')}
-              className={`flex-1 py-3 px-4 text-base sm:text-lg font-semibold ${
-                activeTab === 'tournaments'
-                  ? 'text-[#E11D48] border-b-2 border-[#E11D48]'
-                  : 'text-gray-300 hover:text-[#FC4E5B]'
-              } transition-colors duration-300`}
-            >
-              Registered Tournaments
             </button>
           </div>
 
@@ -344,125 +284,94 @@ const Profile = () => {
           {activeTab === 'payments' && (
             <div className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 animate-in fade-in duration-500">
               <h2 className="text-xl sm:text-2xl font-bold text-[#E11D48] mb-4 sm:mb-6 text-shadow-sm">Payment History</h2>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto border-collapse">
-                  <thead>
-                    <tr className="bg-white/5">
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Date</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Amount</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Status</th>
-                      <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Method</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paymentHistory.map((payment) => (
-                      <tr key={payment.id} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
-                        <td className="px-4 py-3 text-sm text-white">{payment.date}</td>
-                        <td className="px-4 py-3 text-sm text-white">₹{payment.amount}</td>
-                        <td className="px-4 py-3 text-sm text-white">{payment.status}</td>
-                        <td className="px-4 py-3 text-sm text-white">{payment.method}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'tournaments' && (
-            <div className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 animate-in fade-in duration-500">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#E11D48] mb-4 sm:mb-6 text-shadow-sm">Registered Tournaments</h2>
-              {registeredTournaments.length === 0 ? (
-                <p className="text-gray-300 text-sm sm:text-base text-center">No tournaments registered yet.</p>
+              
+              {isLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#E11D48]"></div>
+                </div>
+              ) : isError ? (
+                <div className="text-center py-8">
+                  <p className="text-red-400">Error loading payment history</p>
+                </div>
+              ) : !paymentHistory || paymentHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-300">No payment history found</p>
+                </div>
               ) : (
                 <>
                   {/* Desktop Table */}
-                  <div className="hidden sm:block overflow-x-auto">
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="w-full table-auto border-collapse">
                       <thead>
                         <tr className="bg-white/5">
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Title</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Type</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Game</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Entry Fee</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Status</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Room ID</th>
-                          <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Actions</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Date</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Amount</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Status</th>
+                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Payment Method</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {registeredTournaments.map((tournament) => {
-                          const { isAvailable, message } = getRoomIdStatus(tournament.schedule.checkInStart);
-                          return (
-                            <tr key={tournament.id} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
-                              <td className="px-4 py-3 text-sm text-white">{tournament.title}</td>
-                              <td className="px-4 py-3 text-sm text-white capitalize">{tournament.type}</td>
-                              <td className="px-4 py-3 text-sm text-white">{tournament.game}</td>
-                              <td className="px-4 py-3 text-sm text-white">₹{tournament.entryFee.currency}</td>
-                              <td className="px-4 py-3 text-sm text-white capitalize">{tournament.status.replace('-', ' ')}</td>
-                              <td className="px-4 py-3 text-sm text-white">
-                                {isAvailable ? (
-                                  <span className="font-mono">{tournament.roomId}</span>
-                                ) : (
-                                  <span className="text-gray-400" aria-live="polite">{message || 'Not Available'}</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-white">
-                                <Link to={`/tournaments/${tournament.id}`}>
-                                  <Button_2
-                                    content="View Details"
-                                    className="bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm animate-pulse-hover"
-                                  />
-                                </Link>
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {paymentHistory.map((payment,index) => (
+                          <tr key={index} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
+                            <td className="px-4 py-3 text-sm text-white">
+                              {new Date(payment.createdAt).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-white font-semibold">₹{payment.amount}</td>
+                            <td className="px-4 py-3 text-sm">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                payment.status === 'paid' 
+                                  ? 'bg-green-500/20 text-green-400' 
+                                  : payment.status === 'pending'
+                                  ? 'bg-yellow-500/20 text-yellow-400'
+                                  : 'bg-red-500/20 text-red-400'
+                              }`}>
+                                {payment.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-sm text-white capitalize">
+                              {payment?.metadata?.order_meta?.payment_methods || 'N/A'}
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
+
                   {/* Mobile Cards */}
-                  <div className="sm:hidden space-y-4">
-                    {registeredTournaments.map((tournament) => {
-                      const { isAvailable, message } = getRoomIdStatus(tournament.schedule.checkInStart);
-                      return (
-                        <div key={tournament.id} className="bg-[#1a2634]/50 rounded-lg p-4 border border-white/10 animate-in slide-in-from-bottom-10 duration-300">
-                          <h3 className="text-base font-semibold text-[#E11D48] mb-2">{tournament.title}</h3>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-300">Type:</span>
-                              <span className="text-white capitalize">{tournament.type}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-300">Game:</span>
-                              <span className="text-white">{tournament.game}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-300">Entry Fee:</span>
-                              <span className="text-white">₹{tournament.entryFee.currency}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-300">Status:</span>
-                              <span className="text-white capitalize">{tournament.status.replace('-', ' ')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-300">Room ID:</span>
-                              <span className={isAvailable ? 'text-white font-mono' : 'text-gray-400'} aria-live="polite">
-                                {isAvailable ? tournament.roomId : (message || 'Not Available')}
-                              </span>
-                            </div>
-                            <div className="pt-2">
-                              <Link to={`/tournaments/${tournament.id}`}>
-                                <Button_2
-                                  content="View Details"
-                                  className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm animate-pulse-hover"
-                                />
-                              </Link>
-                            </div>
+                  <div className="md:hidden space-y-4">
+                    {paymentHistory.map((payment,index) => (
+                      <div key={index} className="bg-[#1a2634]/50 rounded-lg p-4 border border-white/10">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <p className="text-white font-semibold text-lg">₹{payment.amount}</p>
+                            <p className="text-gray-400 text-sm">
+                              {new Date(payment.createdAt).toLocaleDateString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                              })}
+                            </p>
                           </div>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            payment.status === 'paid' 
+                              ? 'bg-green-500/20 text-green-400' 
+                              : payment.status === 'pending'
+                              ? 'bg-yellow-500/20 text-yellow-400'
+                              : 'bg-red-500/20 text-red-400'
+                          }`}>
+                            {payment.status}
+                          </span>
                         </div>
-                      );
-                    })}
+                        <div className="text-sm text-gray-300">
+                          <span className="font-medium">Payment Method: </span>
+                          <span className="capitalize">{payment?.metadata?.order_meta?.payment_methods || 'N/A'}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </>
               )}
@@ -475,3 +384,104 @@ const Profile = () => {
 };
 
 export default Profile;
+
+
+
+          // {activeTab === 'tournaments' && (
+          //   <div className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 animate-in fade-in duration-500">
+          //     <h2 className="text-xl sm:text-2xl font-bold text-[#E11D48] mb-4 sm:mb-6 text-shadow-sm">Registered Tournaments</h2>
+          //     {registeredTournaments.length === 0 ? (
+          //       <p className="text-gray-300 text-sm sm:text-base text-center">No tournaments registered yet.</p>
+          //     ) : (
+          //       <>
+          //         <div className="hidden sm:block overflow-x-auto">
+          //           <table className="w-full table-auto border-collapse">
+          //             <thead>
+          //               <tr className="bg-white/5">
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Title</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Type</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Game</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Entry Fee</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Status</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Room ID</th>
+          //                 <th className="px-4 py-2 text-left text-sm font-semibold text-gray-300">Actions</th>
+          //               </tr>
+          //             </thead>
+          //             <tbody>
+          //               {registeredTournaments.map((tournament) => {
+          //                 const { isAvailable, message } = getRoomIdStatus(tournament.schedule.checkInStart);
+          //                 return (
+          //                   <tr key={tournament.id} className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200">
+          //                     <td className="px-4 py-3 text-sm text-white">{tournament.title}</td>
+          //                     <td className="px-4 py-3 text-sm text-white capitalize">{tournament.type}</td>
+          //                     <td className="px-4 py-3 text-sm text-white">{tournament.game}</td>
+          //                     <td className="px-4 py-3 text-sm text-white">₹{tournament.entryFee.currency}</td>
+          //                     <td className="px-4 py-3 text-sm text-white capitalize">{tournament.status.replace('-', ' ')}</td>
+          //                     <td className="px-4 py-3 text-sm text-white">
+          //                       {isAvailable ? (
+          //                         <span className="font-mono">{tournament.roomId}</span>
+          //                       ) : (
+          //                         <span className="text-gray-400" aria-live="polite">{message || 'Not Available'}</span>
+          //                       )}
+          //                     </td>
+          //                     <td className="px-4 py-3 text-sm text-white">
+          //                       <Link to={`/tournaments/${tournament.id}`}>
+          //                         <Button_2
+          //                           content="View Details"
+          //                           className="bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm animate-pulse-hover"
+          //                         />
+          //                       </Link>
+          //                     </td>
+          //                   </tr>
+          //                 );
+          //               })}
+          //             </tbody>
+          //           </table>
+          //         </div>
+                  
+          //         <div className="sm:hidden space-y-4">
+          //           {registeredTournaments.map((tournament) => {
+          //             const { isAvailable, message } = getRoomIdStatus(tournament.schedule.checkInStart);
+          //             return (
+          //               <div key={tournament.id} className="bg-[#1a2634]/50 rounded-lg p-4 border border-white/10 animate-in slide-in-from-bottom-10 duration-300">
+          //                 <h3 className="text-base font-semibold text-[#E11D48] mb-2">{tournament.title}</h3>
+          //                 <div className="space-y-2 text-sm">
+          //                   <div className="flex justify-between">
+          //                     <span className="text-gray-300">Type:</span>
+          //                     <span className="text-white capitalize">{tournament.type}</span>
+          //                   </div>
+          //                   <div className="flex justify-between">
+          //                     <span className="text-gray-300">Game:</span>
+          //                     <span className="text-white">{tournament.game}</span>
+          //                   </div>
+          //                   <div className="flex justify-between">
+          //                     <span className="text-gray-300">Entry Fee:</span>
+          //                     <span className="text-white">₹{tournament.entryFee.currency}</span>
+          //                   </div>
+          //                   <div className="flex justify-between">
+          //                     <span className="text-gray-300">Status:</span>
+          //                     <span className="text-white capitalize">{tournament.status.replace('-', ' ')}</span>
+          //                   </div>
+          //                   <div className="flex justify-between">
+          //                     <span className="text-gray-300">Room ID:</span>
+          //                     <span className={isAvailable ? 'text-white font-mono' : 'text-gray-400'} aria-live="polite">
+          //                       {isAvailable ? tournament.roomId : (message || 'Not Available')}
+          //                     </span>
+          //                   </div>
+          //                   <div className="pt-2">
+          //                     <Link to={`/tournaments/${tournament.id}`}>
+          //                       <Button_2
+          //                         content="View Details"
+          //                         className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm animate-pulse-hover"
+          //                       />
+          //                     </Link>
+          //                   </div>
+          //                 </div>
+          //               </div>
+          //             );
+          //           })}
+          //         </div>
+          //       </>
+          //     )}
+          //   </div>
+          // )}

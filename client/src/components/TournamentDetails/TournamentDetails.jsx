@@ -1,42 +1,45 @@
 import React, { useState, useEffect } from "react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
-import Button_2 from "../Button/Button_2"; // Assuming Button_2 is defined elsewhere
+import toast from "react-hot-toast";
+import Button_2 from "../Button/Button_2";
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
 import Freefire from "../../assets/ff_game_poster.jpg";
 import axios from "axios";
-import {useGetTournamentByIdQuery} from '../../globalState/api/tournamentApi'
+import { useGetTournamentByIdQuery } from "../../globalState/api/tournamentApi";
+import LoadingScreen from "../shared/LoadingScreen";
 import { useParams } from "react-router-dom";
+
 const TournamentDetails = () => {
   const { id } = useParams();
-  const { data: tournamentData = {}, isLoading, isError } = useGetTournamentByIdQuery(id);
-  console.log(tournamentData);
+  const {
+    data: tournamentData = {},
+    isLoading,
+    isError,
+  } = useGetTournamentByIdQuery(id);
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLoggedIn);
   const [isJoining, setIsJoining] = useState(false);
   const [isPrizePoolOpen, setIsPrizePoolOpen] = useState(true);
   const [isRulesOpen, setIsRulesOpen] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
-const navigate=useNavigate()
-
-
+  const navigate = useNavigate();
 
   // Map game to image
-  const gameImages = {
-    BGMI: Bgmi,
-    Valorant: Valo,
-    "Call of Duty": Cod,
-    Freefire: Freefire,
-  };
+const images={
+  "Valorant":Valo,
+  "Battlegrounds Mobile India":Bgmi,
+  "Call of Duty":Cod,
+  "Free Fire":Freefire
+}
 
   // Countdown timer
   useEffect(() => {
     const updateTimer = () => {
       const now = new Date();
       const startTime = new Date(tournamentData?.data?.schedule?.startTime);
-        const diff = startTime - now;
+      const diff = startTime - now;
       if (diff <= 0) {
         setTimeLeft("Tournament Started");
         return;
@@ -74,61 +77,139 @@ const navigate=useNavigate()
       return;
     }
     setIsJoining(true);
-    try {
-      const res = await axios.post(
-        `http://localhost:5001/api/v1/payments/register-in`,
-        {
-          tournament: tournamentId
-        },
-        { withCredentials: true }
-      );
+    if (!(tournamentData?.data?.entryFee.amount == 0)) {
+      try {
+        const res = await axios.post(
+          `http://localhost:5001/api/v1/payments/register-in`,
+          {
+            tournament: tournamentId,
+          },
+          { withCredentials: true }
+        );
 
-
-           navigate('/payment', { 
-          state: { 
+        navigate("/payment", {
+          state: {
             orderId: res.data.orderId,
             paymentSessionId: res.data.paymentSessionId,
+          },
+        });
+        toast.success(res.data.message, {
+          style: {
+            background: "#0a141d",
+            color: "#fff",
+            border: "1px solid #FC4E5B",
+            borderRadius: "8px",
+            padding: "12px",
+          },
+          iconTheme: {
+            primary: "#E11D48",
+            secondary: "#fff",
+          },
+        });
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to join the tournament. Please try again.",
+          {
+            style: {
+              background: "#0a141d",
+              color: "#fff",
+              border: "1px solid #FC4E5B",
+              borderRadius: "8px",
+              padding: "12px",
+            },
+            iconTheme: {
+              primary: "#E11D48",
+              secondary: "#fff",
+            },
           }
-        })
+        );
+      } finally {
+        setIsJoining(false);
+      }
+    } else {
+      try {
+        const res = await axios.post(
+          `http://localhost:5001/api/v1/payments/register-in`,
+          {
+            tournament: tournamentId,
+          },
+          { withCredentials: true }
+        );
+        if (res.data.success) {
+          toast.success(
+            res?.data?.message ||
+              "Failed to join the tournament. Please try again.",
+            {
+              style: {
+                background: "#0a141d",
+                color: "#fff",
+                border: "1px solid #FC4E5B",
+                borderRadius: "8px",
+                padding: "12px",
+              },
+              iconTheme: {
+                primary: "#E11D48",
+                secondary: "#fff",
+              },
+            }
+          );
 
 
+          navigate("/free-tournament-success",{
+            state:{
+              tournament:{
+                title:tournamentData?.data?.title,
+                game:tournamentData?.data?.game,
+                platform:tournamentData?.data?.platform,
+                startTime:tournamentData?.data?.schedule?.startTime,
+              }
 
-      toast.success(res.data.message, {
-        style: {
-          background: "#0a141d",
-          color: "#fff",
-          border: "1px solid #FC4E5B",
-          borderRadius: "8px",
-          padding: "12px",
-        },
-        iconTheme: {
-          primary: "#E11D48",
-          secondary: "#fff",
-        },
-      });
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Failed to join the tournament. Please try again.", {
-        style: {
-          background: "#0a141d",
-          color: "#fff",
-          border: "1px solid #FC4E5B",
-          borderRadius: "8px",
-          padding: "12px",
-        },
-        iconTheme: {
-          primary: "#E11D48",
-          secondary: "#fff",
-        },
-      });
-    } finally {
-      setIsJoining(false);
+            }
+          });
+
+
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to join the tournament. Please try again.",
+          {
+            style: {
+              background: "#0a141d",
+              color: "#fff",
+              border: "1px solid #FC4E5B",
+              borderRadius: "8px",
+              padding: "12px",
+            },
+            iconTheme: {
+              primary: "#E11D48",
+              secondary: "#fff",
+            },
+          }
+        );
+      } finally {
+        setIsJoining(false);
+      }
     }
   };
 
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-screen bg-black/95 text-white font-Lex items-center justify-center">
+        <p className="text-red-500 text-center text-lg sm:text-xl">
+          Failed to load tournaments. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="font-Lex bg-black/95 text-white min-h-screen mt-[11dvh] sm:px-6 lg:px-12 px-6  ">
         <div className="max-w-5xl mx-auto">
           {/* Back Link */}
@@ -157,7 +238,7 @@ const navigate=useNavigate()
           <div className="relative bg-[#0a141d]/60 backdrop-blur-md rounded-2xl border border-white/10 mb-8 shadow-lg overflow-hidden">
             <div className="relative">
               <img
-                src={gameImages[tournamentData?.data?.game] || Freefire}
+                src={images[tournamentData?.data?.game] }
                 alt={tournamentData?.data?.title}
                 className="w-full h-68 sm:h-84 md:h-110 object-bottom"
               />
@@ -208,9 +289,19 @@ const navigate=useNavigate()
                   Starts in: {timeLeft}
                 </div>
                 <Button_2
-                  content={isJoining ? "Joining..." : "Join"}
+                  content={
+                    tournamentData?.data?.isRegistered
+                      ? "Already Registered"
+                      : isJoining
+                      ? "Joining..."
+                      : "Join"
+                  }
                   func={() => joinTournament(tournamentData?.data?._id)}
-                  disabled={isJoining || tournamentData?.data?.status !== "registration-open"}
+                  disabled={
+                    isJoining ||
+                    tournamentData?.data?.status !== "registration-open" ||
+                    tournamentData?.data?.isRegistered
+                  }
                 />
               </div>
             </div>
@@ -246,7 +337,6 @@ const navigate=useNavigate()
                       {tournamentData?.data?.maxParticipants}
                     </span>
                   </div>
-              
                 </div>
               </div>
             </div>
@@ -263,25 +353,33 @@ const navigate=useNavigate()
                   <div className="flex justify-between">
                     <span className="text-gray-300">Start Time:</span>
                     <span className="text-white font-semibold">
-                      {new Date(tournamentData?.data?.schedule.startTime).toLocaleString()}
+                      {new Date(
+                        tournamentData?.data?.schedule.startTime
+                      ).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">End Time:</span>
                     <span className="text-white font-semibold">
-                      {new Date(tournamentData?.data?.schedule.endTime).toLocaleString()}
+                      {new Date(
+                        tournamentData?.data?.schedule.endTime
+                      ).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Check-In Start:</span>
                     <span className="text-white font-semibold">
-                      {new Date(tournamentData?.data?.schedule.checkInStart).toLocaleString()}
+                      {new Date(
+                        tournamentData?.data?.schedule.checkInStart
+                      ).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Check-In End:</span>
                     <span className="text-white font-semibold">
-                      {new Date(tournamentData?.data?.schedule.checkInEnd).toLocaleString()}
+                      {new Date(
+                        tournamentData?.data?.schedule.checkInEnd
+                      ).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -350,19 +448,21 @@ const navigate=useNavigate()
                         </tr>
                       </thead>
                       <tbody>
-                        {tournamentData?.data?.prizePool.distribution.map((prize) => (
-                          <tr
-                            key={prize.position}
-                            className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200"
-                          >
-                            <td className="px-4 py-3 text-sm text-white">
-                              {prize.position}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-white">
-                              ₹{prize.amount}
-                            </td>
-                          </tr>
-                        ))}
+                        {tournamentData?.data?.prizePool.distribution.map(
+                          (prize) => (
+                            <tr
+                              key={prize.position}
+                              className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200"
+                            >
+                              <td className="px-4 py-3 text-sm text-white">
+                                {prize.position}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-white">
+                                ₹{prize.amount}
+                              </td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>

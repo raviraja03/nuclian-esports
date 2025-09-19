@@ -1,6 +1,6 @@
 import { FaGoogle } from "react-icons/fa";
 import { Link ,useNavigate} from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -64,7 +64,6 @@ const Signup = () => {
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="font-Lex flex min-h-screen items-center justify-center bg-black/95 text-white mt-[6vh] px-4 sm:px-6 lg:px-12">
         <div className="relative z-10 w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="form-container overflow-hidden rounded-2xl bg-[#0a141d]/80 backdrop-blur-sm border border-white/10 p-6 sm:p-8 shadow-2xl transition-all duration-500 ease-in-out">
@@ -236,7 +235,7 @@ const Signup = () => {
                   {isSubmitting ? "Creating Account..." : "Create Account"}
                 </button>
 
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <div className="flex-1 border-t border-white/20"></div>
                   <span className="px-3 sm:px-4 text-xs sm:text-sm text-[#E11D48]">
                     OR
@@ -250,7 +249,7 @@ const Signup = () => {
                 >
                   <FaGoogle />
                   <span>Continue with Google</span>
-                </button>
+                </button> */}
 
                 <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
                   Already have an account?

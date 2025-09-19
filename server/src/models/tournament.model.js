@@ -123,6 +123,7 @@ const tournamentSchema = new mongoose.Schema(
     metadata: { type: Map, of: String },
 
     isVisible: { type: Boolean, default: true },
+    roomId: { type: String, trim: true,default:null },
     
   },
   { timestamps: true }
