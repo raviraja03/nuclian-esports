@@ -23,9 +23,8 @@ const {
 } = require("./middleware/errorMiddleware");
 
 const app = express();
-const server = http.createServer(app); // 👈 http server wrapper
+const server = http.createServer(app); 
 
-// Socket.IO
 const io = new Server(server, {
   cors: {
     origin: [
@@ -33,6 +32,7 @@ const io = new Server(server, {
       "http://127.0.0.1:5173",
       "http://localhost:4173",
       "http://127.0.0.1:4173",
+      process.env.CLIENT_URL,
     ],
     methods: ["GET", "POST"],
     credentials: true,
@@ -48,6 +48,7 @@ app.use(
       "http://127.0.0.1:5173",
       "http://localhost:4173",
       "http://127.0.0.1:4173",
+      process.env.CLIENT_URL,
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
