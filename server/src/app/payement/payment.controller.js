@@ -28,12 +28,10 @@ const generateOrderId = () => {
 const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   const { tournament } = req.body;
 
-  // 1. Validate input
   if (!tournament) {
     return next(new CustomError("Tournament ID is required", 400));
   }
 
-  // 2. Check if tournament exists
   const tournamentDoc = await Tournament.findById(tournament);
   if (!tournamentDoc) {
     return next(new CustomError("Tournament not found", 404));
@@ -51,12 +49,12 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
     if (count >= tournament.maxParticipants) {
     return next(new CustomError("Tournament is full", 400));
   }
-
 if (tournamentDoc.entryFee.amount === 0) {
+
   const registration = await Registration.create({
     user: req.user._id,
     tournament,
-    status: "free", 
+    status: "paid", 
     payment: null,  // no payment record needed
   });
 
@@ -66,7 +64,6 @@ if (tournamentDoc.entryFee.amount === 0) {
     registrationId: registration._id,
   });
 }
-
 
 
 
@@ -256,89 +253,107 @@ const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
 
 
 
-const webhookHandler = GlobalErrorHandler(async (req, res) => {
-  const {
-    order_id: orderId,
-    order_amount: orderAmount,
-    order_currency: orderCurrency,
-    order_status: orderStatus,
-    payment_id: paymentId,
-    payment_amount: paymentAmount,
-    payment_currency: paymentCurrency,
-    payment_status: paymentStatus,
-    payment_message: paymentMessage,
-    payment_time: paymentTime,
-    bank_reference: bankReference,
-    auth_id: authId,
-    payment_method: paymentMethod,
-  } = req.body;
+// const webhookHandler = GlobalErrorHandler(async (req, res) => {
+//   const {
+//     order_id: orderId,
+//     order_amount: orderAmount,
+//     order_currency: orderCurrency,
+//     order_status: orderStatus,
+//     payment_id: paymentId,
+//     payment_amount: paymentAmount,
+//     payment_currency: paymentCurrency,
+//     payment_status: paymentStatus,
+//     payment_message: paymentMessage,
+//     payment_time: paymentTime,
+//     bank_reference: bankReference,
+//     auth_id: authId,
+//     payment_method: paymentMethod,
+//   } = req.body;
 
-  console.log("Webhook received:", req.body);
-  // if (!orderId) {
-  //   return res.status(400).json({ message: "Order ID is required" });
-  // }
+//   console.log("Webhook received:", req.body);
+//   // if (!orderId) {
+//   //   return res.status(400).json({ message: "Order ID is required" });
+//   // }
 
-  // // Find the payment record
-  // const paymentDoc = await Payment.findOne({ orderId });
-  // if (!paymentDoc) {
-  //   console.error(`Payment not found for orderId: ${orderId}`);
-  //   return res.status(404).json({ message: "Payment not found" });
-  // }
+//   // // Find the payment record
+//   // const paymentDoc = await Payment.findOne({ orderId });
+//   // if (!paymentDoc) {
+//   //   console.error(`Payment not found for orderId: ${orderId}`);
+//   //   return res.status(404).json({ message: "Payment not found" });
+//   // }
 
-  // console.log(`Updating Payment ${orderId} from status: ${paymentDoc.status} to: ${orderStatus}`);
+//   // console.log(`Updating Payment ${orderId} from status: ${paymentDoc.status} to: ${orderStatus}`);
 
-  // // Update Payment status
-  // switch (orderStatus) {
-  //   case "PAID":
-  //     paymentDoc.status = "paid";
-  //     paymentDoc.transactionId = paymentId || authId || paymentDoc.transactionId;
-  //     paymentDoc.metadata = { paymentMethod, paymentTime, bankReference };
-  //     break;
+//   // // Update Payment status
+//   // switch (orderStatus) {
+//   //   case "PAID":
+//   //     paymentDoc.status = "paid";
+//   //     paymentDoc.transactionId = paymentId || authId || paymentDoc.transactionId;
+//   //     paymentDoc.metadata = { paymentMethod, paymentTime, bankReference };
+//   //     break;
 
-  //   case "EXPIRED":
-  //     paymentDoc.status = "cancelled";
-  //     break;
+//   //   case "EXPIRED":
+//   //     paymentDoc.status = "cancelled";
+//   //     break;
 
-  //   case "FAILED":
-  //     paymentDoc.status = "failed";
-  //     paymentDoc.metadata = { paymentMessage };
-  //     break;
+//   //   case "FAILED":
+//   //     paymentDoc.status = "failed";
+//   //     paymentDoc.metadata = { paymentMessage };
+//   //     break;
 
-  //   case "PENDING":
-  //     paymentDoc.status = "pending";
-  //     break;
+//   //   case "PENDING":
+//   //     paymentDoc.status = "pending";
+//   //     break;
 
-  //   default:
-  //     paymentDoc.status = orderStatus.toLowerCase();
-  // }
+//   //   default:
+//   //     paymentDoc.status = orderStatus.toLowerCase();
+//   // }
 
-  // await paymentDoc.save();
+//   // await paymentDoc.save();
 
-  // // Update Registration linked to this payment
-  // const registration = await Registration.findOne({ payment: paymentDoc._id });
-  // if (registration) {
-  //   if (paymentDoc.status === "paid") {
-  //     registration.status = "confirmed";
-  //   } else if (paymentDoc.status === "cancelled" || paymentDoc.status === "failed") {
-  //     registration.status = paymentDoc.status;
-  //   } else {
-  //     registration.status = "pending";
-  //   }
-  //   await registration.save();
-  // }
+//   // // Update Registration linked to this payment
+//   // const registration = await Registration.findOne({ payment: paymentDoc._id });
+//   // if (registration) {
+//   //   if (paymentDoc.status === "paid") {
+//   //     registration.status = "confirmed";
+//   //   } else if (paymentDoc.status === "cancelled" || paymentDoc.status === "failed") {
+//   //     registration.status = paymentDoc.status;
+//   //   } else {
+//   //     registration.status = "pending";
+//   //   }
+//   //   await registration.save();
+//   // }
 
-  // console.log(`Webhook processed: ${orderId} → ${paymentDoc.status}`);
+//   // console.log(`Webhook processed: ${orderId} → ${paymentDoc.status}`);
 
-  // return res.json({
-  //   success: true,
-  //   message: "Webhook processed successfully",
-  //   orderId,
-  //   status: paymentDoc.status,
-  // });
+//   // return res.json({
+//   //   success: true,
+//   //   message: "Webhook processed successfully",
+//   //   orderId,
+//   //   status: paymentDoc.status,
+//   // });
+// });
+
+const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const payments = await Payment.find({ user: userId })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.status(200).json({
+    success: true,
+    count: payments.length,
+    data: payments,
+  });
 });
+
+
+
 
 module.exports = {
   handleRegistration,
   verifyPayment,
-  webhookHandler,
+  getMyPayments
+  // webhookHandler,
 };

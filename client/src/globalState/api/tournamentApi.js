@@ -4,7 +4,7 @@ export const tournamentApi = createApi({
   reducerPath: "tournamentApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:5001/api/v1",
-    credentials: "include", // ✅ include cookies if auth needed
+    // credentials: "include", // ✅ include cookies if auth needed
   }),
   endpoints: (builder) => ({
     getTournaments: builder.query({
@@ -17,14 +17,47 @@ export const tournamentApi = createApi({
         return `/tournaments?${params.toString()}`;
       },
       transformResponse: (response) => response,
+      providesTags: (result) =>
+        result?.tournaments
+          ? [
+              ...result.tournaments.map((t) => ({
+                type: "Tournament",
+                id: t._id,
+              })),
+              { type: "Tournament", id: "LIST" },
+            ]
+          : [{ type: "Tournament", id: "LIST" }],
     }),
 
     getTournamentById: builder.query({
-      query: (id) => `/tournaments/${id}`,
+      query: (id) => {
+        return {
+          url: `/tournaments/${id}`,
+          credentials: "include",
+        };
+      },
+
       transformResponse: (response) => response,
+      providesTags: (result, error, id) => [{ type: "Tournament", id }],
+    }),
+
+    getMyTournaments: builder.query({
+      query: ({ page = 1, limit = 6 } = {}) => ({
+        url: `/tournaments/my/all?page=${page}&limit=${limit}`,
+        method: "GET",
+        credentials: "include",
+      }),
+      transformResponse: (response) => response,
+      providesTags: (result) =>
+        result?.data
+          ? result.data.map((t) => ({ type: "TournamentId", id: t._id }))
+          : [],
     }),
   }),
 });
 
-export const { useGetTournamentsQuery, useGetTournamentByIdQuery } =
-  tournamentApi;
+export const {
+  useGetTournamentsQuery,
+  useGetTournamentByIdQuery,
+  useGetMyTournamentsQuery,
+} = tournamentApi;
