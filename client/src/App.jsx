@@ -37,31 +37,23 @@ const UnderDevelopment = React.lazy(() =>
 const FreeTournamentSuccess = React.lazy(() =>
   import("./components/Payments/FreeTournamentSuccess")
 );
-  const ForgotPassword = React.lazy(() =>
-    import("./pages/ForgotPassword")
-  );
+const ForgotPassword = React.lazy(() => import("./pages/ForgotPassword"));
 import Auth from "./Auth";
+import { useFetchProfileQuery } from "./globalState/api/authApi";
 
 const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
   const user = useSelector((state) => state.auth.user);
-
+  const { data: profile, isLoading, isError } = useFetchProfileQuery();
   React.useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
-        withCredentials: true,
-      })
-      .then((response) => {
-        // console.log("User data fetched:", response.data.data);
-        dispatch({ type: "socket/connect" });
-        dispatch(setCredentials({ user: response.data.data }));
-      })
-      .catch(() => {
-        dispatch(clearCredentials());
-      });
-  }, [dispatch]);
-
+    if (profile) {
+      dispatch(setCredentials({ user: profile.data }));
+      dispatch({ type: "socket/connect" });
+    } else if (isError) {
+      dispatch(clearCredentials());
+    }
+  }, [profile, isError, dispatch]);
   const protectedRoutes = [
     { path: "profile", element: <Profile /> },
     { path: "payment", element: <PaymentPage /> },
