@@ -4,6 +4,7 @@ const {
   CustomError,
   GlobalErrorHandler,
 } = require("../../middleware/errorMiddleware");
+const Registration = require("../../models/registrationSchema.mode");
 
 // USER ENDPOINTS
 
@@ -109,6 +110,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
 
 exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
+    const userId = req?.user?._id; // user comes from auth middleware
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(new CustomError("Invalid tournament ID", 400));
@@ -122,21 +124,56 @@ exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   if (!tournament) {
     return next(new CustomError("Tournament not found", 404));
   }
+  let isRegistered = false;
+
+  if (userId) {
+    const registration = await Registration.findOne({
+      user: userId,
+      tournament: id,
+      status: "paid",
+    }).lean();
+    console.log(registration);
+
+    isRegistered = !!registration;
+  }
 
   res.status(200).json({
     success: true,
-    data: tournament,
+    data: { ...tournament, isRegistered },
   });
 });
 
 // GET /api/v1/tournaments/my/all - Get tournaments the logged-in user is registered in
-exports.getMyTournaments = GlobalErrorHandler(async (req, res) => {
+exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
-  const tournaments = await Tournament.find({
-    isVisible: true,
-    "participants.userId": userId,
+  const { page = 1, limit = 6 } = req.query;
+  // ✅ Fetch user registrations (only paid ones)
+  const registrations = await Registration.find({
+    user: userId,
+    status: "paid",
+  })
+    .populate({
+      path: "tournament",
+      match: { isVisible: true },
+      select:
+        "title game platform schedule status maxParticipants entryFee prizePool roomId",
+    })
+    .skip((page - 1) * limit)
+    .limit(Number(limit))
+    .lean();
+  const tournaments = registrations.map((r) => r.tournament).filter(Boolean);
+  const total = await Registration.countDocuments({
+    user: userId,
+    status: "paid",
   });
-  res.status(200).json({ tournaments });
+
+  res.status(200).json({
+    success: true,
+    count: tournaments.length,
+    page: Number(page),
+    totalPages: Math.ceil(total / limit),
+    data: tournaments,
+  });
 });
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId - Withdraw a user from a tournament

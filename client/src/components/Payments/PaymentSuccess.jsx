@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Button_2 from "../Button/Button_2"; // Assuming Button_2 is defined elsewhere
 import axios from "axios";
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
-  const [booking, setBooking] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const orderId = searchParams.get("order_id");
@@ -85,7 +84,6 @@ const PaymentSuccess = () => {
   if (loading) {
     return (
       <>
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <div className="font-Lex bg-black/95 text-white min-h-screen mt-[10vh] px-4 sm:px-6 lg:px-12 ">
           <div className="max-w-md mx-auto">
             <Link
@@ -146,7 +144,6 @@ const PaymentSuccess = () => {
   if (error) {
     return (
       <>
-        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <div className="font-Lex bg-black/95 text-white min-h-screen pt-[10vh] px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
           <div className="max-w-md mx-auto">
             <Link
@@ -207,7 +204,6 @@ const PaymentSuccess = () => {
 
   return (
     <>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div className="font-Lex bg-black/95 text-white min-h-screen pt-[10vh] px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
         <div className="max-w-md mx-auto">
           <Link
@@ -253,65 +249,6 @@ const PaymentSuccess = () => {
               <p className="text-gray-300 text-sm sm:text-base mb-6">
                 Your tournament registration has been confirmed.
               </p>
-
-              {/* {booking && (
-                <div className="bg-[#1a2634]/50 rounded-lg p-4 sm:p-6 mb-6 text-left border border-white/10">
-                  <h3 className="text-sm sm:text-base font-semibold text-[#E11D48] mb-3">
-                    Registration Details
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
-                    <div>
-                      <span className="font-medium text-gray-300">
-                        Tournament:
-                      </span>
-                      <span className="text-white">
-                        {" "}
-                        {booking.tournament_details.name || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-300">
-                        Entry Fee:
-                      </span>
-                      <span className="text-white">
-                        {" "}
-                        ₹{booking.tournament_details.fee || "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-300">Date:</span>
-                      <span className="text-white">
-                        {" "}
-                        {booking.tournament_details.date
-                          ? new Date(booking.paymentDate).toLocaleDateString()
-                          : "N/A"}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-300">
-                        Order ID:
-                      </span>
-                      <span className="text-white">
-                        {" "}
-                        {booking.order_id || "N/A"}
-                      </span>
-                    </div>
-                    {booking.order_meta && (
-                      <div>
-                        <span className="font-medium text-gray-300">
-                          Payment Method:
-                        </span>
-                        <span className="text-white">
-                          {" "}
-                          {booking.order_meta.payment_method || "N/A"}
-                        </span>
-                      </div>
-                    )}
-          
-                  </div>
-                </div>
-              )} */}
-
               <div className="space-y-3">
                 <Button_2
                   content="Join Another Tournament"

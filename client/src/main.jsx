@@ -4,11 +4,12 @@ import './index.css'
 import App from './App.jsx'
 import {Provider} from "react-redux"
 import store from './globalState/store.js'
+import {Toaster} from "react-hot-toast"
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
-
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
     <App />
     </Provider>
   </StrictMode>,

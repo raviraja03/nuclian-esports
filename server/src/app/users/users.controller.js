@@ -26,10 +26,9 @@ const register = GlobalErrorHandler(async (req, res, next) => {
   res.clearCookie("sessionId");
   res.cookie("sessionId", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production", // HTTPS only in prod
-    secure: true, // HTTPS only in prod
-    sameSite: "None", // Required for cross-subdomain in modern browsers
-    // domain: ".yourapp.com", // Root domain for subdomains
+    secure: true,
+    sameSite: "None", 
+    domain: ".sunilspace.me",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.status(201).json({
@@ -82,10 +81,9 @@ const login = GlobalErrorHandler(async (req, res, next) => {
   res.clearCookie("sessionId");
   res.cookie("sessionId", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production", // HTTPS only in prod
     secure: true,
-    sameSite: "None", // Required for cross-subdomain in modern browsers
-    // domain: ".yourapp.com", // Root domain for subdomains
+    sameSite: "None", 
+    domain: ".sunilspace.me",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.json({
@@ -106,12 +104,7 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/logout
 // @access  Private
 const logout = GlobalErrorHandler(async (req, res, next) => {
-  // Update user session info
-  // const user = await User.findById(req.user._id);
-  // if (user) {
-  //   user.sessionInfo = "loggedOut";
-  //   await user.save();
-  // }
+ 
 
   // Clear the session cookie
   res.clearCookie("sessionId", {

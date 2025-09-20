@@ -1,89 +1,122 @@
-const mongoose = require('mongoose');
-const Tournament = require('../../models/tournament.model');
+const mongoose = require("mongoose");
+const Tournament = require("../../models/tournament.model");
+const {
+  CustomError,
+  GlobalErrorHandler,
+} = require("../../middleware/errorMiddleware");
 
+// ================== GET ALL TOURNAMENTS ==================
+exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
+  const {
+    page = 1,
+    limit = 20,
+    status,
+    game,
+    type,
+    region,
+    platform,
+    isVisible,
+  } = req.query;
 
-// GET /tournaments - Get all tournaments with pagination and filters
-exports.getAllTournaments = async (req, res, next) => {
-  try {
-    const { page = 1, limit = 20, status, game, type, region, platform } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (game) filter.game = game;
-    if (type) filter.type = type;
-    if (region) filter.region = region;
-    if (platform) filter.platform = platform;
-    const tournaments = await Tournament.find(filter)
-      .skip((page - 1) * limit)
+  const filter = {};
+  if (status) filter.status = status;
+  if (game) filter.game = game;
+  if (type) filter.type = type;
+  if (region) filter.region = region;
+  if (platform) filter.platform = platform;
+  if (isVisible !== undefined) filter.isVisible = isVisible === "true";
+
+  const skip = (page - 1) * limit;
+  const [tournaments, total] = await Promise.all([
+    Tournament.find(filter)
+      .skip(skip)
       .limit(Number(limit))
-      .sort({ 'schedule.startTime': -1 });
-    const total = await Tournament.countDocuments(filter);
-    res.status(200).json({ tournaments, total, page: Number(page), limit: Number(limit) });
-  } catch (err) {
-    next(err);
-  }
-};
+      .sort({ "schedule.startTime": -1 }),
+    Tournament.countDocuments(filter),
+  ]);
 
-// GET /tournaments/:id - Get single tournament by ID
-exports.getTournamentById = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid tournament ID' });
-    }
-    const tournament = await Tournament.findById(id);
-    if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
-    }
-    res.status(200).json(tournament);
-  } catch (err) {
-    next(err);
-  }
-};
+  res.status(200).json({
+    success: true,
+    data: tournaments,
+    meta: {
+      total,
+      page: Number(page),
+      limit: Number(limit),
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: skip + tournaments.length < total,
+      hasPrevPage: page > 1,
+    },
+  });
+});
 
-// POST /tournaments - Create a tournament
-exports.createTournament = async (req, res, next) => {
-  try {
-    const tournament = new Tournament(req.body);
-    await tournament.save();
-    res.status(201).json({ message: 'Tournament created', tournament });
-  } catch (err) {
-    next(err);
+// ================== GET TOURNAMENT BY ID ==================
+exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new CustomError("Invalid tournament ID", 400);
   }
-};
 
-// PUT /tournaments/:id - Update tournament fields
-exports.updateTournament = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid tournament ID' });
-    }
-    const tournament = await Tournament.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
-    if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
-    }
-    res.status(200).json({ message: 'Tournament updated', tournament });
-  } catch (err) {
-    next(err);
+  const tournament = await Tournament.findById(id);
+  if (!tournament) {
+    throw new CustomError("Tournament not found", 404);
   }
-};
 
-// DELETE /tournaments/:id - Delete a tournament
-exports.deleteTournament = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid tournament ID' });
-    }
-    const tournament = await Tournament.findByIdAndDelete(id);
-    if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
-    }
-    res.status(200).json({ message: 'Tournament deleted' });
-  } catch (err) {
-    next(err);
+  res.status(200).json({ success: true, data: tournament });
+});
+
+// ================== CREATE TOURNAMENT ==================
+exports.createTournament = GlobalErrorHandler(async (req, res) => {
+  const tournament = new Tournament(req.body);
+  await tournament.save();
+
+  res.status(201).json({
+    success: true,
+    message: "Tournament created successfully",
+    // data: tournament,
+  });
+});
+
+// ================== UPDATE TOURNAMENT (PATCH) ==================
+exports.updateTournament = GlobalErrorHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new CustomError("Invalid tournament ID", 400);
   }
-};
+
+  const tournament = await Tournament.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!tournament) {
+    throw new CustomError("Tournament not found", 404);
+  }
+     req.app.get("io").emit("tournamentUpdated", {message:"refresh",tournamentId:id});
+ 
+  res.status(200).json({
+    success: true,
+    message: "Tournament updated successfully",
+    // data: tournament,
+  });
+});
+
+// ================== DELETE TOURNAMENT ==================
+exports.deleteTournament = GlobalErrorHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new CustomError("Invalid tournament ID", 400);
+  }
+
+  const tournament = await Tournament.findByIdAndDelete(id);
+  if (!tournament) {
+    throw new CustomError("Tournament not found", 404);
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Tournament deleted successfully",
+  });
+});
 
 // PATCH /tournaments/:id/status - Update tournament status
 exports.updateTournamentStatus = async (req, res, next) => {
@@ -91,20 +124,20 @@ exports.updateTournamentStatus = async (req, res, next) => {
     const { id } = req.params;
     const { status } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: 'Invalid tournament ID' });
+      return res.status(400).json({ message: "Invalid tournament ID" });
     }
     // Validate status
-    const validStatuses = Tournament.schema.path('status').enumValues;
+    const validStatuses = Tournament.schema.path("status").enumValues;
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid status' });
+      return res.status(400).json({ message: "Invalid status" });
     }
     const tournament = await Tournament.findById(id);
     if (!tournament) {
-      return res.status(404).json({ message: 'Tournament not found' });
+      return res.status(404).json({ message: "Tournament not found" });
     }
     tournament.status = status;
     await tournament.save();
-    res.status(200).json({ message: 'Status updated', tournament });
+    res.status(200).json({ message: "Status updated", tournament });
   } catch (err) {
     next(err);
   }
@@ -115,20 +148,27 @@ exports.updateParticipantStatus = async (req, res, next) => {
   try {
     const { id, userId } = req.params;
     const { status } = req.body;
-    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: 'Invalid tournament or user ID' });
+    if (
+      !mongoose.Types.ObjectId.isValid(id) ||
+      !mongoose.Types.ObjectId.isValid(userId)
+    ) {
+      return res.status(400).json({ message: "Invalid tournament or user ID" });
     }
     // Use isAdminParticipant middleware for ruggedness
     const tournament = req.tournament;
     const participant = req.participant;
     // Validate participant status
-    const validStatuses = Tournament.schema.path('participants.0.status').enumValues;
+    const validStatuses = Tournament.schema.path(
+      "participants.0.status"
+    ).enumValues;
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid participant status' });
+      return res.status(400).json({ message: "Invalid participant status" });
     }
     participant.status = status;
     await tournament.save();
-    res.status(200).json({ message: 'Participant status updated', participant });
+    res
+      .status(200)
+      .json({ message: "Participant status updated", participant });
   } catch (err) {
     next(err);
   }

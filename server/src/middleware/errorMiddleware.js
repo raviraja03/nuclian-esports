@@ -1,23 +1,5 @@
-const { verifyToken } = require("../utilities/jwt");
-
-function authMiddleware(req, res, next) {
-  // Checks for JWT token in Authorization header
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token provided" });
-  try {
-    // Verifies token and attaches user to request
-    const decoded = verifyToken(token);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
-  }
-}
-
-
-
 // Custom Error Class
- class CustomError extends Error {
+class CustomError extends Error {
   constructor(message, statusCode) {
     super(message);
 
@@ -28,7 +10,7 @@ function authMiddleware(req, res, next) {
   }
 }
 
- const errorMiddleware = (err, req, res, next) => {
+const errorMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
 
@@ -48,7 +30,6 @@ function authMiddleware(req, res, next) {
       409
     );
   }
- 
 
   if (err.name === "JsonWebTokenError") {
     err = new CustomError("Invalid token", 401);
@@ -98,14 +79,13 @@ function authMiddleware(req, res, next) {
   });
 };
 
- const GlobalErrorHandler = (fn) => {
+const GlobalErrorHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
 module.exports = {
-  authMiddleware,
   errorMiddleware,
   CustomError,
   GlobalErrorHandler,

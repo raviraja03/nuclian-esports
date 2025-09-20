@@ -7,6 +7,7 @@ const {
   isParticipant,
 } = require("../../middleware/tournamentMiddleware");
 const { createTournamentValidation } = require("../../utils/validation");
+const { protect,optionalAuth } = require("../../middleware/auth");
 
 const tournamentRouter = express.Router();
 
@@ -22,16 +23,17 @@ tournamentRouter.get("/", controller.getAllTournaments);
 
 // GET /api/v1/tournaments/:id
 tournamentRouter.get(
-  "/:id",
+  "/:id",optionalAuth,
   controller.getTournamentById
 );
-
 // GET /api/v1/tournaments/my/all
 tournamentRouter.get(
   "/my/all",
-  requireAuth,
-  asyncHandler(controller.getMyTournaments)
+  protect,
+  controller.getMyTournaments
 );
+
+
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId
 // This route is for user withdrawal only. Admin removal should be in admin.route.js if needed.

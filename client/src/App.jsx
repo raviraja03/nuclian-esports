@@ -34,6 +34,9 @@ const PaymentSuccess = React.lazy(() =>
 const UnderDevelopment = React.lazy(() =>
   import("./components/shared/UnderDevelopment")
 );
+const FreeTournamentSuccess = React.lazy(() =>
+  import("./components/Payments/FreeTournamentSuccess")
+);
 import Auth from "./Auth";
 
 const App = () => {
@@ -48,6 +51,7 @@ const App = () => {
       })
       .then((response) => {
         // console.log("User data fetched:", response.data.data);
+        dispatch({ type: "socket/connect" });
         dispatch(setCredentials({ user: response.data.data }));
       })
       .catch(() => {
@@ -59,6 +63,8 @@ const App = () => {
     { path: "profile", element: <Profile /> },
     { path: "payment", element: <PaymentPage /> },
     { path: "payment-success", element: <PaymentSuccess /> },
+    { path: "matches", element: <Matches /> },
+    { path: "free-tournament-success", element: <FreeTournamentSuccess /> },
   ];
 
   const publicRoutes = [
@@ -68,7 +74,6 @@ const App = () => {
     { path: "tournaments", element: <Tournament /> },
     { path: "tournaments/:id", element: <TournamentDetails /> },
     { path: "leaderboard", element: <UnderDevelopment /> },
-    { path: "matches", element: <UnderDevelopment /> },
     { path: "blog", element: <Blog /> },
     { path: "walletpage", element: <WalletPage /> },
     { path: "contact", element: <Contact /> },
