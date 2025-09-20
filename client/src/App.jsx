@@ -37,6 +37,9 @@ const UnderDevelopment = React.lazy(() =>
 const FreeTournamentSuccess = React.lazy(() =>
   import("./components/Payments/FreeTournamentSuccess")
 );
+  const ForgotPassword = React.lazy(() =>
+    import("./pages/ForgotPassword")
+  );
 import Auth from "./Auth";
 
 const App = () => {
@@ -46,7 +49,7 @@ const App = () => {
 
   React.useEffect(() => {
     axios
-      .get("http://localhost:5001/api/v1/users/profile", {
+      .get(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
         withCredentials: true,
       })
       .then((response) => {
@@ -77,6 +80,7 @@ const App = () => {
     { path: "blog", element: <Blog /> },
     { path: "walletpage", element: <WalletPage /> },
     { path: "contact", element: <Contact /> },
+    { path: "forgot-password", element: <ForgotPassword /> },
   ];
 
   if (loading) {

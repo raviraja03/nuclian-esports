@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const tournamentApi = createApi({
   reducerPath: "tournamentApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5001/api/v1",
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
     // credentials: "include", // ✅ include cookies if auth needed
   }),
   endpoints: (builder) => ({
