@@ -2,7 +2,7 @@ const {
   CustomError,
   GlobalErrorHandler,
 } = require("../../middleware/errorMiddleware");
-const Registration = require("../../models/registrationSchema.mode");
+const Registration = require("../../models/registrationSchema.model");
 const Payment = require("../../models/payment.model");
 const Tournament = require("../../models/tournament.model");
 // const {cashfree} = require("../../index");

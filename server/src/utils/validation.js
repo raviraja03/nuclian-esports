@@ -93,6 +93,152 @@ const userIdValidation = [
     .withMessage('Invalid user ID format'),
 ];
 
+const createTournamentValidation = [
+  body('title')
+    .trim()
+    .notEmpty()
+    .withMessage('Title is required')
+    .isLength({ min: 3, max: 100 })
+    .withMessage('Title must be between 3 and 100 characters'),
+  
+  body('description')
+    .trim()
+    .notEmpty()
+    .withMessage('Description is required')
+    .isLength({ min: 10 })
+    .withMessage('Description must be at least 10 characters'),
+  
+  body('type')
+    .trim()
+    .notEmpty()
+    .withMessage('Tournament type is required')
+    .isIn(['solo', 'duo', 'squad'])
+    .withMessage('Invalid tournament type'),
+  
+  body('game')
+    .trim()
+    .notEmpty()
+    .withMessage('Game is required'),
+  
+  body('platform')
+    .trim()
+    .notEmpty()
+    .withMessage('Platform is required')
+    .isIn(['pc', 'mobile', 'console', 'cross-platform'])
+    .withMessage('Invalid platform'),
+  
+  body('schedule.startTime')
+    .notEmpty()
+    .withMessage('Start time is required')
+    .isISO8601()
+    .withMessage('Invalid start time format')
+    .custom((value) => {
+      if (new Date(value) <= new Date()) {
+        throw new Error('Start time must be in the future');
+      }
+      return true;
+    }),
+  
+  body('schedule.endTime')
+    .notEmpty()
+    .withMessage('End time is required')
+    .isISO8601()
+    .withMessage('Invalid end time format')
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date(req.body.schedule.startTime)) {
+        throw new Error('End time must be after start time');
+      }
+      return true;
+    }),
+  
+  body('schedule.checkInStart')
+    .notEmpty()
+    .withMessage('Check-in start time is required')
+    .isISO8601()
+    .withMessage('Invalid check-in start time format')
+    .custom((value, { req }) => {
+      if (new Date(value) >= new Date(req.body.schedule.startTime)) {
+        throw new Error('Check-in must end before tournament starts');
+      }
+      return true;
+    }),
+  
+  body('schedule.checkInEnd')
+    .notEmpty()
+    .withMessage('Check-in end time is required')
+    .isISO8601()
+    .withMessage('Invalid check-in end time format')
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date(req.body.schedule.checkInStart)) {
+        throw new Error('Check-in end must be after check-in start');
+      }
+      if (new Date(value) >= new Date(req.body.schedule.startTime)) {
+        throw new Error('Check-in must end before tournament starts');
+      }
+      return true;
+    }),
+  
+  body('maxParticipants')
+    .notEmpty()
+    .withMessage('Maximum participants is required')
+    .isInt({ min: 2 })
+    .withMessage('Maximum participants must be at least 2'),
+  
+  body('entryFee.coins')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('Coins entry fee must be a non-negative number'),
+  
+  body('entryFee.amount')
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage('Amount entry fee must be a non-negative number'),
+  
+  body('prizePool.distribution.*.position')
+    .notEmpty()
+    .withMessage('Prize position is required')
+    .isInt({ min: 1 })
+    .withMessage('Prize position must be a positive number'),
+  
+  body('prizePool.distribution.*.rewardType')
+    .notEmpty()
+    .withMessage('Reward type is required')
+    .isIn(['coins', 'currency'])
+    .withMessage('Invalid reward type'),
+  
+  body('prizePool.distribution.*.amount')
+    .notEmpty()
+    .withMessage('Prize amount is required')
+    .isFloat({ min: 0 })
+    .withMessage('Prize amount must be a non-negative number'),
+  
+  body('rules')
+    .optional()
+    .isArray()
+    .withMessage('Rules must be an array'),
+  
+  body('rules.*')
+    .optional()
+    .isString()
+    .withMessage('Each rule must be a string'),
+  
+  body('region')
+    .notEmpty()
+    .withMessage('Region is required')
+    .isIn(['NA', 'EU', 'ASIA', 'SEA', 'MENA', 'SA', 'OCE', 'GLOBAL'])
+    .withMessage('Invalid region'),
+  
+  body('streamLink')
+    .optional()
+    .isURL()
+    .withMessage('Invalid stream link URL'),
+  
+  body('discordLink')
+    .optional()
+    .isURL()
+    .withMessage('Invalid discord link URL'),
+];
+
 const forgotPasswordValidation = [
   body('email')
     .trim()
@@ -152,4 +298,5 @@ module.exports = {
   updateUserValidation,
   paginationValidation,
   userIdValidation,
+  createTournamentValidation,
 };
