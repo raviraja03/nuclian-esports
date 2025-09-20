@@ -31,7 +31,9 @@ const { registerSchema, loginSchema } = require("../../middleware/schemas");
 userRouter.post("/register", validate(registerSchema), register);
 userRouter.post("/login", validate(loginSchema), login);
 userRouter.post("/logout", logout);
-userRouter.post("/forgot-password", forgotPasswordValidation, forgotPassword);
+
+
+userRouter.post("/forgot-password", forgotPassword);
 userRouter.post("/verify-otp", verifyOtpValidation, verifyOtpAndResetPassword);
 userRouter.post("/resend-otp", resendOtpValidation, resendOtp);
 

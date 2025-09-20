@@ -16,7 +16,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     try{
-      axios.post("http://localhost:5001/api/v1/users/logout", {}, { withCredentials: true });
+      axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/logout`, {}, { withCredentials: true });
       dispatch(clearCredentials());
     }catch(err){
       console.error("Error during logout:", err);

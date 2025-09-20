@@ -126,12 +126,12 @@ const Login = () => {
                     </p>
                   )}
                   <div className="mt-1 text-right">
-                    <a
-                      href="#"
+                    <Link
+                      to="/forgot-password"
                       className="text-xs sm:text-sm text-gray-400 hover:text-[#FC4E5B] transition-colors duration-300"
                     >
                       Forgot password?
-                    </a>
+                    </Link>
                   </div>
                 </div>
 

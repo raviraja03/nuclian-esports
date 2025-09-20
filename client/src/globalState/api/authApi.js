@@ -3,7 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5001/api/v1", 
+    baseUrl: import.meta.env.VITE_BACKEND_URL, 
+
     credentials: "include", 
   }),
 
@@ -26,6 +27,15 @@ export const authApi = createApi({
     fetchProfile: builder.query({
       query: () => "/users/profile",
     }),
+
+     forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "/users/forgot-password",
+        method: "POST",
+        body: email ,
+      }),
+      transformResponse: (response) => response,
+    }),
   }),
 });
 
@@ -33,4 +43,5 @@ export const {
   useSignupMutation,
   useLoginMutation,
   useFetchProfileQuery,
+  useForgotPasswordMutation,
 } = authApi;

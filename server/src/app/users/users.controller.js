@@ -312,7 +312,8 @@ const forgotPassword = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // @desc    Verify OTPs and Reset Password
-// @route   POST /api/users/verify-otp
+// @route   POST /api/users/verify-otp nlbh ckjy aiys eaib
+
 // @access  Public
 const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
   const { email, emailOtp, newPassword } = req.body;
