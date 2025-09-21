@@ -9,7 +9,6 @@ const path = require("path");
 
 // Load environment variables
 dotenv.config();
-console.log('Environment:', process.env.NODE_ENV);
 
 // Routes
 const userRouter = require("./app/users/users.route");
@@ -35,7 +34,7 @@ const io = new Server(server, {
       "http://127.0.0.1:4173",
       process.env.CLIENT_URL,
     ],
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
   },
 });
@@ -71,7 +70,9 @@ app.get('*', (req, res) => {
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    const conn = await mongoose.connect(process.env.MONGODB_URI,{
+      dbName: process.env.DB_NAME,
+    });
     console.log(`MongoDB Connected Successfully: ${conn.connection.host}`);
   } catch (error) {
     console.error(`Error: ${error.message}`);

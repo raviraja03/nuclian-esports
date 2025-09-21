@@ -3,8 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { useSelector, useDispatch } from "react-redux";
 import { MdLogout } from "react-icons/md";
-import {clearCredentials} from "../../globalState/slices/auth";
+import { clearCredentials } from "../../globalState/slices/auth";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { TOAST_DESIGN_SUCCESS } from "../../constant";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,16 +17,20 @@ const Navbar = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    try{
-      axios.post(`${import.meta.env.VITE_BACKEND_URL}/users/logout`, {}, { withCredentials: true });
+    try {
+      axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/users/logout`,
+        {},
+        { withCredentials: true }
+      );
       dispatch(clearCredentials());
-    }catch(err){
+      toast.success("Logged out successfully", TOAST_DESIGN_SUCCESS);
+    } catch (err) {
       console.error("Error during logout:", err);
     }
     setIsOpen(false);
     setIsDropdownOpen(false);
   };
-
 
   return (
     <header className="bg-black/95 fixed top-0 right-0 left-0 z-50 shadow-md shadow-white/5">
@@ -187,6 +193,21 @@ const Navbar = () => {
             </button>
             <ul className="flex flex-col items-center justify-center flex-grow gap-6 py-8">
               <li>
+                {isUserLoggedIn && (
+                  <Link
+                    to="/profile"
+                    className="flex rounded-full border border-white/20 items-center gap-2 text-white font-Lex font-semibold text-lg transition-colors duration-300 hover:text-[#FC4E5B]"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <img
+                      src={user?.userProfileImage}
+                      alt="User profile picture"
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  </Link>
+                )}
+              </li>
+              <li>
                 <Link
                   to="/"
                   className="text-white font-Lex font-semibold text-lg transition-colors duration-300 hover:text-[#FC4E5B]"
@@ -231,26 +252,15 @@ const Navbar = () => {
                   Blog
                 </Link>
               </li>
+
               <li className="flex flex-row items-center gap-4 mt-4">
                 {isUserLoggedIn ? (
                   <>
-                    <Link
-                      to="/profile"
-                      className="flex rounded-full border border-white/20 items-center gap-2 text-white font-Lex font-semibold text-lg transition-colors duration-300 hover:text-[#FC4E5B]"
-                      onClick={() => setIsOpen(false)}
-                    >
-                      <img
-                        src={user?.userProfileImage}
-                        alt="User profile picture"
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
-                      
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="text-white font-Lex font-semibold text-lg transition-colors duration-300 hover:text-[#FC4E5B]"
                     >
-                      <MdLogout size={22}/>
+                      <MdLogout size={22} />
                     </button>
                   </>
                 ) : (
@@ -262,7 +272,9 @@ const Navbar = () => {
                     >
                       Login
                     </Link>
-                    <span className="text-white/50 select-none font-bold">|</span>
+                    <span className="text-white/50 select-none font-bold">
+                      |
+                    </span>
                     <Link
                       to="/signup"
                       className="text-white font-Lex font-semibold text-lg transition-colors duration-300 hover:text-[#FC4E5B]"

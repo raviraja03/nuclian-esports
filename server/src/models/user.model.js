@@ -43,12 +43,12 @@ const userSchema = new mongoose.Schema(
       default: "pending",
     },
     otp: {
-      code: String,
-      expiresAt: Date,
+      type:String,
+      default:null
     },
-    verifyOtp: {
-      code: String,
-      expiresAt: Date,
+    otpExpiresAt: {
+     type:Date,
+     default:null
     },
     isVerified: {
       email: {
@@ -124,6 +124,14 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("save", function (next) {
+  if (this.isModified("otp")) {
+    if (this.otp) {
+      this.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+    }
+  }
+  next();
+});
 userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email });
 };
