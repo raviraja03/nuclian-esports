@@ -27,14 +27,8 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "http://localhost:4173",
-      "http://127.0.0.1:4173",
-      process.env.CLIENT_URL,
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    origin: process.env.APP_HOST || "*",
+    methods: "GET,PUT,POST,DELETE",
     credentials: true,
   },
 });
@@ -61,11 +55,6 @@ app.use(express.static(path.join(__dirname, '../../client/dist')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../client/dist', 'index.html'));
 });
-
-// app.use(express.static(path.join(__dirname, '../client/build')));
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-// });
 
 // MongoDB Connection
 const connectDB = async () => {
