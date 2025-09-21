@@ -6,7 +6,7 @@ const LoadingScreen = () => {
     <div className="flex flex-col items-center justify-center h-screen w-screen bg-black text-white">
       {/* Neon logo / brand text */}
       <h1 className="text-4xl md:text-6xl font-extrabold mb-6">
-        <span className="text-pink-600">Nuclian</span>
+        <span className="text-pink-600">TribeX</span>
         <span className="text-white">Esports</span>
       </h1>
 

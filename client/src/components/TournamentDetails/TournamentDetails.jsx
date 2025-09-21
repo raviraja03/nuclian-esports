@@ -80,7 +80,7 @@ const images={
     if (!(tournamentData?.data?.entryFee.amount == 0)) {
       try {
         const res = await axios.post(
-          `http://localhost:5001/api/v1/payments/register-in`,
+          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
           {
             tournament: tournamentId,
           },
@@ -130,7 +130,7 @@ const images={
     } else {
       try {
         const res = await axios.post(
-          `http://localhost:5001/api/v1/payments/register-in`,
+          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
           {
             tournament: tournamentId,
           },
