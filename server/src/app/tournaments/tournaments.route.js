@@ -6,11 +6,19 @@ const {
   asyncHandler,
   isParticipant,
 } = require("../../middleware/tournamentMiddleware");
+const { createTournamentValidation } = require("../../utils/validation");
 const { protect,optionalAuth } = require("../../middleware/auth");
 
 const tournamentRouter = express.Router();
 
-// GET /api/v1/tournaments
+// POST /api/v1/tournaments - Create a new tournament
+tournamentRouter.post(
+  "/",
+  createTournamentValidation,
+  asyncHandler(controller.createTournament)
+);
+
+// GET /api/v1/tournaments - Get all tournaments
 tournamentRouter.get("/", controller.getAllTournaments);
 
 // GET /api/v1/tournaments/:id

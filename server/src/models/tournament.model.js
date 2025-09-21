@@ -1,50 +1,6 @@
 const mongoose = require("mongoose");
 const { CustomError } = require("../middleware/errorMiddleware");
 
-// const tournamentParticipantSchema = new mongoose.Schema(
-//   {
-//     tournamentId: {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Tournament",
-//       required: true,
-//     },
-//     userId: {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "User",
-//       required: true,
-//     },
-
-//     registeredAt: { type: Date, default: Date.now },
-
-//     status: {
-//       type: String,
-//       enum: ["registered", "checked-in", "playing", "eliminated", "winner"],
-//       default: "registered",
-//     },
-
-//     teamName: { type: String, trim: true },
-//     position: { type: Number },
-
-//     metadata: { type: Map, of: String },
-//   },
-//   { timestamps: true }
-// );
-
-// // Prevent duplicate registrations
-// tournamentParticipantSchema.index(
-//   { tournamentId: 1, userId: 1 },
-//   { unique: true }
-// );
-
-// const TournamentParticipant = mongoose.model(
-//   "TournamentParticipant",
-//   tournamentParticipantSchema
-// );
-// module.exports = { TournamentParticipant };
-
-
-
-
 const tournamentSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
@@ -109,12 +65,16 @@ const tournamentSchema = new mongoose.Schema(
       default: "draft",
     },
 
-    // createdBy: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    //   required: true,
-    // },
-    // region: { type: String, required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    region: { 
+      type: String, 
+      required: true,
+      enum: ["NA", "EU", "ASIA", "SEA", "MENA", "SA", "OCE", "GLOBAL"]
+    },
 
 
     streamLink: { type: String, trim: true },

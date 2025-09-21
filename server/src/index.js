@@ -5,6 +5,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 // Load environment variables
 dotenv.config();
@@ -42,19 +43,29 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "http://localhost:4173",
-      "http://127.0.0.1:4173",
-      process.env.CLIENT_URL,
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    credentials: true,
+    origin: process.env.APP_HOST || "*",
+    methods: "GET,PUT,POST,DELETE",
+    // credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    exposedHeaders: ["Content-Disposition", "FileLength"]
   })
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the React build
+app.use(express.static(path.join(__dirname, '../../client/dist')));
+
+// For any route, serve index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../client/dist', 'index.html'));
+});
+
+// app.use(express.static(path.join(__dirname, '../client/build')));
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+// });
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -75,11 +86,13 @@ app.use("/api/v1/tournaments", tournamentRouter);
 app.use("/api/v1/admin/tournaments", tournamentAdminRouter);
 app.use("/api/v1/payments", paymentRouter);
 
-app.all("*", (req, res, next) => {
-  next(
-    new CustomError(`The requested URL ${req.originalUrl} was not found`, 404)
-  );
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: "API is running 🚀"
+  });
 });
+
 
 // Error middleware
 app.use(errorMiddleware);

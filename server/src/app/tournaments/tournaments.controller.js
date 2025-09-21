@@ -4,9 +4,40 @@ const {
   CustomError,
   GlobalErrorHandler,
 } = require("../../middleware/errorMiddleware");
-const Registration = require("../../models/registrationSchema.mode");
+const Registration = require("../../models/registrationSchema.model");
 
 // USER ENDPOINTS
+
+// POST /api/v1/tournaments - Create a new tournament
+exports.createTournament = GlobalErrorHandler(async (req, res, next) => {
+  // Add creator info
+  req.body.createdBy = req.user._id;
+  
+  // Calculate total prize pool
+  const prizeDistribution = req.body.prizePool?.distribution || [];
+  let totalCoins = 0;
+  let totalCurrency = 0;
+  
+  prizeDistribution.forEach(prize => {
+    if (prize.rewardType === 'coins') {
+      totalCoins += prize.amount;
+    } else {
+      totalCurrency += prize.amount;
+    }
+  });
+
+  req.body.prizePool.totalCoins = totalCoins;
+  req.body.prizePool.totalCurrency = totalCurrency;
+
+  // Create tournament
+  const tournament = await Tournament.create(req.body);
+
+  res.status(201).json({
+    success: true,
+    data: tournament
+  });
+});
+
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
 
 exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
