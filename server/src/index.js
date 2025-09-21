@@ -70,6 +70,9 @@ const connectDB = async () => {
 };
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tournaments", tournamentRouter);
 app.use("/api/v1/admin/tournaments", tournamentAdminRouter);

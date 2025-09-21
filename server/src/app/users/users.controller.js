@@ -79,13 +79,13 @@ const login = GlobalErrorHandler(async (req, res, next) => {
   // Generate token
   const token = generateToken(user._id);
   res.clearCookie("sessionId");
-  res.cookie("sessionId", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    // domain: ".sunilspace.me",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+    res.cookie("sessionId", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      // domain: ".sunilspace.me",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
   res.json({
     success: true,
     data: {
