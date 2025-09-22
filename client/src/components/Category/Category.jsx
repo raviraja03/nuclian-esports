@@ -2,34 +2,85 @@ import React from "react";
 import Heading from "../Heading/Heading";
 import Button from "../Button/Button";
 import { Link } from "react-router-dom";
-import { useGetTournamentsQuery } from "../../globalState/api/tournamentApi";
-import FeaturedCard from "../shared/FeaturedCard";
-import PageLoader from "../shared/PageLoader";
+import Valo from "../../assets/Valo_game_poster.jpg";
+import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
+import Cod from "../../assets/cod_game_poster.jpg";
+import Freefire from "../../assets/ff_game_poster.jpg";
+const images = {
+  Valorant: Valo,
+  "Battlegrounds Mobile India": Bgmi,
+  "Call of Duty": Cod,
+  "Free Fire": Freefire,
+};
 
+const Category = ({tournaments}) => {
 
-
-const Category = () => {
-  const {
-    data: tournaments = [],
-    isError,
-    isLoading,
-  } = useGetTournamentsQuery({ limit: 3, status: "registration-open" });
-  console.log("Fetched Tournaments:", tournaments.data); 
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  if (isError) {
-    return <p className="text-red-500 text-center py-10">Error loading tournaments. Please try again later.</p>;
-  }
   return (
     <section className="bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(25,31,52,0.6)_40%,rgba(100,100,100,0.2)_62%,rgba(0,0,0,1)_80%)] py-12">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <Heading highlight="Featured" nohighlight="Tournaments" />
 
         <div className="flex overflow-x-auto space-x-6 mt-10 pb-4 custom-scroll ">
-          {tournaments.data.map((card, index) => (
-            <FeaturedCard key={index} card={card} />))}
+          {tournaments.map((card, index) => {
+            return (
+              <div key={index} className="bg-white/20 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-white/10 min-w-[280px] sm:min-w-[320px] md:min-w-[360px]">
+                {/* Card Container with Flex to Stick Button to Bottom */}
+                <div className="flex flex-col h-full">
+                  {/* Card Image */}
+                  <div className="w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-lg relative">
+                    <img
+                      src={images[card.game]}
+                      alt={card.title}
+                      className="w-full h-full object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+                    />
+                    <span
+                      className="absolute top-2 left-2 bg-[#E11D48]/80 text-white text-xs font-Lex font-semibold px-2 py-1 rounded-md shadow-sm hover:bg-[#FC4E5B]/80 transition-colors duration-300"
+                      aria-label={`Tournament type: ${card.type}`}
+                    >
+                      {card.type}
+                    </span>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="flex flex-col flex-grow p-4 text-white font-Lex">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight mb-3">
+                      {card.title}
+                    </h3>
+
+                    <div className="flex justify-between text-sm sm:text-base font-medium mb-2">
+                      <span className="text-gray-300">Entry:</span>
+                      <span className="text-[#E11D48] font-bold">
+                        ₹{card.entryFee.amount}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-sm sm:text-base font-medium mb-2">
+                      <span className="text-gray-300">Prize:</span>
+                      <span className="text-[#FC4E5B] font-bold">
+                        ₹{card.prizePool.totalCurrency}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-sm sm:text-base font-medium mb-4">
+                      <span className="text-gray-300">Players:</span>
+                      <span className="text-yellow-400">{`${card.registeredPlayersCount}/${card.maxParticipants}`}</span>
+                    </div>
+
+                    {/* Button Pushed to Bottom */}
+                    <div className="mt-auto pt-2">
+                      <Link to={`/tournaments/${card._id}`}>
+                        <button className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm sm:text-base border border-[#E11D48]/50 animate-pulse-hover">
+                          {card.entryFee.amount === 0
+                            ? "Join For Free"
+                            : "Join Now"}
+                        </button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* View All Button */}
