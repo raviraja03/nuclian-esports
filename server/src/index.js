@@ -26,7 +26,7 @@ const server = http.createServer(app);
 // -------------------- SOCKET.IO --------------------
 const io = new Server(server, {
   cors: {
-    origin: process.env.APP_HOST || "*",
+    origin:[ process.env.APP_HOST] ,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -37,7 +37,7 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.APP_HOST,  // must be exact domain
+    origin:[ process.env.APP_HOST],  // must be exact domain
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,             // if using cookies or auth headers
     exposedHeaders: ["Content-Disposition", "FileLength"],
