@@ -37,13 +37,13 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.APP_HOST || "*",
+    origin: process.env.APP_HOST,  // must be exact domain
     methods: ["GET", "POST", "PUT", "DELETE"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
+    credentials: true,             // if using cookies or auth headers
     exposedHeaders: ["Content-Disposition", "FileLength"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -71,13 +71,13 @@ app.use("/api/v1/payments", paymentRouter);
 app.use(errorMiddleware);
 
 // -------------------- STATIC FILES (React Build) --------------------
-const clientDistPath = path.join(__dirname, "../../client/dist");
-app.use(express.static(clientDistPath));
+// const clientDistPath = path.join(__dirname, "../../client/dist");
+// app.use(express.static(clientDistPath));
 
-// Serve React app for any non-API route
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
+// // Serve React app for any non-API route
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(clientDistPath, "index.html"));
+// });
 
 // -------------------- SOCKET.IO EVENTS --------------------
 io.on("connection", (socket) => {
