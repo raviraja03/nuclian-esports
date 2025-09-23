@@ -67,10 +67,9 @@ const connectDB = async () => {
   }
 };
 
-// -------------------- API ROUTES --------------------
-// Health check
+// Routes
 app.get("/", (req, res) => {
-  res.json({ success: true, message: "API is running 🚀" });
+  res.send("API is running...");
 });
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tournaments", tournamentRouter);

@@ -6,6 +6,7 @@ const {
   CustomError,
   GlobalErrorHandler,
 } = require("../../middleware/errorMiddleware");
+const {cookieOptions,cookieOptionsForClearCookie} = require("../../utilities/jwt");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -23,14 +24,8 @@ const register = GlobalErrorHandler(async (req, res, next) => {
     userStatus: "active", // Middleware
   });
   const token = generateToken(user._id);
-  res.clearCookie("sessionId");
-  res.cookie("sessionId", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    // domain: ".sunilspace.me",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+  res.clearCookie("sessionId",cookieOptionsForClearCookie);
+  res.cookie("sessionId", token,cookieOptions);
   res.status(201).json({
     success: true,
     data: {
@@ -78,14 +73,8 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 
   // Generate token
   const token = generateToken(user._id);
-  res.clearCookie("sessionId");
-  res.cookie("sessionId", token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    // domain: ".sunilspace.me",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
-  });
+  res.clearCookie("sessionId",cookieOptionsForClearCookie);
+    res.cookie("sessionId", token, cookieOptions);
   res.json({
     success: true,
     data: {
@@ -105,11 +94,7 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 // @access  Private
 const logout = GlobalErrorHandler(async (req, res, next) => {
   // Clear the session cookie
-  res.clearCookie("sessionId", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-  });
+  res.clearCookie("sessionId", cookieOptionsForClearCookie);
 
   res.json({
     success: true,
@@ -355,59 +340,7 @@ const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Resend OTP to email
-// @route   POST /api/users/resend-otp
-// @access  Public
-const resendOtp = GlobalErrorHandler(async (req, res, next) => {
-  const { email } = req.body;
 
-  // Find user by email
-  const user = await User.findOne({ email });
-  if (!user) {
-    return next(new CustomError("No user found with this email", 404));
-  }
-
-  // Check if previous OTP request was made within last 1 minute
-  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-  if (user.otp?.expiresAt && new Date(user.otp.expiresAt) > oneMinuteAgo) {
-    return next(
-      new CustomError("Please wait 1 minute before requesting a new OTP", 429)
-    );
-  }
-
-  // Generate new OTP
-  const emailOtp = generateOTP();
-
-  // Save OTP with expiry (10 minutes)
-  user.otp = {
-    code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  };
-  user.verifyOtp = {
-    code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-  };
-
-  await user.save();
-
-  try {
-    // TODO: Implement actual email sending
-    // For development, return OTP in response
-    res.json({
-      success: true,
-      message: "New OTP sent to email",
-      debug: {
-        emailOtp,
-      },
-    });
-  } catch (error) {
-    user.otp = undefined;
-    user.verifyOtp = undefined;
-    await user.save();
-
-    return next(new CustomError("Failed to send OTP", 500));
-  }
-});
 
 module.exports = {
   sendOtp,

@@ -10,7 +10,14 @@ const tournamentSchema = new mongoose.Schema(
 
     game: { type: String, required: true },
     // gameId: { type: String, required: true },
-
+    totalMember: {
+      type: Number,
+      required: true,
+      default: function () {
+        return this.type === "solo" ? 1 : this.type === "duo" ? 2 : 4;
+      },
+    },
+    totalTeams: { type: Number, required: true },
     platform: {
       type: String,
       enum: ["pc", "mobile", "console", "cross-platform"],
@@ -25,9 +32,13 @@ const tournamentSchema = new mongoose.Schema(
       checkInEnd: { type: Date, required: true },
     },
 
-    maxParticipants: { type: Number, required: true },
-    // minParticipants: { type: Number, required: true, default: 2 },
-
+    maxParticipants: {
+      type: Number,
+      required: true,
+      default: function () {
+            return this.totalTeams * this.totalMember;
+      },
+    },
     entryFee: {
       coins: { type: Number, default: 0, min: 0 },
       amount: { type: Number, default: 0, min: 0 },
@@ -65,17 +76,11 @@ const tournamentSchema = new mongoose.Schema(
       default: "draft",
     },
 
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    region: { 
-      type: String, 
-      required: true,
-      enum: ["NA", "EU", "ASIA", "SEA", "MENA", "SA", "OCE", "GLOBAL"]
-    },
-
+    // createdBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    //   required: true,
+    // },
 
     streamLink: { type: String, trim: true },
     discordLink: { type: String, trim: true },
@@ -83,12 +88,9 @@ const tournamentSchema = new mongoose.Schema(
     metadata: { type: Map, of: String },
 
     isVisible: { type: Boolean, default: true },
-    roomId: { type: String, trim: true,default:null },
-    
+    roomId: { type: String, trim: true, default: null },
   },
   { timestamps: true }
-
-
 );
 
 // Indexes for performance
@@ -110,14 +112,14 @@ tournamentSchema.pre("save", function (next) {
       new CustomError("Check-in must end before tournament starts", 400)
     );
   }
-  if (this.minParticipants > this.maxParticipants) {
-    return next(
-      new CustomError(
-        "Minimum cannot be greater than maximum participants",
-        400
-      )
-    );
-  }
+  // if (this.minParticipants > this.maxParticipants) {
+  //   return next(
+  //     new CustomError(
+  //       "Minimum cannot be greater than maximum participants",
+  //       400
+  //     )
+  //   );
+  // }
   next();
 });
 
