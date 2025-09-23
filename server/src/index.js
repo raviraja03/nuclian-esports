@@ -47,15 +47,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// -------------------- STATIC FILES (React Build) --------------------
-const clientDistPath = path.join(__dirname, "../../client/dist");
-app.use(express.static(clientDistPath));
-
-// Serve React app for any non-API route
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
-
 // -------------------- DATABASE --------------------
 const connectDB = async () => {
   try {
@@ -78,6 +69,15 @@ app.use("/api/v1/payments", paymentRouter);
 
 // -------------------- ERROR HANDLING --------------------
 app.use(errorMiddleware);
+
+// -------------------- STATIC FILES (React Build) --------------------
+// const clientDistPath = path.join(__dirname, "../../client/dist");
+// app.use(express.static(clientDistPath));
+
+// // Serve React app for any non-API route
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(clientDistPath, "index.html"));
+// });
 
 // -------------------- SOCKET.IO EVENTS --------------------
 io.on("connection", (socket) => {
