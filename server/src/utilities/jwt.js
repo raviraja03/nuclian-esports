@@ -1,6 +1,6 @@
 // Handles JWT token generation and verification
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET || "Secreet";
 
 function generateToken(payload) {
@@ -14,4 +14,27 @@ function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
-module.exports = { generateToken, verifyToken };
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "Strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
+if (process.env.NODE_ENV === "production") {
+  cookieOptions.domain = process.env.COOKIE_DOMAIN;
+}
+const cookieOptionsForClearCookie = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "Strict",
+};
+if (process.env.NODE_ENV === "production") {
+  cookieOptionsForClearCookie.domain = process.env.COOKIE_DOMAIN;
+}
+
+module.exports = {
+  generateToken,
+  verifyToken,
+  cookieOptions,
+  cookieOptionsForClearCookie,
+};

@@ -18,7 +18,8 @@ const Home = () => {
     data: tournaments = {},
 
     isLoading,
-  } = useGetTournamentsQuery({ limit: 3, status: "registration-open" });
+  } = useGetTournamentsQuery({ limit: 3, status: "registrataion-open" });
+  console.log(tournaments.data);
   return (
     <div>
       <Hero />
@@ -27,7 +28,7 @@ const Home = () => {
         <PageLoader />
       ) : (
         <>
-          {tournaments?.data !== 0 && (
+          {tournaments?.data?.length > 0 && (
             <Category tournaments={tournaments.data} />
           )}
         </>
