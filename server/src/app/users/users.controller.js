@@ -2,11 +2,15 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const User = require("../../models/user.model");
 const { generateToken } = require("../../middleware/auth");
+const  sendMail  = require("../../utilities/mailer");
 const {
   CustomError,
   GlobalErrorHandler,
 } = require("../../middleware/errorMiddleware");
-const {cookieOptions,cookieOptionsForClearCookie} = require("../../utilities/jwt");
+const {
+  cookieOptions,
+  cookieOptionsForClearCookie,
+} = require("../../utilities/jwt");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -24,8 +28,8 @@ const register = GlobalErrorHandler(async (req, res, next) => {
     userStatus: "active", // Middleware
   });
   const token = generateToken(user._id);
-  res.clearCookie("sessionId",cookieOptionsForClearCookie);
-  res.cookie("sessionId", token,cookieOptions);
+  res.clearCookie("sessionId", cookieOptionsForClearCookie);
+  res.cookie("sessionId", token, cookieOptions);
   res.status(201).json({
     success: true,
     data: {
@@ -73,8 +77,8 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 
   // Generate token
   const token = generateToken(user._id);
-  res.clearCookie("sessionId",cookieOptionsForClearCookie);
-    res.cookie("sessionId", token, cookieOptions);
+  res.clearCookie("sessionId", cookieOptionsForClearCookie);
+  res.cookie("sessionId", token, cookieOptions);
   res.json({
     success: true,
     data: {
@@ -229,7 +233,7 @@ const updateProfile = GlobalErrorHandler(async (req, res, next) => {
     user.password = newPassword;
   }
 
-   await user.save();
+  await user.save();
 
   res.json({
     success: true,
@@ -275,16 +279,18 @@ const sendOtp = GlobalErrorHandler(async (req, res, next) => {
   await user.save();
 
   try {
+    await sendMail(user.email, emailOtp);
     // TODO: Implement actual email and SMS sending
     // For development, return OTPs in response
     res.json({
       success: true,
       message: "OTPs sent to email",
-      debug: {
-        emailOtp,
-      },
+      // debug: {
+      //   emailOtp,
+      // },
     });
   } catch (error) {
+    console.error("Error sending OTPs:", error);
     user.otp = null;
     user.otpExpiresAt = null;
     await user.save();
@@ -339,8 +345,6 @@ const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
     message: "Password reset successful",
   });
 });
-
-
 
 module.exports = {
   sendOtp,
