@@ -1,74 +1,71 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import Button_2 from "../components/Button/Button_2";
 import {
   useForgotPasswordMutation,
-  // useResetPasswordMutation
+  useVerifyAndResetPasswordMutation,
 } from "../globalState/api/authApi";
 
+import { TOAST_DESIGN_SUCCESS, TOAST_DESIGN_ERROR } from "../constant";
+
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1); // Step 1: Email | Step 2: OTP + Reset
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-    reset,
   } = useForm();
 
+
+
   const [forgotPassword] = useForgotPasswordMutation();
-  // const [resetPassword] = useResetPasswordMutation();
+  const [verifyAndResetPassword] = useVerifyAndResetPasswordMutation();
 
   // Step 1 - Request OTP
   const onSubmitEmail = async ({ email }) => {
     try {
-      await forgotPassword({ email }).unwrap();
-      toast.success("OTP sent to your email!", {
-        style: {
-          background: "#0a141d",
-          color: "#fff",
-          border: "1px solid #E11D48",
-          borderRadius: "8px",
-        },
-      });
+      const res = await forgotPassword({ email }).unwrap();
+      console.log(res);
+      toast.success("OTP sent to your email!", TOAST_DESIGN_SUCCESS);
       setEmail(email);
       setStep(2);
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to send OTP");
+      toast.error(
+        err?.data?.message || "Failed to send OTP",
+        TOAST_DESIGN_ERROR
+      );
     }
   };
 
   // Step 2 - Reset password
   const onSubmitReset = async (data) => {
-    if (data.newPassword !== data.confirmPassword) {
-      toast.error("Passwords do not match!");
-      return;
-    }
-
     try {
-      // await resetPassword({
-      //   email,
-      //   otp: data.code,
-      //   newPassword: data.newPassword,
-      // }).unwrap();
-
-      toast.success("Password reset successfully!");
-      reset();
-      setStep(1);
-    } catch (err) {
-      toast.error(err?.data?.message || "Failed to reset password");
+      await verifyAndResetPassword({
+        email: email,
+        emailOtp: data.code,
+        newPassword: data.password,
+      }).unwrap();
+      toast.success("Password reset successfully!", TOAST_DESIGN_SUCCESS);
+      navigate("/login");
+    } catch (er) {
+      toast.error(er?.data?.message, TOAST_DESIGN_ERROR);
     }
   };
 
   const handleResend = async () => {
     try {
       await forgotPassword({ email }).unwrap();
-      toast.success("OTP resent!");
+      toast.success("OTP resent!", TOAST_DESIGN_SUCCESS);
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to resend OTP");
+      toast.error(
+        err?.data?.message || "Failed to resend OTP",
+        TOAST_DESIGN_ERROR
+      );
     }
   };
 
@@ -148,30 +145,7 @@ const ForgotPassword = () => {
                 className="space-y-4"
               >
                 {/* enter your email */}
-                <div>
-                  <label className="block text-sm text-gray-300 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                                    disabled={true}
 
-                    type="email"
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /.+@.+\..+/,
-                        message: "Enter a valid email",
-                      },
-                    })}
-                    className="w-full bg-[#1a2634]/50 border border-white/20 rounded-lg py-2 px-4 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-[#FC4E5B]"
-                    placeholder="Enter your email"
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
                 {/* OTP Field */}
 
                 <div>

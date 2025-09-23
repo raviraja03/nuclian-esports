@@ -1,11 +1,12 @@
 import { FaGoogle } from "react-icons/fa";
-import { Link ,useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../globalState/slices/auth";
-import {useSignupMutation} from "../../globalState/api/authApi"
+import { useSignupMutation } from "../../globalState/api/authApi";
+import { TOAST_DESIGN_ERROR, TOAST_DESIGN_SUCCESS } from "../../constant";
+
 const Signup = () => {
   const navigate = useNavigate();
   const [signup] = useSignupMutation();
@@ -19,7 +20,6 @@ const Signup = () => {
 
   const onSubmit = async (data) => {
     try {
-
       const response = await signup({
         name: data.username,
         email: data.email,
@@ -27,37 +27,13 @@ const Signup = () => {
         phoneNumber: data.phone,
       }).unwrap();
 
-      toast.success("Account created successfully!", {
-        style: {
-          background: "#0a141d",
-          color: "#fff",
-          border: "1px solid #FC4E5B",
-          borderRadius: "8px",
-          padding: "12px",
-        },
-        iconTheme: {
-          primary: "#E11D48",
-          secondary: "#fff",
-        },
-      });
+      toast.success("Account created successfully!", TOAST_DESIGN_SUCCESS);
       dispatch(setCredentials({ user: response.data }));
       navigate("/", { replace: true });
     } catch (error) {
       toast.error(
         error.data.message || "An error occurred. Please try again.",
-        {
-          style: {
-            background: "#0a141d",
-            color: "#fff",
-            border: "1px solid #FC4E5B",
-            borderRadius: "8px",
-            padding: "12px",
-          },
-          iconTheme: {
-            primary: "#E11D48",
-            secondary: "#fff",
-          },
-        }
+        TOAST_DESIGN_ERROR
       );
     }
   };

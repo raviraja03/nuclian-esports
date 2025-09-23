@@ -1,14 +1,15 @@
 import { FaGoogle } from "react-icons/fa";
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../globalState/slices/auth";
-import {useLoginMutation} from "../../globalState/api/authApi"
+import { useLoginMutation } from "../../globalState/api/authApi";
+import { TOAST_DESIGN_ERROR, TOAST_DESIGN_SUCCESS } from "../../constant";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-    const [login] = useLoginMutation();
+  const [login] = useLoginMutation();
 
   const {
     register,
@@ -18,40 +19,19 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await login({ email: data.email, password: data.password }).unwrap();
+      const response = await login({
+        email: data.email,
+        password: data.password,
+      }).unwrap();
 
-      toast.success("Login successful!", {
-        style: {
-          background: "#0a141d",
-          color: "#fff",
-          border: "1px solid #FC4E5B",
-          borderRadius: "8px",
-          padding: "12px",
-        },
-        iconTheme: {
-          primary: "#E11D48",
-          secondary: "#fff",
-        },
-      });
+      toast.success("Login successful!", TOAST_DESIGN_SUCCESS);
       dispatch(setCredentials({ user: response.data }));
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Login error:", error);
       toast.error(
         error.data.message || "An error occurred. Please try again.",
-        {
-          style: {
-            background: "#0a141d",
-            color: "#fff",
-            border: "1px solid #FC4E5B",
-            borderRadius: "8px",
-            padding: "12px",
-          },
-          iconTheme: {
-            primary: "#E11D48",
-            secondary: "#fff",
-          },
-        }
+        TOAST_DESIGN_ERROR
       );
     }
   };

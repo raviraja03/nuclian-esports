@@ -27,8 +27,8 @@ const register = GlobalErrorHandler(async (req, res, next) => {
   res.cookie("sessionId", token, {
     httpOnly: true,
     secure: true,
-    sameSite: "None", 
-    domain: ".sunilspace.me",
+    sameSite: "None",
+    // domain: ".sunilspace.me",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.status(201).json({
@@ -82,8 +82,8 @@ const login = GlobalErrorHandler(async (req, res, next) => {
   res.cookie("sessionId", token, {
     httpOnly: true,
     secure: true,
-    sameSite: "None", 
-    domain: ".sunilspace.me",
+    sameSite: "None",
+    // domain: ".sunilspace.me",
     maxAge: 30 * 24 * 60 * 60 * 1000,
   });
   res.json({
@@ -104,8 +104,6 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/logout
 // @access  Private
 const logout = GlobalErrorHandler(async (req, res, next) => {
- 
-
   // Clear the session cookie
   res.clearCookie("sessionId", {
     httpOnly: true,
@@ -224,7 +222,7 @@ const getProfile = GlobalErrorHandler(async (req, res, next) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateProfile = GlobalErrorHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user._id).select("+password");
   const { name, email, phoneNumber, currentPassword, newPassword } = req.body;
 
   // Update basic fields
@@ -246,17 +244,11 @@ const updateProfile = GlobalErrorHandler(async (req, res, next) => {
     user.password = newPassword;
   }
 
-  const updatedUser = await user.save();
+   await user.save();
 
   res.json({
     success: true,
-    data: {
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      phoneNumber: updatedUser.phoneNumber,
-      role: updatedUser.role,
-    },
+    message: "Profile updated successfully",
   });
 });
 
@@ -268,7 +260,7 @@ const generateOTP = () => {
 // @desc    Forgot password - Send OTPs
 // @route   POST /api/users/forgot-password
 // @access  Public
-const forgotPassword = GlobalErrorHandler(async (req, res, next) => {
+const sendOtp = GlobalErrorHandler(async (req, res, next) => {
   const { email } = req.body;
 
   // Find user by email and phone
@@ -279,16 +271,21 @@ const forgotPassword = GlobalErrorHandler(async (req, res, next) => {
 
   // Generate OTPs
   const emailOtp = generateOTP();
+  if (user.otpExpiresAt) {
+    const otpRequestedAt = new Date(user.otpExpiresAt - 10 * 60 * 1000);
+    const diffInMs = new Date() - otpRequestedAt;
+    if (diffInMs / (1000 * 60) < 1) {
+      return next(
+        new CustomError(
+          "Please wait at least 1 minute before requesting a new OTP",
+          429
+        )
+      );
+    }
+  }
 
   // Save OTPs with expiry (10 minutes)
-  user.otp = {
-    code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-  };
-  user.verifyOtp = {
-    code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
-  };
+  user.otp = emailOtp;
 
   await user.save();
 
@@ -300,11 +297,11 @@ const forgotPassword = GlobalErrorHandler(async (req, res, next) => {
       message: "OTPs sent to email",
       debug: {
         emailOtp,
-      }
+      },
     });
   } catch (error) {
-    user.otp = undefined;
-    user.verifyOtp = undefined;
+    user.otp = null;
+    user.otpExpiresAt = null;
     await user.save();
 
     return next(new CustomError("Failed to send OTPs", 500));
@@ -325,29 +322,36 @@ const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
   }
 
   // Check if OTPs exist and are valid
-  if (!user.otp?.code || !user.verifyOtp?.code) {
-    return next(new CustomError("OTPs have not been generated. Please request new OTPs", 400));
+  if (!user.otp) {
+    return next(
+      new CustomError(
+        "OTPs have not been generated. Please request new OTPs",
+        400
+      )
+    );
   }
 
   // Check if OTPs have expired
-  if (user.otp.expiresAt < Date.now() || user.verifyOtp.expiresAt < Date.now()) {
-    return next(new CustomError("OTPs have expired. Please request new OTPs", 400));
+  if (user.otpExpiresAt < Date.now()) {
+    return next(
+      new CustomError("OTPs have expired. Please request new OTPs", 400)
+    );
   }
 
   // Verify OTPs
-  if (user.otp.code !== emailOtp || user.verifyOtp.code !== emailOtp) {
+  if (user.otp !== emailOtp) {
     return next(new CustomError("Invalid OTPs. Please try again", 400));
   }
 
   // Update password
   user.password = newPassword;
-  user.otp = undefined;
-  user.verifyOtp = undefined;
+  user.otp = null;
+  user.otpExpiresAt = null;
   await user.save();
 
   res.json({
     success: true,
-    message: "Password reset successful"
+    message: "Password reset successful",
   });
 });
 
@@ -366,7 +370,9 @@ const resendOtp = GlobalErrorHandler(async (req, res, next) => {
   // Check if previous OTP request was made within last 1 minute
   const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
   if (user.otp?.expiresAt && new Date(user.otp.expiresAt) > oneMinuteAgo) {
-    return next(new CustomError("Please wait 1 minute before requesting a new OTP", 429));
+    return next(
+      new CustomError("Please wait 1 minute before requesting a new OTP", 429)
+    );
   }
 
   // Generate new OTP
@@ -375,11 +381,11 @@ const resendOtp = GlobalErrorHandler(async (req, res, next) => {
   // Save OTP with expiry (10 minutes)
   user.otp = {
     code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   };
   user.verifyOtp = {
     code: emailOtp,
-    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
   };
 
   await user.save();
@@ -391,8 +397,8 @@ const resendOtp = GlobalErrorHandler(async (req, res, next) => {
       success: true,
       message: "New OTP sent to email",
       debug: {
-        emailOtp
-      }
+        emailOtp,
+      },
     });
   } catch (error) {
     user.otp = undefined;
@@ -404,9 +410,8 @@ const resendOtp = GlobalErrorHandler(async (req, res, next) => {
 });
 
 module.exports = {
-  forgotPassword,
+  sendOtp,
   verifyOtpAndResetPassword,
-  resendOtp,
   register,
   login,
   logout,

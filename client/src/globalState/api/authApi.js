@@ -3,9 +3,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL, 
+    baseUrl: import.meta.env.VITE_BACKEND_URL,
 
-    credentials: "include", 
+    credentials: "include",
   }),
 
   endpoints: (builder) => ({
@@ -26,15 +26,34 @@ export const authApi = createApi({
 
     fetchProfile: builder.query({
       query: () => "/users/profile",
+      providesTags: ["fetchUser"],
     }),
 
-     forgotPassword: builder.mutation({
+    forgotPassword: builder.mutation({
       query: (email) => ({
         url: "/users/forgot-password",
         method: "POST",
-        body: email ,
+        body: email,
       }),
       transformResponse: (response) => response,
+    }),
+
+    verifyAndResetPassword: builder.mutation({
+      query: (data) => ({
+        url: "/users/verify-otp",
+        method: "POST",
+        body: data,
+      }),
+      transformResponse: (response) => response,
+    }),
+    updateProfile: builder.mutation({
+      query: (data) => ({
+        url: "/users/profile",
+        method: "PATCH",
+        body: data,
+      }),
+      transformResponse: (response) => response,
+      invalidatesTags: ["fetchUser"],
     }),
   }),
 });
@@ -44,4 +63,6 @@ export const {
   useLoginMutation,
   useFetchProfileQuery,
   useForgotPasswordMutation,
+  useVerifyAndResetPasswordMutation,
+  useUpdateProfileMutation,
 } = authApi;

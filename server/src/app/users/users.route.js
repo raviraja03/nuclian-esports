@@ -9,7 +9,7 @@ const {
   deleteUser,
   getProfile,
   updateProfile,
-  forgotPassword,
+  sendOtp,
   verifyOtpAndResetPassword,
   resendOtp,
 } = require("./users.controller");
@@ -32,19 +32,15 @@ userRouter.post("/register", validate(registerSchema), register);
 userRouter.post("/login", validate(loginSchema), login);
 userRouter.post("/logout", logout);
 
-
-userRouter.post("/forgot-password", forgotPassword);
+userRouter.post("/forgot-password", sendOtp);
 userRouter.post("/verify-otp", verifyOtpValidation, verifyOtpAndResetPassword);
-userRouter.post("/resend-otp", resendOtpValidation, resendOtp);
+// userRouter.post("/resend-otp", resendOtpValidation, resendOtp);
 
 // Protected routes
 userRouter.use(protect); // Apply authentication middleware to all routes below
 
 // User profile routes
-userRouter
-  .route("/profile")
-  .get(getProfile)
-  .put(updateUserValidation, updateProfile);
+userRouter.route("/profile").get(getProfile).patch(updateProfile);
 
 // Admin only routes
 userRouter
