@@ -23,6 +23,41 @@ const { errorMiddleware } = require("./middleware/errorMiddleware");
 const app = express();
 const server = http.createServer(app);
 
+// -------------------- MIDDLEWARE --------------------
+app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:3000", // if sometimes using 3000
+  "http://localhost:3001", // your React dev server
+  "https://www.tribexesports.com" // production domain
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // if you use cookies/auth headers
+    exposedHeaders: ["Content-Disposition", "FileLength"],
+  })
+);
+
+// Handle preflight requests
+app.options("*", cors());
+
+// app.use(
+//   cors({
+//     origin: process.env.APP_HOST,  // must be exact domain
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,             // if using cookies or auth headers
+//     exposedHeaders: ["Content-Disposition", "FileLength"],
+//   })
+// );
+
 // -------------------- SOCKET.IO --------------------
 const io = new Server(server, {
   cors: {
@@ -32,17 +67,6 @@ const io = new Server(server, {
   },
 });
 app.set("io", io);
-
-// -------------------- MIDDLEWARE --------------------
-app.use(cookieParser());
-app.use(
-  cors({
-    origin: process.env.APP_HOST,  // must be exact domain
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,             // if using cookies or auth headers
-    exposedHeaders: ["Content-Disposition", "FileLength"],
-  })
-);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -69,15 +93,6 @@ app.use("/api/v1/payments", paymentRouter);
 
 // -------------------- ERROR HANDLING --------------------
 app.use(errorMiddleware);
-
-// -------------------- STATIC FILES (React Build) --------------------
-// const clientDistPath = path.join(__dirname, "../../client/dist");
-// app.use(express.static(clientDistPath));
-
-// // Serve React app for any non-API route
-// app.get("*", (req, res) => {
-//   res.sendFile(path.join(clientDistPath, "index.html"));
-// });
 
 // -------------------- SOCKET.IO EVENTS --------------------
 io.on("connection", (socket) => {

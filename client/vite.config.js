@@ -16,5 +16,6 @@ export default defineConfig(({ mode }) => {
       port: parseInt(env.VITE_PORT) || 5000,
       host: true,
     },
+    base: "/", // Set base to root for proper routing
   };
 });
