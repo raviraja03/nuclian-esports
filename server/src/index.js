@@ -61,7 +61,7 @@ app.options("*", cors());
 // -------------------- SOCKET.IO --------------------
 const io = new Server(server, {
   cors: {
-    origin: process.env.APP_HOST || "*",
+    origin:[ process.env.APP_HOST] ,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
