@@ -1,7 +1,9 @@
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
-import Freefire from "../../assets/ff_game_poster.jpg";
+// import Freefire from "../../assets/ff_game_poster.jpg";
+import Freefire from "../../assets/free_fire_live.jpeg";
+
 import { Link } from "react-router-dom";
 
 const TournamentCard = ({ card }) => {
@@ -40,13 +42,13 @@ const TournamentCard = ({ card }) => {
             <span className="text-[#E11D48] font-bold">₹{card.entryFee.amount}</span>
           </div>
           <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
-            <span className="text-gray-300">Prize:</span>
+            <span className="text-gray-300">Prize Pool:</span>
             <span className="text-[#FC4E5B] font-bold">₹{card.prizePool.totalCurrency}</span>
           </div>
-          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+          {/* <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
             <span className="text-gray-300">Players:</span>
             <span className="text-yellow-400">{`${card.registeredPlayersCount}/${card.maxParticipants}`}</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Button - Sticky to bottom */}

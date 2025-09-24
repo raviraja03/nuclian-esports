@@ -17,49 +17,82 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
 
   const filter = { isVisible: true };
 
-  if (game) filter.game = game;
-  if (status) filter.status = status;
-  if (search) {
-    filter.title = { $regex: search, $options: "i" };
+  // Add filters with proper validation
+  if (game && game.trim()) {
+    filter.game = { $regex: new RegExp(game.trim(), "i") }; // Case insensitive match
+  }
+  if (status && status.trim()) {
+    filter.status = status.trim();
+  }
+  if (search && search.trim()) {
+    filter.title = { $regex: new RegExp(search.trim(), "i") };
   }
 
   const sortField = sortBy || "schedule.startTime";
   const sortOrder = order === "asc" ? 1 : -1;
 
   const skip = (page - 1) * limit;
+  console.log("Filter object:", JSON.stringify(filter, null, 2));
+  console.log("Sort field:", sortField, "Sort order:", sortOrder);
 
-  const [tournaments, total] = await Promise.all([
-    Tournament.aggregate([
-      { $match: filter },
-      {
-        $lookup: {
-          from: "registrations", // 👈 must match the actual collection name
-          let: { tournamentId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ["$tournament", "$$tournamentId"],
+  // Build aggregation pipeline with proper filtering
+  const pipeline = [
+    { $match: filter },
+    {
+      $lookup: {
+        from: "registrations", // This should match your actual MongoDB collection name
+        let: { tournamentId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $eq: ["$tournament", "$$tournamentId"] },
+              status: "paid",
+            },
+          },
+        ],
+        as: "registrations",
+      },
+    },
+    {
+      $addFields: {
+        registeredTeamsCount: { $size: "$registrations" },
+        registeredPlayersCount: {
+          $sum: {
+            $map: {
+              input: "$registrations",
+              as: "reg",
+              in: {
+                $cond: {
+                  if: { $isArray: "$$reg.team.members" },
+                  then: { $size: "$$reg.team.members" },
+                  else: 0,
                 },
-                status: "paid", // ✅ simpler: filter directly here
               },
             },
-          ],
-          as: "registrations",
+          },
         },
       },
-      {
-        $addFields: {
-          registeredPlayersCount: { $size: "$registrations" }, // ✅ count directly
-        },
-      },
-      { $project: { registrations: 0 } }, // remove raw array
-      { $sort: { [sortField]: sortOrder } },
-      { $skip: skip },
-      { $limit: limit },
-    ]),
+    },
+    { $project: { registrations: 0 } },
+  ];
+
+  // Add sorting - handle nested field names properly
+  const sortObj = {};
+  sortObj[sortField] = sortOrder;
+  pipeline.push({ $sort: sortObj });
+
+  // Add pagination
+  pipeline.push({ $skip: skip });
+  pipeline.push({ $limit: limit });
+
+  console.log("Aggregation pipeline:", JSON.stringify(pipeline, null, 2));
+
+  const [tournaments, total] = await Promise.all([
+    Tournament.aggregate(pipeline),
     Tournament.countDocuments(filter),
   ]);
+
+  console.log("Results count:", tournaments.length, "Total:", total);
 
   res.status(200).json({
     success: true,
@@ -79,7 +112,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
 
 exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
-    const userId = req?.user?._id; // user comes from auth middleware
+  const userId = req?.user?._id; // user comes from auth middleware
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(new CustomError("Invalid tournament ID", 400));

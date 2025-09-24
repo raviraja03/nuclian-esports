@@ -11,7 +11,9 @@ import axios from "axios";
 import { useGetTournamentByIdQuery } from "../../globalState/api/tournamentApi";
 import LoadingScreen from "../shared/LoadingScreen";
 import { useParams } from "react-router-dom";
-
+import { formatDate12Hour } from "../../helpers/timeFormat";
+import { useForm } from "react-hook-form";
+import { TOAST_DESIGN_ERROR, TOAST_DESIGN_SUCCESS } from "../../constant";
 const TournamentDetails = () => {
   const { id } = useParams();
   const {
@@ -20,46 +22,98 @@ const TournamentDetails = () => {
     isError,
   } = useGetTournamentByIdQuery(id);
   const isUserLoggedIn = useSelector((state) => state.auth.isUserLoggedIn);
-  const [isJoining, setIsJoining] = useState(false);
   const [isPrizePoolOpen, setIsPrizePoolOpen] = useState(true);
   const [isRulesOpen, setIsRulesOpen] = useState(true);
-  const [timeLeft, setTimeLeft] = useState("");
   const navigate = useNavigate();
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid, isSubmitting },
+    reset,
+  } = useForm();
+
+  const onSubmit = async ({ teamName, players, tournamentId }) => {
+
+    
+    if (!(tournamentData?.data?.entryFee.amount == 0)) { // Paid Tournament
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
+          {
+            tournament: tournamentId,
+            teamName: teamName,
+            players:[]
+          },
+          { withCredentials: true }
+        );
+
+        navigate("/payment", {
+          state: {
+            orderId: res.data.orderId,
+            paymentSessionId: res.data.paymentSessionId,
+          },
+        });
+
+        toast.success(res.data.message, TOAST_DESIGN_SUCCESS);
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to join the tournament. Please try again.",
+          TOAST_DESIGN_ERROR
+        );
+      }
+    } else { // Free Tournament
+      try {
+        const res = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
+          {
+            tournament: tournamentId,
+            teamName: teamName,
+            players: players,
+          },
+          { withCredentials: true }
+        );
+        if (res.data.success) {
+          toast.success(
+            res?.data?.message ||
+              "Failed to join the tournament. Please try again.",
+            TOAST_DESIGN_SUCCESS
+          );
+
+          navigate("/free-tournament-success", {
+            state: {
+              tournament: {
+                title: tournamentData?.data?.title,
+                game: tournamentData?.data?.game,
+                platform: tournamentData?.data?.platform,
+                startTime: tournamentData?.data?.schedule?.startTime,
+              },
+            },
+          });
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to join the tournament. Please try again.",
+          TOAST_DESIGN_ERROR
+        );
+      }
+    }
+  };
+
   // Map game to image
-const images={
-  "Valorant":Valo,
-  "Battlegrounds Mobile India":Bgmi,
-  "Call of Duty":Cod,
-  "Free Fire":Freefire
-}
+  const images = {
+    Valorant: Valo,
+    "Battlegrounds Mobile India": Bgmi,
+    "Call of Duty": Cod,
+    "Free Fire": Freefire,
+  };
 
   // Countdown timer
-  useEffect(() => {
-    const updateTimer = () => {
-      const now = new Date();
-      const startTime = new Date(tournamentData?.data?.schedule?.startTime);
-      const diff = startTime - now;
-      if (diff <= 0) {
-        setTimeLeft("Tournament Started");
-        return;
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor(
-        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      );
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      setTimeLeft(
-        `${days > 0 ? `${days}d ` : ""}${hours}h ${minutes}m ${seconds}s`
-      );
-    };
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, [tournamentData]);
 
-  const joinTournament = async (tournamentId) => {
+  const openModal = () => {
     if (!isUserLoggedIn) {
       toast.error("Please log in to join the tournament", {
         style: {
@@ -76,123 +130,12 @@ const images={
       });
       return;
     }
-    setIsJoining(true);
-    if (!(tournamentData?.data?.entryFee.amount == 0)) {
-      try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
-          {
-            tournament: tournamentId,
-          },
-          { withCredentials: true }
-        );
-
-        navigate("/payment", {
-          state: {
-            orderId: res.data.orderId,
-            paymentSessionId: res.data.paymentSessionId,
-          },
-        });
-        toast.success(res.data.message, {
-          style: {
-            background: "#0a141d",
-            color: "#fff",
-            border: "1px solid #FC4E5B",
-            borderRadius: "8px",
-            padding: "12px",
-          },
-          iconTheme: {
-            primary: "#E11D48",
-            secondary: "#fff",
-          },
-        });
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message ||
-            "Failed to join the tournament. Please try again.",
-          {
-            style: {
-              background: "#0a141d",
-              color: "#fff",
-              border: "1px solid #FC4E5B",
-              borderRadius: "8px",
-              padding: "12px",
-            },
-            iconTheme: {
-              primary: "#E11D48",
-              secondary: "#fff",
-            },
-          }
-        );
-      } finally {
-        setIsJoining(false);
-      }
-    } else {
-      try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
-          {
-            tournament: tournamentId,
-          },
-          { withCredentials: true }
-        );
-        if (res.data.success) {
-          toast.success(
-            res?.data?.message ||
-              "Failed to join the tournament. Please try again.",
-            {
-              style: {
-                background: "#0a141d",
-                color: "#fff",
-                border: "1px solid #FC4E5B",
-                borderRadius: "8px",
-                padding: "12px",
-              },
-              iconTheme: {
-                primary: "#E11D48",
-                secondary: "#fff",
-              },
-            }
-          );
-
-
-          navigate("/free-tournament-success",{
-            state:{
-              tournament:{
-                title:tournamentData?.data?.title,
-                game:tournamentData?.data?.game,
-                platform:tournamentData?.data?.platform,
-                startTime:tournamentData?.data?.schedule?.startTime,
-              }
-
-            }
-          });
-
-
-        }
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message ||
-            "Failed to join the tournament. Please try again.",
-          {
-            style: {
-              background: "#0a141d",
-              color: "#fff",
-              border: "1px solid #FC4E5B",
-              borderRadius: "8px",
-              padding: "12px",
-            },
-            iconTheme: {
-              primary: "#E11D48",
-              secondary: "#fff",
-            },
-          }
-        );
-      } finally {
-        setIsJoining(false);
-      }
-    }
+    setIsModalOpen(true);
   };
+
+  const joinTournament = async (tournamentId) => {};
+
+  // All return stared from here
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -234,11 +177,11 @@ const images={
             Back to Tournaments
           </Link>
 
-          {/* Hero Section */}
+          {/*  Hero Section  */}
           <div className="relative bg-[#0a141d]/60 backdrop-blur-md rounded-2xl border border-white/10 mb-8 shadow-lg overflow-hidden">
             <div className="relative">
               <img
-                src={images[tournamentData?.data?.game] }
+                src={images[tournamentData?.data?.game]}
                 alt={tournamentData?.data?.title}
                 className="w-full h-68 sm:h-84 md:h-110 object-bottom"
               />
@@ -286,19 +229,20 @@ const images={
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  Starts in: {timeLeft}
+                  Starts in:{" "}
+                  {formatDate12Hour(
+                    tournamentData?.data?.schedule.checkInStart
+                  )}
                 </div>
                 <Button_2
                   content={
                     tournamentData?.data?.isRegistered
                       ? "Already Registered"
-                      : isJoining
-                      ? "Joining..."
                       : "Join"
                   }
-                  func={() => joinTournament(tournamentData?.data?._id)}
+                  func={() => openModal()}
                   disabled={
-                    isJoining ||
+                    isSubmitting ||
                     tournamentData?.data?.status !== "registration-open" ||
                     tournamentData?.data?.isRegistered
                   }
@@ -306,6 +250,147 @@ const images={
               </div>
             </div>
           </div>
+
+          {/* Team Registration Modal */}
+          {isModalOpen && (
+            <div
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              aria-modal="true"
+              role="dialog"
+            >
+              <div className="bg-[#0a141d] border border-[#E11D48]/30 rounded-xl p-6 max-w-xl w-full max-h-[85vh] overflow-y-auto shadow-2xl">
+                {/* Modal Header */}
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-[#E11D48]">
+                    Join Tournament
+                  </h2>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-gray-400 hover:text-[#FC4E5B] transition-colors p-1"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                <form
+                  onSubmit={handleSubmit((data) =>
+                    onSubmit({
+                      ...data,
+                      tournamentId: tournamentData?.data?._id,
+                    })
+                  )}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm text-gray-300 mb-1">
+                      Team Name <span className="text-[#FC4E5B]">*</span>
+                    </label>
+                    <input
+                      {...register("teamName", {
+                        required: "Team name is required",
+                        minLength: { value: 3, message: "Min 3 characters" },
+                      })}
+                      className={`w-full bg-[#1a2634]/50 border ${
+                        errors.teamName ? "border-red-500" : "border-white/20"
+                      } rounded-lg py-2 px-3 text-white placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none text-sm`}
+                      placeholder="Enter team name"
+                    />
+                    {errors.teamName && (
+                      <p className="text-red-400 text-xs mt-1">
+                        {errors.teamName.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Players */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-white mb-3">
+                      Team Players
+                    </h3>
+                    <div className="space-y-3">
+                      {new Array(tournamentData?.data?.totalMember)
+                        .fill(2)
+                        .map((_, index) => (
+                          <div
+                            key={index}
+                            className="bg-[#1a2634]/30 rounded-lg p-3 border border-white/10"
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-5 h-5 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                {index + 1}
+                              </div>
+                              <span className="text-xs text-gray-300">
+                                Player {index + 1}{" "}
+                                {index === 0 && (
+                                  <span className="text-[#FC4E5B]">
+                                    (Captain)
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                {...register(`players.${index}.gameId`, {
+                                  required: "Game ID required",
+                                })}
+                                className={`w-full bg-[#0a141d]/50 border ${
+                                  errors.players?.[index]?.gameId
+                                    ? "border-red-500"
+                                    : "border-white/20"
+                                } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
+                                placeholder="Game ID"
+                              />
+                              <input
+                                {...register(`players.${index}.gameName`, {
+                                  required: "Name required",
+                                })}
+                                className={`w-full bg-[#0a141d]/50 border ${
+                                  errors.players?.[index]?.gameName
+                                    ? "border-red-500"
+                                    : "border-white/20"
+                                } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
+                                placeholder="In-game Name"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      disabled={isSubmitting}
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="flex-1 bg-[#1a2634]/80 hover:bg-[#2a3644] text-white py-2 px-4 rounded-lg text-sm transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting || !isValid}
+                      className="flex-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] text-white py-2 px-4 rounded-lg text-sm disabled:opacity-50 transition-all"
+                    >
+                      Join
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           {/* Details Sections */}
           <div className="bg-[#0a141d]/60 backdrop-blur-md rounded-2xl border border-white/10 p-6 sm:p-8 shadow-lg animate-in fade-in duration-500">
@@ -337,6 +422,12 @@ const images={
                       {tournamentData?.data?.maxParticipants}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Max Teams:</span>
+                    <span className="text-white font-semibold">
+                      {tournamentData?.data?.totalTeams}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -353,33 +444,31 @@ const images={
                   <div className="flex justify-between">
                     <span className="text-gray-300">Start Time:</span>
                     <span className="text-white font-semibold">
-                      {new Date(
+                      {formatDate12Hour(
                         tournamentData?.data?.schedule.startTime
-                      ).toLocaleString()}
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">End Time:</span>
                     <span className="text-white font-semibold">
-                      {new Date(
-                        tournamentData?.data?.schedule.endTime
-                      ).toLocaleString()}
+                      {formatDate12Hour(tournamentData?.data?.schedule.endTime)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Check-In Start:</span>
                     <span className="text-white font-semibold">
-                      {new Date(
+                      {formatDate12Hour(
                         tournamentData?.data?.schedule.checkInStart
-                      ).toLocaleString()}
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-300">Check-In End:</span>
                     <span className="text-white font-semibold">
-                      {new Date(
+                      {formatDate12Hour(
                         tournamentData?.data?.schedule.checkInEnd
-                      ).toLocaleString()}
+                      )}
                     </span>
                   </div>
                 </div>

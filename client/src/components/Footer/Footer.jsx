@@ -64,7 +64,7 @@ const SiteFooter = () => {
 
         {/* Footer Bottom */}
         <div className="pt-4 sm:pt-6 text-center border-t border-white/10">
-          <p className="text-xs sm:text-sm opacity-70 tracking-wide">© 2025 NuclianEsports. All rights reserved.</p>
+          <p className="text-xs sm:text-sm opacity-70 tracking-wide">© 2025 TribeXeSports. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -29,8 +29,6 @@ const io = new Server(server, {
     origin: [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
-      "http://localhost:4173",
-      "http://127.0.0.1:4173",
       process.env.CLIENT_URL,
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -45,8 +43,6 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://127.0.0.1:5173",
-      "http://localhost:4173",
-      "http://127.0.0.1:4173",
       process.env.CLIENT_URL,
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

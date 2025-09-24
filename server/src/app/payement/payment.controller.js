@@ -26,10 +26,10 @@ const generateOrderId = () => {
 };
 
 const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
-  const { tournament } = req.body;
+  const { tournament, teamName, players } = req.body;
 
-  if (!tournament) {
-    return next(new CustomError("Tournament ID is required", 400));
+    if (!tournament || !teamName || !players || players.length === 0) {
+    return next(new CustomError("Missing required fields", 400));
   }
 
   const tournamentDoc = await Tournament.findById(tournament);
@@ -51,12 +51,21 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   }
 if (tournamentDoc.entryFee.amount === 0) {
 
-  const registration = await Registration.create({
+  const registration = new Registration({
     user: req.user._id,
     tournament,
+     team: {
+        name: teamName,
+        members: players.map((player, idx) => ({
+          gameId: player.gameId,
+          gameName: player.gameName,
+          role: idx === 0 ? "leader" : "member",
+        })),
+      },
     status: "paid", 
     payment: null,  // no payment record needed
   });
+  await registration.save();
 
   return res.json({
     success: true,
@@ -164,9 +173,8 @@ if (tournamentDoc.entryFee.amount === 0) {
       customer_email: req.user.email,
     },
     order_meta: {
-      return_url: `http://localhost:5173/payment-success?order_id=${orderId}`,
-      // notify_url: `http://localhost:5001/api/v1/payments/webhook`,
-      notify_url: `https://34ce71a33dab.ngrok-free.app/api/v1/payments/webhook`,
+      return_url: `${CLIENT_URL}/payment-success?order_id=${orderId}`,
+      // notify_url: `https://34ce71a33dab.ngrok-free.app/api/v1/payments/webhook`,
       payment_methods: "upi",
     },
     cart_details: {

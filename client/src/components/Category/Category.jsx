@@ -61,10 +61,10 @@ const Category = ({tournaments}) => {
                       </span>
                     </div>
 
-                    <div className="flex justify-between text-sm sm:text-base font-medium mb-4">
+                    {/* <div className="flex justify-between text-sm sm:text-base font-medium mb-4">
                       <span className="text-gray-300">Players:</span>
                       <span className="text-yellow-400">{`${card.registeredPlayersCount}/${card.maxParticipants}`}</span>
-                    </div>
+                    </div> */}
 
                     {/* Button Pushed to Bottom */}
                     <div className="mt-auto pt-2">

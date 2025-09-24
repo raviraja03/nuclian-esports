@@ -75,7 +75,9 @@ const FreeTournamentSuccess = () => {
                     {tournament.platform}
                   </p>
                   <p className="text-sm text-gray-300">
-                    <span className="font-semibold text-white">Start Time:</span>{" "}
+                    <span className="font-semibold text-white">
+                      Start Time:
+                    </span>{" "}
                     {tournament.startTime
                       ? new Date(tournament.startTime).toLocaleString()
                       : "To Be Announced"}
@@ -85,14 +87,16 @@ const FreeTournamentSuccess = () => {
 
               {/* Buttons */}
               <div className="space-y-3">
-                <Button_2
-                  content="Join Another Tournament"
-                  func={() => (window.location.href = "/tournaments")}
+                <Link
+                  to="/tournaments"
                   className="w-full bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-sm sm:text-base border border-[#E11D48]/50 animate-pulse-hover"
-                />
-                <p className="text-xs sm:text-sm text-gray-400">
+                >
+                  Join Another Tournament
+                </Link>
+
+                {/* <p className="text-xs sm:text-sm text-gray-400">
                   A confirmation email will be sent shortly.
-                </p>
+                </p> */}
               </div>
             </div>
           </section>

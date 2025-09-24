@@ -7,22 +7,22 @@ const registrationSchema = new mongoose.Schema(
       ref: "Tournament",
       required: true,
     },
-      team: {
-      leaderName: { type: String, trim: true }, // Leader's name
-      name: { type: String, trim: true }, // Optional team name
+    team: {
+      name: { type: String, trim: true },
       members: [
         {
+          _id: false,
           gameId: { type: String, trim: true }, // Player's game ID
+          gameName: { type: String, trim: true }, // Player's game name
           role: {
             type: String,
             enum: ["leader", "member"],
             default: "member",
           },
-          joinedAt: { type: Date, default: Date.now },
         },
       ],
     },
-    payment: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" }, 
+    payment: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
     status: {
       type: String,
       enum: ["pending", "paid", "cancelled", "completed", "failed"],
