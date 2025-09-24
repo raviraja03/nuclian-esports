@@ -12,10 +12,10 @@ export default defineConfig(({ mode }) => {
       host: true, // allows external access
       allowedHosts: ['www.tribexesports.com'], // whitelist your host
     },
-    preview: {
-      port: parseInt(env.VITE_PORT) || 5000,
-      host: true,
-    },
+    // preview: {
+    //   port: parseInt(env.VITE_PORT) || 5000,
+    //   host: true,
+    // },
     base: "/", // Set base to root for proper routing
   };
 });
