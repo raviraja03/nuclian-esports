@@ -13,7 +13,7 @@ class CustomError extends Error {
 const errorMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-
+console.log(err);
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((error) => ({
       field: error.path,
@@ -24,11 +24,25 @@ const errorMiddleware = (err, req, res, next) => {
   }
 
   if (err.code === 11000) {
-    const field = Object.keys(err.keyPattern)[0];
-    err = new CustomError(
-      `${field.charAt(0).toUpperCase() + field.slice(1)} already exists`,
-      409
-    );
+   const fields = Object.keys(err.keyPattern);
+  const values = err.keyValue;
+
+  let message;
+
+  // Handle specific cases
+  if (fields.includes("email")) {
+    message = "Email already exists";
+  } else if (fields.includes("username")) {
+    message = "Username already exists";
+  } else if (fields.includes("team.members.gameId")) {
+    message = `Game ID "${values["team.members.gameId"]}" is already registered for this tournament`;
+  } else if (fields.includes("tournament")) {
+    message = "Tournament already exists";
+  } else {
+    message = `${fields.join(", ")} must be unique`;
+  }
+
+  err = new CustomError(message, 409);
   }
 
   if (err.name === "JsonWebTokenError") {

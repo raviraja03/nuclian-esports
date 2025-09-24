@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import { formatDate12Hour } from "../../helpers/timeFormat";
 import { useForm } from "react-hook-form";
 import { TOAST_DESIGN_ERROR, TOAST_DESIGN_SUCCESS } from "../../constant";
+import {useRegisterInTournamentMutation} from "../../globalState/api/tournamentApi";
 const TournamentDetails = () => {
   const { id } = useParams();
   const {
@@ -25,6 +26,7 @@ const TournamentDetails = () => {
   const [isPrizePoolOpen, setIsPrizePoolOpen] = useState(true);
   const [isRulesOpen, setIsRulesOpen] = useState(true);
   const navigate = useNavigate();
+  const [registerInTournament] = useRegisterInTournamentMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {
@@ -35,28 +37,24 @@ const TournamentDetails = () => {
   } = useForm();
 
   const onSubmit = async ({ teamName, players, tournamentId }) => {
-
-    
-    if (!(tournamentData?.data?.entryFee.amount == 0)) { // Paid Tournament
+    if (!(tournamentData?.data?.entryFee.amount == 0)) {
+      // Paid Tournament
       try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
-          {
+       const res = await registerInTournament({
             tournament: tournamentId,
             teamName: teamName,
-            players:[]
-          },
-          { withCredentials: true }
-        );
+            players: players,
+          }).unwrap();
+
 
         navigate("/payment", {
           state: {
-            orderId: res.data.orderId,
-            paymentSessionId: res.data.paymentSessionId,
+            orderId: res.orderId,
+            paymentSessionId: res.paymentSessionId,
           },
         });
 
-        toast.success(res.data.message, TOAST_DESIGN_SUCCESS);
+        toast.success(res.message, TOAST_DESIGN_SUCCESS);
       } catch (error) {
         toast.error(
           error.response?.data?.message ||
@@ -64,20 +62,18 @@ const TournamentDetails = () => {
           TOAST_DESIGN_ERROR
         );
       }
-    } else { // Free Tournament
+    } else {
+      // Free Tournament
       try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/payments/register-in`,
-          {
+          const res = await registerInTournament({
             tournament: tournamentId,
             teamName: teamName,
             players: players,
-          },
-          { withCredentials: true }
-        );
-        if (res.data.success) {
+          }).unwrap();
+
+        if (res.success) {
           toast.success(
-            res?.data?.message ||
+            res?.message ||
               "Failed to join the tournament. Please try again.",
             TOAST_DESIGN_SUCCESS
           );
@@ -94,6 +90,7 @@ const TournamentDetails = () => {
           });
         }
       } catch (error) {
+        console.log(error);
         toast.error(
           error.response?.data?.message ||
             "Failed to join the tournament. Please try again.",
@@ -133,7 +130,6 @@ const TournamentDetails = () => {
     setIsModalOpen(true);
   };
 
-  const joinTournament = async (tournamentId) => {};
 
   // All return stared from here
 
@@ -314,62 +310,90 @@ const TournamentDetails = () => {
                     )}
                   </div>
 
-                  {/* Players */}
-                  <div>
+                    {/* Players */}
+                    <div>
                     <h3 className="text-sm font-semibold text-white mb-3">
                       Team Players
                     </h3>
                     <div className="space-y-3">
                       {new Array(tournamentData?.data?.totalMember)
-                        .fill(2)
-                        .map((_, index) => (
-                          <div
-                            key={index}
-                            className="bg-[#1a2634]/30 rounded-lg p-3 border border-white/10"
-                          >
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-5 h-5 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {index + 1}
-                              </div>
-                              <span className="text-xs text-gray-300">
-                                Player {index + 1}{" "}
-                                {index === 0 && (
-                                  <span className="text-[#FC4E5B]">
-                                    (Captain)
-                                  </span>
-                                )}
-                              </span>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <input
-                                {...register(`players.${index}.gameId`, {
-                                  required: "Game ID required",
-                                })}
-                                className={`w-full bg-[#0a141d]/50 border ${
-                                  errors.players?.[index]?.gameId
-                                    ? "border-red-500"
-                                    : "border-white/20"
-                                } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
-                                placeholder="Game ID"
-                              />
-                              <input
-                                {...register(`players.${index}.gameName`, {
-                                  required: "Name required",
-                                })}
-                                className={`w-full bg-[#0a141d]/50 border ${
-                                  errors.players?.[index]?.gameName
-                                    ? "border-red-500"
-                                    : "border-white/20"
-                                } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
-                                placeholder="In-game Name"
-                              />
-                            </div>
+                      .fill(2)
+                      .map((_, index) => (
+                        <div
+                        key={index}
+                        className="bg-[#1a2634]/30 rounded-lg p-3 border border-white/10"
+                        >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-5 h-5 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                          {index + 1}
                           </div>
-                        ))}
+                          <span className="text-xs text-gray-300">
+                          Player {index + 1}{" "}
+                          {index === 0 && (
+                            <span className="text-[#FC4E5B]">
+                            (Captain)
+                            </span>
+                          )}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                          <input
+                            {...register(`players.${index}.gameId`, {
+                            required: index===0?"Game ID required":false,
+                            validate: (value, allValues) => {
+                              // Check duplicates among all players
+                              const allGameIds = allValues.players
+                              .map((p) => p?.gameId?.trim())
+                              .filter(Boolean);
+                              const duplicates = allGameIds.filter(
+                              (id) => id === value.trim()
+                              );
+                              return duplicates.length > 1
+                              ? "Game ID must be unique"
+                              : true;
+                            },
+                            })}
+                            className={`w-full bg-[#0a141d]/50 border ${
+                            errors.players?.[index]?.gameId
+                              ? "border-red-500"
+                              : "border-white/20"
+                            } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
+                            placeholder="Game ID"
+                          />
+                          <input
+                            {...register(`players.${index}.gameName`, {
+                            required: index===0?"Name required":false,
+                            })}
+                            className={`w-full bg-[#0a141d]/50 border ${
+                            errors.players?.[index]?.gameName
+                              ? "border-red-500"
+                              : "border-white/20"
+                            } rounded py-2 px-2 text-white text-xs placeholder-gray-500 focus:border-[#FC4E5B] focus:outline-none`}
+                            placeholder="In-game Name"
+                          />
+                          </div>
+                          {(errors.players?.[index]?.gameId || errors.players?.[index]?.gameName) && (
+                          <div className="space-y-1">
+                            {errors.players?.[index]?.gameId && (
+                            <p className="text-red-400 text-xs">
+                              {errors.players[index].gameId.message}
+                            </p>
+                            )}
+                            {errors.players?.[index]?.gameName && (
+                            <p className="text-red-400 text-xs">
+                              {errors.players[index].gameName.message}
+                            </p>
+                            )}
+                          </div>
+                          )}
+                        </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                    </div>
 
-                  {/* Buttons */}
+                    {/* Buttons */}
                   <div className="flex gap-2 pt-4">
                     <button
                       disabled={isSubmitting}
@@ -381,7 +405,7 @@ const TournamentDetails = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={isSubmitting || !isValid}
+                      disabled={isSubmitting}
                       className="flex-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] text-white py-2 px-4 rounded-lg text-sm disabled:opacity-50 transition-all"
                     >
                       Join

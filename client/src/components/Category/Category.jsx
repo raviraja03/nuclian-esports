@@ -20,7 +20,7 @@ const Category = ({tournaments}) => {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         <Heading highlight="Featured" nohighlight="Tournaments" />
 
-        <div className="flex overflow-x-auto space-x-6 mt-10 pb-4 custom-scroll ">
+        <div className="flex overflow-x-auto space-x-6 mt-10 pb-4 custom-scroll justify-center">
           {tournaments.map((card, index) => {
             return (
               <div key={index} className="bg-white/20 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-white/10 min-w-[280px] sm:min-w-[320px] md:min-w-[360px]">
@@ -84,11 +84,11 @@ const Category = ({tournaments}) => {
         </div>
 
         {/* View All Button */}
-        <div className="mt-8 flex justify-center">
+        {/* <div className="mt-8 flex justify-center">
           <Link to="/tournaments">
             <Button content="View All" />
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );

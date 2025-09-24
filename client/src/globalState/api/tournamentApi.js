@@ -6,6 +6,7 @@ export const tournamentApi = createApi({
     baseUrl: import.meta.env.VITE_BACKEND_URL,
     // credentials: "include", // ✅ include cookies if auth needed
   }),
+  // tagTypes: ["Tournament", "TournamentId"],
   endpoints: (builder) => ({
     getTournaments: builder.query({
       query: ({ page = 1, limit, game, status } = {}) => {
@@ -48,10 +49,31 @@ export const tournamentApi = createApi({
         credentials: "include",
       }),
       transformResponse: (response) => response,
-      providesTags: (result) =>
-        result?.data
-          ? result.data.map((t) => ({ type: "TournamentId", id: t._id }))
-          : [],
+      providesTags: (result, error, id) => [
+        { type: "TournamentId"}, // ✅ invalidation works per tournament
+      ],
+    }),
+
+    registerInTournament: builder.mutation({
+      query: ({ tournament, teamName, players }) => ({
+        url: "/payments/register-in",
+        method: "POST",
+        body: { tournament, teamName, players },
+        credentials: "include",
+      }),
+
+      invalidatesTags: [{ type: "TournamentId" }],
+    }),
+
+    updateRegistrationData: builder.mutation({
+      query: ({ registrationId, teamName, members }) => ({
+        url: "/payments/update-registration",
+        method: "PATCH",
+        body: { registrationId, teamName, members },
+        credentials: "include",
+      }),
+
+      invalidatesTags: [{ type: "TournamentId" }],
     }),
   }),
 });
@@ -60,4 +82,6 @@ export const {
   useGetTournamentsQuery,
   useGetTournamentByIdQuery,
   useGetMyTournamentsQuery,
+  useRegisterInTournamentMutation,
+  useUpdateRegistrationDataMutation,
 } = tournamentApi;

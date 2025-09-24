@@ -6,8 +6,7 @@ const Registration = require("../../models/registrationSchema.mode");
 const Payment = require("../../models/payment.model");
 const Tournament = require("../../models/tournament.model");
 // const {cashfree} = require("../../index");
-const dotenv = require("dotenv");
-dotenv.config();
+require("dotenv").config();
 const { Cashfree, CFEnvironment } = require("cashfree-pg");
 const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID;
 const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
@@ -24,11 +23,33 @@ const generateOrderId = () => {
     "ORDER_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9)
   );
 };
+//for client (update registration data)
+const updateRegistrationData = GlobalErrorHandler(async (req, res, next) => {
+  const { registrationId, teamName, members } = req.body;
+
+  const registration = await Registration.findOne({ _id: registrationId });
+  if (!registration) {
+    return next(new CustomError("Registration not found", 404));
+  }
+
+  registration.team.name = teamName;
+  registration.team.members = members.map((member) => ({
+    gameId: member.gameId,
+    gameName: member.gameName,
+  }));
+
+  await registration.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Registration updated successfully",
+  });
+});
 
 const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   const { tournament, teamName, players } = req.body;
 
-    if (!tournament || !teamName || !players || players.length === 0) {
+  if (!tournament || !teamName || !players || players.length === 0) {
     return next(new CustomError("Missing required fields", 400));
   }
 
@@ -46,15 +67,14 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
     tournament,
     status: "paid",
   });
-    if (count >= tournament.maxParticipants) {
+  if (count >= tournament.maxParticipants) {
     return next(new CustomError("Tournament is full", 400));
   }
-if (tournamentDoc.entryFee.amount === 0) {
-
-  const registration = new Registration({
-    user: req.user._id,
-    tournament,
-     team: {
+  if (tournamentDoc.entryFee.amount === 0) {
+    const registration = new Registration({
+      user: req.user._id,
+      tournament,
+      team: {
         name: teamName,
         members: players.map((player, idx) => ({
           gameId: player.gameId,
@@ -62,19 +82,17 @@ if (tournamentDoc.entryFee.amount === 0) {
           role: idx === 0 ? "leader" : "member",
         })),
       },
-    status: "paid", 
-    payment: null,  // no payment record needed
-  });
-  await registration.save();
+      status: "paid",
+      payment: null, // no payment record needed
+    });
+    await registration.save();
 
-  return res.json({
-    success: true,
-    message: "Successfully registered for free tournament",
-    registrationId: registration._id,
-  });
-}
-
-
+    return res.json({
+      success: true,
+      message: "Successfully registered for free tournament",
+      registrationId: registration._id,
+    });
+  }
 
   const existingRegistration = await Registration.findOne({
     user: req.user._id,
@@ -82,7 +100,6 @@ if (tournamentDoc.entryFee.amount === 0) {
   }).populate("payment");
 
   if (existingRegistration) {
-
     const cashfreeResponse = await cashfree.PGFetchOrder(
       existingRegistration.payment.orderId
     );
@@ -94,8 +111,11 @@ if (tournamentDoc.entryFee.amount === 0) {
       );
     }
 
-    if (orderStatus === "EXPIRED" || orderStatus === "FAILED"||orderStatus === "ACTIVE") {
-
+    if (
+      orderStatus === "EXPIRED" ||
+      orderStatus === "FAILED" ||
+      orderStatus === "ACTIVE"
+    ) {
       if (existingRegistration.status === "pending") {
         existingRegistration.payment.status = "cancelled";
         await existingRegistration.payment.save();
@@ -158,8 +178,6 @@ if (tournamentDoc.entryFee.amount === 0) {
       }
     }
   }
-
-
 
   const orderId = generateOrderId();
   const orderData = {
@@ -259,8 +277,6 @@ const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-
-
 // const webhookHandler = GlobalErrorHandler(async (req, res) => {
 //   const {
 //     order_id: orderId,
@@ -356,12 +372,10 @@ const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-
-
-
 module.exports = {
   handleRegistration,
   verifyPayment,
-  getMyPayments
+  getMyPayments,
+  updateRegistrationData
   // webhookHandler,
 };

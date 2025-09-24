@@ -32,6 +32,8 @@ const registrationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Create compound index to ensure gameId is unique per tournament
+
 const Registration =
   mongoose.models.Registration ||
   mongoose.model("Registration", registrationSchema);

@@ -8,91 +8,32 @@ const Registration = require("../../models/registrationSchema.mode");
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-
 exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
-  let { page = 1, limit = 20, game, status, search, sortBy, order } = req.query;
+  let { page = 1, limit = 20, game, status, type, search } = req.query;
 
   page = Math.max(1, parseInt(page, 10));
   limit = Math.max(1, parseInt(limit, 10));
 
+  // Base filter
   const filter = { isVisible: true };
 
-  // Add filters with proper validation
-  if (game && game.trim()) {
-    filter.game = { $regex: new RegExp(game.trim(), "i") }; // Case insensitive match
-  }
-  if (status && status.trim()) {
-    filter.status = status.trim();
-  }
-  if (search && search.trim()) {
-    filter.title = { $regex: new RegExp(search.trim(), "i") };
-  }
-
-  const sortField = sortBy || "schedule.startTime";
-  const sortOrder = order === "asc" ? 1 : -1;
+  if (game) filter.game = { $regex: new RegExp(game.trim(), "i") };
+  if (status) filter.status = status.trim();
+  if (type) filter.type = type.trim(); // solo, duo, squad
+  if (search) filter.title = { $regex: new RegExp(search.trim(), "i") };
 
   const skip = (page - 1) * limit;
-  console.log("Filter object:", JSON.stringify(filter, null, 2));
-  console.log("Sort field:", sortField, "Sort order:", sortOrder);
 
-  // Build aggregation pipeline with proper filtering
-  const pipeline = [
-    { $match: filter },
-    {
-      $lookup: {
-        from: "registrations", // This should match your actual MongoDB collection name
-        let: { tournamentId: "$_id" },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ["$tournament", "$$tournamentId"] },
-              status: "paid",
-            },
-          },
-        ],
-        as: "registrations",
-      },
-    },
-    {
-      $addFields: {
-        registeredTeamsCount: { $size: "$registrations" },
-        registeredPlayersCount: {
-          $sum: {
-            $map: {
-              input: "$registrations",
-              as: "reg",
-              in: {
-                $cond: {
-                  if: { $isArray: "$$reg.team.members" },
-                  then: { $size: "$$reg.team.members" },
-                  else: 0,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    { $project: { registrations: 0 } },
-  ];
-
-  // Add sorting - handle nested field names properly
-  const sortObj = {};
-  sortObj[sortField] = sortOrder;
-  pipeline.push({ $sort: sortObj });
-
-  // Add pagination
-  pipeline.push({ $skip: skip });
-  pipeline.push({ $limit: limit });
-
-  console.log("Aggregation pipeline:", JSON.stringify(pipeline, null, 2));
-
+  // Query tournaments
+  console.log(filter);
   const [tournaments, total] = await Promise.all([
-    Tournament.aggregate(pipeline),
+    Tournament.find(filter)
+      .sort({ "schedule.startTime": 1 }) // always sort by start time ascending
+      .skip(skip)
+      .limit(limit),
     Tournament.countDocuments(filter),
   ]);
-
-  console.log("Results count:", tournaments.length, "Total:", total);
+  
 
   res.status(200).json({
     success: true,
@@ -107,6 +48,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
     },
   });
 });
+
 
 // GET /api/v1/tournaments/:id - Get single tournament details
 
@@ -158,12 +100,13 @@ exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
       path: "tournament",
       match: { isVisible: true },
       select:
-        "title game platform schedule status maxParticipants entryFee prizePool roomId",
+        "title game platform schedule status  entryFee prizePool roomId totalMember",
     })
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .lean();
-  const tournaments = registrations.map((r) => r.tournament).filter(Boolean);
+    // console.log(registrations);
+  const tournaments = registrations.map((r) => { return {_id: r._id, tournament: r.tournament, team: r.team }; }).filter(Boolean);
   const total = await Registration.countDocuments({
     user: userId,
     status: "paid",
@@ -175,6 +118,7 @@ exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     page: Number(page),
     totalPages: Math.ceil(total / limit),
     data: tournaments,
+  
   });
 });
 
