@@ -28,7 +28,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:3000", // if sometimes using 3000
   "http://localhost:3001", // your React dev server
-  "https://www.tribexesports.com" // production domain
+  "https://tribexesports.com",       // no-www
+  "https://www.tribexesports.com"    // with www
 ];
 
 app.use(
