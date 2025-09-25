@@ -19,7 +19,7 @@ const Navbar = () => {
   const handleLogout = () => {
     try {
       axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/users/logout`,
+        `${import.meta.env.VITE_BACKEND_URL}users/logout`,
         {},
         { withCredentials: true }
       );

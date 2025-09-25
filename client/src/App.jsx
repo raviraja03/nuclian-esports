@@ -1,8 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
-
 import Layout from "./components/Layout/Layout";
 import LoadingScreen from "./components/shared/LoadingScreen";
 import { setCredentials, clearCredentials } from "./globalState/slices/auth";
@@ -45,7 +43,7 @@ const App = () => {
   const dispatch = useDispatch();
   const loading = useSelector((state) => state.auth.loading);
   const user = useSelector((state) => state.auth.user);
-  const { data: profile, isLoading, isError } = useFetchProfileQuery();
+  const { data: profile, isError } = useFetchProfileQuery();
   React.useEffect(() => {
     if (profile) {
       dispatch(setCredentials({ user: profile.data }));

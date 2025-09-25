@@ -7,7 +7,7 @@ export const socketMiddleware = (store) => (next) => (action) => {
   switch (action.type) {
     case "socket/connect": {
       if (!socket) {
-        socket = io("http://localhost:5001", {
+        socket = io(import.meta.env.VITE_SOCKET_URL, {
           transports: ["websocket"],
           withCredentials: true,
         });

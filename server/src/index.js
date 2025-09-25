@@ -23,38 +23,54 @@ const { errorMiddleware } = require("./middleware/errorMiddleware");
 const app = express();
 const server = http.createServer(app);
 
+// -------------------- MIDDLEWARE --------------------
+app.use(cookieParser());
+const allowedOrigins = [
+  "http://localhost:3000", // if sometimes using 3000
+  "http://localhost:3001", // your React dev server
+  "https://tribexesports.com",       // no-www
+  "https://www.tribexesports.com"    // with www
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // if you use cookies/auth headers
+    exposedHeaders: ["Content-Disposition", "FileLength"],
+  })
+);
+
+// Handle preflight requests
+app.options("*", cors());
+
+// app.use(
+//   cors({
+//     origin: process.env.APP_HOST,  // must be exact domain
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,             // if using cookies or auth headers
+//     exposedHeaders: ["Content-Disposition", "FileLength"],
+//   })
+// );
+
 // -------------------- SOCKET.IO --------------------
 const io = new Server(server, {
   cors: {
-    origin: process.env.APP_HOST || "*",
+    origin:[ process.env.APP_HOST] ,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
 app.set("io", io);
 
-// -------------------- MIDDLEWARE --------------------
-app.use(cookieParser());
-app.use(
-  cors({
-    origin: process.env.APP_HOST || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    exposedHeaders: ["Content-Disposition", "FileLength"],
-  })
-);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// -------------------- STATIC FILES (React Build) --------------------
-const clientDistPath = path.join(__dirname, "../../client/dist");
-app.use(express.static(clientDistPath));
-
-// Serve React app for any non-API route
-app.get("*", (req, res) => {
-  res.sendFile(path.join(clientDistPath, "index.html"));
-});
 
 // -------------------- DATABASE --------------------
 const connectDB = async () => {
@@ -67,10 +83,9 @@ const connectDB = async () => {
   }
 };
 
-// -------------------- API ROUTES --------------------
-// Health check
+// Routes
 app.get("/", (req, res) => {
-  res.json({ success: true, message: "API is running 🚀" });
+  res.send("API is running...");
 });
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tournaments", tournamentRouter);
