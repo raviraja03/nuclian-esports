@@ -7,6 +7,7 @@ import { clearCredentials } from "../../globalState/slices/auth";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { TOAST_DESIGN_SUCCESS } from "../../constant";
+import logo from "../../assets/loko.jpg";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,6 +41,7 @@ const Navbar = () => {
           to="/"
           className="text-2xl sm:text-3xl font-bold font-Lex text-white tracking-tight"
         >
+          <img src={logo} alt="TribeX eSports Logo" className="h-10 inline mr-2" />  
           TribeX<span className="text-[#E11D48]">eSports</span>
         </Link>
 

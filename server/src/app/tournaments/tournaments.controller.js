@@ -39,58 +39,32 @@ exports.createTournament = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-
 exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
-  let { page = 1, limit = 20, game, status, search, sortBy, order } = req.query;
+  let { page = 1, limit = 20, game, status, type, search } = req.query;
 
   page = Math.max(1, parseInt(page, 10));
   limit = Math.max(1, parseInt(limit, 10));
 
+  // Base filter
   const filter = { isVisible: true };
 
-  if (game) filter.game = game;
-  if (status) filter.status = status;
-  if (search) {
-    filter.title = { $regex: search, $options: "i" };
-  }
-
-  const sortField = sortBy || "schedule.startTime";
-  const sortOrder = order === "asc" ? 1 : -1;
+  if (game) filter.game = { $regex: new RegExp(game.trim(), "i") };
+  if (status) filter.status = status.trim();
+  if (type) filter.type = type.trim(); // solo, duo, squad
+  if (search) filter.title = { $regex: new RegExp(search.trim(), "i") };
 
   const skip = (page - 1) * limit;
 
+  // Query tournaments
+  console.log(filter);
   const [tournaments, total] = await Promise.all([
-    Tournament.aggregate([
-      { $match: filter },
-      {
-        $lookup: {
-          from: "registrations", // 👈 must match the actual collection name
-          let: { tournamentId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ["$tournament", "$$tournamentId"],
-                },
-                status: "paid", // ✅ simpler: filter directly here
-              },
-            },
-          ],
-          as: "registrations",
-        },
-      },
-      {
-        $addFields: {
-          registeredPlayersCount: { $size: "$registrations" }, // ✅ count directly
-        },
-      },
-      { $project: { registrations: 0 } }, // remove raw array
-      { $sort: { [sortField]: sortOrder } },
-      { $skip: skip },
-      { $limit: limit },
-    ]),
+    Tournament.find(filter)
+      .sort({ "schedule.startTime": 1 }) // always sort by start time ascending
+      .skip(skip)
+      .limit(limit),
     Tournament.countDocuments(filter),
   ]);
+  
 
   res.status(200).json({
     success: true,
@@ -106,11 +80,12 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
   });
 });
 
+
 // GET /api/v1/tournaments/:id - Get single tournament details
 
 exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
-    const userId = req?.user?._id; // user comes from auth middleware
+  const userId = req?.user?._id; // user comes from auth middleware
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(new CustomError("Invalid tournament ID", 400));
@@ -156,12 +131,13 @@ exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
       path: "tournament",
       match: { isVisible: true },
       select:
-        "title game platform schedule status maxParticipants entryFee prizePool roomId",
+        "title game platform schedule status  entryFee prizePool roomId totalMember",
     })
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .lean();
-  const tournaments = registrations.map((r) => r.tournament).filter(Boolean);
+    // console.log(registrations);
+  const tournaments = registrations.map((r) => { return {_id: r._id, tournament: r.tournament, team: r.team }; }).filter(Boolean);
   const total = await Registration.countDocuments({
     user: userId,
     status: "paid",
@@ -173,6 +149,7 @@ exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     page: Number(page),
     totalPages: Math.ceil(total / limit),
     data: tournaments,
+  
   });
 });
 

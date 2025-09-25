@@ -44,10 +44,11 @@ const SiteFooter = () => {
           <div className="col-span-1">
             <h3 className="uppercase text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4 text-[#E11D48] tracking-wide">Quick Links</h3>
             <ul className="space-y-2 sm:space-y-3">
-              <li><a href="/tournament.html" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Tournaments</a></li>
-              <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Leaderboard</a></li>
-              <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">My Matches</a></li>
-              <li><a href="/news.html" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Blog</a></li>
+              <li><Link to="/tournaments" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Tournaments</Link></li>
+              <li><Link to="/leaderboard" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Leaderboard</Link></li>
+              <li><Link to="/matches" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">My Matches</Link></li>
+              {/* <li><Link to="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Buy Pass</Link></li> */}
+              <li><Link to="/blog" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Blog</Link></li>
             </ul>
           </div>
 
@@ -55,7 +56,7 @@ const SiteFooter = () => {
           <div className="col-span-1">
             <h3 className="uppercase text-base sm:text-lg lg:text-xl font-bold mb-3 sm:mb-4 text-[#E11D48] tracking-wide">Support</h3>
             <ul className="space-y-2 sm:space-y-3">
-              <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Help Center</a></li>
+              {/* <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Help Center</a></li> */}
               <li><Link to="/contact" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Contact Us</Link></li>
               <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Terms Of Service</a></li>
               <li><a href="#" className="text-white/90 text-sm sm:text-base hover:text-[#FC4E5B] transition-colors duration-300 hover:underline underline-offset-4">Privacy Policy</a></li>
@@ -87,7 +88,7 @@ const SiteFooter = () => {
 
         {/* Footer Bottom */}
         <div className="pt-4 sm:pt-6 text-center border-t border-white/10">
-          <p className="text-xs sm:text-sm opacity-70 tracking-wide">© 2025 TribeXEsports. All rights reserved.</p>
+          <p className="text-xs sm:text-sm opacity-70 tracking-wide">© 2025 TribeXeSports. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -68,7 +68,6 @@ const io = new Server(server, {
   },
 });
 app.set("io", io);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -6,11 +6,15 @@ export const paymentApi = createApi({
     baseUrl: import.meta.env.VITE_BACKEND_URL,
     credentials: "include",
   }),
+
   endpoints: (builder) => ({
     getMyPayments: builder.query({
       query: () => "/payments/my-payments",
       transformResponse: (response) => response, // you can shape it if needed
     }),
+
+
   }),
 });
-export const { useGetMyPaymentsQuery } = paymentApi;
+export const { useGetMyPaymentsQuery } =
+  paymentApi;

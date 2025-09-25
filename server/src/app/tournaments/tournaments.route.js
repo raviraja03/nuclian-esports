@@ -22,18 +22,9 @@ tournamentRouter.post(
 tournamentRouter.get("/", controller.getAllTournaments);
 
 // GET /api/v1/tournaments/:id
-tournamentRouter.get(
-  "/:id",optionalAuth,
-  controller.getTournamentById
-);
+tournamentRouter.get("/:id", optionalAuth, controller.getTournamentById);
 // GET /api/v1/tournaments/my/all
-tournamentRouter.get(
-  "/my/all",
-  protect,
-  controller.getMyTournaments
-);
-
-
+tournamentRouter.get("/my/all", protect, controller.getMyTournaments);
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId
 // This route is for user withdrawal only. Admin removal should be in admin.route.js if needed.

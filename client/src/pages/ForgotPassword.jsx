@@ -23,7 +23,7 @@ const ForgotPassword = () => {
 
 
 
-  const [forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword,{isLoading}] = useForgotPasswordMutation();
   const [verifyAndResetPassword] = useVerifyAndResetPasswordMutation();
 
   // Step 1 - Request OTP
@@ -199,6 +199,7 @@ const ForgotPassword = () => {
                     {isSubmitting ? "Resetting..." : "Submit"}
                   </button>
                   <button
+                    disabled={isLoading}
                     type="button"
                     onClick={handleResend}
                     className="flex-1 bg-[#1a2634] border border-gray-600 text-gray-300 font-semibold py-2 rounded-lg shadow-md hover:border-[#FC4E5B] hover:text-[#FC4E5B] transition-all duration-300 text-sm"

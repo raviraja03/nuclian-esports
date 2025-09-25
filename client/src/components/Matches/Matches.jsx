@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useGetMyTournamentsQuery } from "../../globalState/api/tournamentApi"; // Adjust path to RTK Query API
-import LoadingScreen from "../shared/LoadingScreen"; // Adjust path to LoadingScreen
+import { useGetMyTournamentsQuery } from "../../globalState/api/tournamentApi";
+// import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import LoadingScreen from "../shared/LoadingScreen";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { formatDate12Hour } from "../../helpers/timeFormat"; // Adjust path to your date utility
+import { formatDate12Hour } from "../../helpers/timeFormat";
+import EditTeamModal from "../modals/EditTeamModal";
+import ModalManager from "../shared/ModalManager";
+import { useDispatch } from "react-redux";
+import { openModal } from "../../globalState/slices/modal";
 const RegisteredTournamentsPage = () => {
+  const dispatch = useDispatch();
+  
   const [currentPage, setCurrentPage] = useState(1);
-  const [timers, setTimers] = useState({}); // Store countdown timers
-
   const {
     data: registrationsData = {},
     isLoading,
@@ -19,13 +25,12 @@ const RegisteredTournamentsPage = () => {
 
   const tournaments = registrationsData?.data || [];
   const { count, page, totalPages } = registrationsData;
-  // Handle page change
+
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Generate page numbers
   const getPageNumbers = () => {
     const pages = [];
     const maxVisiblePages = 5;
@@ -44,21 +49,24 @@ const RegisteredTournamentsPage = () => {
 
   const pageNumbers = getPageNumbers();
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  const handleOpenModal = (cardData) => {
+    dispatch(
+      openModal({
+        modalType: "EDIT_TEAM",
+        modalProps: {
+          isOpen: true,
+          teamData: cardData.team,
+          id: cardData._id,
+          totalMember: cardData.tournament.totalMember,
+        },
+      })
+    );
+  };
+
+
+  if (isLoading) return <LoadingScreen />;
 
   if (isError) {
-    toast.error("Failed to load registered tournaments.", {
-      style: {
-        background: "#0a141d",
-        color: "#fff",
-        border: "1px solid #FC4E5B",
-        borderRadius: "8px",
-        padding: "12px",
-      },
-      iconTheme: { primary: "#E11D48", secondary: "#fff" },
-    });
     return (
       <div className="flex h-screen bg-black/95 text-white font-Lex items-center justify-center animate-in fade-in duration-500">
         <div className="text-center">
@@ -77,18 +85,15 @@ const RegisteredTournamentsPage = () => {
 
   return (
     <main className="bg-black/95 text-white font-Lex relative min-h-screen mt-[12vh] px-4 sm:px-6 lg:px-12">
+      <ModalManager />
       <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] bg-clip-text text-transparent mb-6 sm:mb-8 text-center animate-in fade-in duration-500">
         Registered Tournaments
       </h1>
 
-      {/* Tournament Grid */}
       <section className="relative z-10 mb-8">
         {tournaments.length === 0 ? (
           <div className="text-center py-12 bg-[#0a141d]/60 backdrop-blur-md rounded-2xl border border-white/10 animate-in fade-in duration-500">
-            <p
-              className="text-gray-300 text-sm sm:text-base mb-4"
-              aria-live="polite"
-            >
+            <p className="text-gray-300 text-sm sm:text-base mb-4">
               You haven't registered for any tournaments yet.
             </p>
             <Link to="/tournaments">
@@ -98,76 +103,88 @@ const RegisteredTournamentsPage = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {tournaments.map((cardData) => (
-              <div
-                key={cardData._id || cardData.id}
-                className="relative animate-in fade-in duration-500"
-              >
-                {/* Tournament Info Card (no image) */}
-                <div className="bg-[#0a141d]/60 backdrop-blur-md rounded-lg p-4 border border-white/10 shadow-md hover:shadow-lg transition-all duration-300">
-                  <h2 className="text-lg sm:text-xl font-semibold text-[#FC4E5B] mb-2">
-                    {cardData.title}
-                  </h2>
-                  {/* <p className="text-sm text-gray-300 mb-1">
-                    <span className="font-semibold text-white">Game:</span>{" "}
-                    {cardData.game || "N/A"}
-                  </p> */}
-                  <p className="text-sm text-gray-300 mb-1">
-                    <span className="font-semibold text-white">Platform:</span>{" "}
-                    {cardData.platform || "N/A"}
-                  </p>
-                  <p className="text-sm text-gray-300 mb-1">
-                    <span className="font-semibold text-white">Status:</span>{" "}
-                    <span
-                      className={`${
-                        cardData.status === "registration-open"
-                          ? "text-yellow-400"
-                          : cardData.status === "completed"
-                          ? "text-green-400"
-                          : "text-red-400"
-                      }`}
-                    >
-                      {cardData.status}
-                    </span>
-                  </p>
-                  <p className="text-sm text-gray-300 mb-1">
-                    <span className="font-semibold text-white">Entry Fee:</span>{" "}
-                    {cardData.entryFee
-                      ? `${
-                          cardData.entryFee.amount === 0
-                            ? "Free"
-                            : `₹ ${cardData.entryFee.amount}`
-                        }`
-                      : "Free"}
-                  </p>
-                  <p className="text-sm text-gray-300 mb-3">
-                    <span className="font-semibold text-white">
-                      Prize Pool:
-                    </span>{" "}
-                    {cardData.prizePool
-                      ? `₹ ${cardData.prizePool.totalCurrency}`
-                      : "N/A"}
-                  </p>
-
-                  
-                  <div className="mt-2 ">
-                    <p
-                      className="text-[#FC4E5B] text-sm sm:text-base font-Lex font-semibold"
-                      aria-label={`Room ID for ${cardData.title}`}
-                    >
-                      <span className="text-[#FC4E5B]">Room ID:</span>{" "}
-                      <span className="text-white">
-                        {cardData.roomId == null
-                          ? ` will be shown soon`
-                          : cardData.roomId}
-                      </span>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {tournaments.map((cardData, index) => (
+                <div
+                  key={index}
+                  className="group relative bg-gradient-to-b from-[#111a24] to-[#0a141d] rounded-2xl p-6 border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                >
+                  {/* modal for edit team */}
+                 
+                  {/* Tournament Header */}
+                  <div className="mb-5">
+                    <h2 className="text-xl font-bold text-[#FC4E5B] group-hover:text-[#ff6b75] transition-colors">
+                      {cardData.tournament.title}
+                    </h2>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {formatDate12Hour(cardData.tournament.schedule.startTime)}
                     </p>
                   </div>
+
+                  {/* Tournament Details */}
+                  <div className="space-y-2 text-sm text-gray-300">
+                    <p>
+                      <span className="font-medium text-white">Game:</span>{" "}
+                      {cardData.tournament.game}
+                    </p>
+                    <p>
+                      <span className="font-medium text-white">Platform:</span>{" "}
+                      {cardData.tournament.platform}
+                    </p>
+                    <p>
+                      <span className="font-medium text-white">Status:</span>{" "}
+                      <span
+                        className={`font-semibold ${
+                          cardData.tournament.status === "registration-open"
+                            ? "text-yellow-400"
+                            : cardData.tournament.status === "completed"
+                            ? "text-green-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {cardData.tournament.status}
+                      </span>
+                    </p>
+                    <p>
+                      <span className="font-medium text-white">Entry Fee:</span>{" "}
+                      {cardData.tournament.entryFee.amount === 0
+                        ? "Free"
+                        : `₹ ${cardData.tournament.entryFee.amount}`}
+                    </p>
+                    <p>
+                      <span className="font-medium text-white">
+                        Prize Pool:
+                      </span>{" "}
+                      ₹ {cardData.tournament.prizePool.totalCurrency}
+                    </p>
+                  </div>
+
+                  {/* Room ID Highlight */}
+                  <div className="mt-5 p-4 rounded-xl bg-[#1a232e]/70 border border-dashed border-[#FC4E5B]/40 text-center">
+                    <p className="text-xs uppercase tracking-wider text-gray-400">
+                      Room ID
+                    </p>
+                    <p className="text-lg font-bold text-white mt-1">
+                      {cardData.tournament.roomId ?? "Will be shown soon"}
+                    </p>
+                  </div>
+
+                  {/* Team Section */}
+                  {cardData.tournament.status === "registration-open" && (
+                    <div className="mt-5">
+                      <button
+                        onClick={() => handleOpenModal(cardData)}
+                        className="w-full bg-[#FC4E5B] hover:bg-[#E11D48] text-white text-sm font-semibold py-2 px-4 rounded-md transition-all"
+                      >
+                        Edit Team
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </section>
 
@@ -177,7 +194,7 @@ const RegisteredTournamentsPage = () => {
           <button
             onClick={() => handlePageChange(page - 1)}
             disabled={page === 1}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm sm:text-base font-Lex transition-all duration-300 ${
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
               page > 1
                 ? "bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] text-white shadow-md hover:shadow-xl hover:-translate-y-0.5"
                 : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
@@ -190,7 +207,7 @@ const RegisteredTournamentsPage = () => {
             <button
               key={pageNum}
               onClick={() => handlePageChange(pageNum)}
-              className={`px-3 py-2 rounded-lg font-semibold text-sm sm:text-base font-Lex transition-all duration-300 ${
+              className={`px-3 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
                 page === pageNum
                   ? "bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] text-white shadow-md"
                   : "bg-[#0a141d]/60 text-gray-300 border border-white/20 hover:bg-[#FC4E5B]/20 hover:text-[#FC4E5B]"
@@ -203,7 +220,7 @@ const RegisteredTournamentsPage = () => {
           <button
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
-            className={`px-4 py-2 rounded-lg font-semibold text-sm sm:text-base font-Lex transition-all duration-300 ${
+            className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${
               page < totalPages
                 ? "bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] text-white shadow-md hover:shadow-xl hover:-translate-y-0.5"
                 : "bg-gray-600/50 text-gray-400 cursor-not-allowed"
