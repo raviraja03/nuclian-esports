@@ -9,7 +9,7 @@ import Fortnite from "../../assets/fortnite_game_poster.jpg";
 
 const Games = () => {
     return (
-        <section className="bg-[linear-gradient(180deg,rgba(0,0,0,1)_10%,rgba(50,50,50,0.8)_90%)] py-12">
+    <section className="bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(25,31,52,0.6)_40%,rgba(100,100,100,0.2)_62%,rgba(0,0,0,1)_80%)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10 text-white">
                 <Heading highlight="Featured" nohighlight="Games" />
 

@@ -25,7 +25,6 @@ const CommunitySection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-white">
         <div className="relative rounded-2xl mx-0 overflow-hidden bg-gradient-to-b from-[#C0103F] via-[#260E27] to-[#000] shadow-2xl border border-white/10 min-h-[30vh]">
           <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between w-full px-4 sm:px-6 lg:px-12 py-8 lg:py-12 gap-8 lg:gap-12">
-            
             {/* Left Side: Text and Button */}
             <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight tracking-tight mb-4">
@@ -34,21 +33,26 @@ const CommunitySection = () => {
                 <span className="text-[#17A448]">COMMUNITY</span>
               </h2>
               <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-md mb-6">
-                Connect with fellow gamers and stay updated on all things TribeXeSports. Join us now!
+                Connect with fellow gamers and stay updated on all things
+                TribeXeSports. Join us now!
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href=""
-                className="inline-block py-3 px-6 bg-[#17A448] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#17A448]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#17A448]/70 focus:outline-none focus:ring-2 focus:ring-[#17A448]/50"
-              >
-                Join Whatsapp
-              </a>
-              <a
-                href=""
-                className="inline-block py-3 px-6 bg-[#1769a4] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#1769a4]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1769a4]/70 focus:outline-none focus:ring-2 focus:ring-[#1769a4]/50"
-              >
-                Join Discord
-              </a>
+                <a
+                  arget="_blank"
+                  rel="noopener noreferrer"
+                  href="https://whatsapp.com/channel/0029Vb6nTSk4o7qDjcH17I1K"
+                  className="inline-block py-3 px-6 bg-[#17A448] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#17A448]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#17A448]/70 focus:outline-none focus:ring-2 focus:ring-[#17A448]/50"
+                >
+                  Join Whatsapp
+                </a>
+                <a
+                  rel="noopener noreferrer"
+                  href="https://discord.gg/pbFZQMWYQu"
+                  target="_blank"
+                  className="inline-block py-3 px-6 bg-[#1769a4] text-black font-bold text-sm sm:text-base rounded-xl shadow-lg shadow-[#1769a4]/50 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-[#1769a4]/70 focus:outline-none focus:ring-2 focus:ring-[#1769a4]/50"
+                >
+                  Join Discord
+                </a>
               </div>
             </div>
 
@@ -71,7 +75,6 @@ const CommunitySection = () => {
                 </div>
               ))}
             </div>
-
           </div>
           {/* Subtle background overlay */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>

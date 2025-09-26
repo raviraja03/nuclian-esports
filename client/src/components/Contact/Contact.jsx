@@ -12,7 +12,6 @@ const Contact = () => {
     // Simulate form submission
     setTimeout(() => {
       setFormSubmitted(true);
-      // Reset form and hide success message after 3 seconds
       setTimeout(() => {
         setFormSubmitted(false);
         e.target.reset();
@@ -20,13 +19,7 @@ const Contact = () => {
     }, 1000);
   };
   
-  const socialLinks = [
-    { icon: <FaXTwitter />, href: '#', title: 'Twitter', hoverClass: 'hover:bg-[#000000] hover:shadow-[0_5px_15px_rgba(0,0,0,0.4)]' },
-    { icon: <FaFacebookF />, href: '#', title: 'Facebook', hoverClass: 'hover:bg-[#1877F2] hover:shadow-[0_5px_15px_rgba(24,119,242,0.4)]' },
-    { icon: <FaInstagram />, href: '#', title: 'Instagram', specialClass: 'instagram-link', hoverClass: 'hover:shadow-[0_5px_15px_rgba(131,58,180,0.4)]' },
-    { icon: <FaLinkedinIn />, href: '#', title: 'LinkedIn', hoverClass: 'hover:bg-[#0A66C2] hover:shadow-[0_5px_15px_rgba(10,102,194,0.4)]' },
-  ];
-  
+
   // Base classes for form inputs for reusability
   const inputBaseClasses = "w-full p-3.5 bg-[rgba(30,30,30,0.7)] border border-[#333333] rounded-lg text-[#ffffff] font-['Lexend',sans-serif] text-base transition-all duration-300 focus:border-[#fc4e5b] focus:outline-none focus:ring-2 focus:ring-[#fc4e5b]/30 hover:border-[#fc4e5b]";
 
@@ -48,33 +41,26 @@ const Contact = () => {
                 <FaMapMarkerAlt className="mt-1 text-xl text-[#fc4e5b]" />
                 <div>
                   <h3 className="text-lg font-semibold text-[#ffffff]">Our Location</h3>
-                  <p className="text-[#e0e0e0]">K.R. Mangalam University<br/>Sohna Road, Gurugram<br/>Haryana, India.</p>
+                  <p className="text-[#e0e0e0]">J305, sohna road , gurgaon,haryana, 122103</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <FaPhoneAlt className="mt-1 text-xl text-[#fc4e5b]" />
                 <div>
                   <h3 className="text-lg font-semibold text-[#ffffff]">Phone Number</h3>
-                  <p className="text-[#e0e0e0]">+91 (555) 123-4567<br/>+91 (555) 987-6543</p>
+                  <p className="text-[#e0e0e0]">+91 9140934524</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <FaEnvelope className="mt-1 text-xl text-[#fc4e5b]" />
                 <div>
                   <h3 className="text-lg font-semibold text-[#ffffff]">Email Address</h3>
-                  <p className="text-[#e0e0e0]">contact@nuclianesports.com<br/>support@nuclianesports.com</p>
+                  <p className="text-[#e0e0e0]">Partnerships@gmail.com<br/>support@tribexesports.com</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex gap-4 mt-auto pt-7">
-              {socialLinks.map((link, index) => (
-                 <a key={index} href={link.href} title={link.title} className={`relative group flex items-center justify-center w-10 h-10 rounded-full bg-white/10 text-xl transition-all duration-300 hover:-translate-y-1 active:translate-y-0 active:scale-95 text-[#ffffff] ${link.hoverClass} ${link.specialClass || ''}`}>
-                  {link.specialClass === 'instagram-link' && <div className="absolute inset-0 z-0 transition-opacity duration-300 rounded-full bg-gradient-to-br from-[#833AB4] via-[#E1306C] to-[#F77737] opacity-0 group-hover:opacity-100" />}
-                  <span className="relative z-10">{link.icon}</span>
-                 </a>
-              ))}
-            </div>
+         
           </div>
 
           {/* Right Panel: Contact Form */}

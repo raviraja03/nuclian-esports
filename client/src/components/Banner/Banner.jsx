@@ -1,5 +1,6 @@
 import React from 'react'
 import bcard from '../../assets/banner_card_4.jpg'
+// import bcard from '../../assets/Gemini_Generated_Image_l87jrfl87jrfl87j.png'
 
 const Banner = () => {
   return (

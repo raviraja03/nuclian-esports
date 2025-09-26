@@ -6,7 +6,6 @@ export const tournamentApi = createApi({
     baseUrl: import.meta.env.VITE_BACKEND_URL,
     // credentials: "include", // ✅ include cookies if auth needed
   }),
-  // tagTypes: ["Tournament", "TournamentId"],
   endpoints: (builder) => ({
     getTournaments: builder.query({
       query: ({ page = 1, limit, game, status } = {}) => {
@@ -19,9 +18,9 @@ export const tournamentApi = createApi({
       },
       transformResponse: (response) => response,
       providesTags: (result) =>
-        result?.tournaments
+        result?.data?.length
           ? [
-              ...result.tournaments.map((t) => ({
+              ...result.data.map((t) => ({
                 type: "Tournament",
                 id: t._id,
               })),
@@ -49,9 +48,16 @@ export const tournamentApi = createApi({
         credentials: "include",
       }),
       transformResponse: (response) => response,
-      providesTags: (result, error, id) => [
-        { type: "TournamentId"}, // ✅ invalidation works per tournament
-      ],
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((entry) => ({
+                type: "MyTournament",
+                id: entry._id, // 👈 registrationId
+              })),
+              { type: "MyTournament", id: "LIST" },
+            ]
+          : [{ type: "MyTournament", id: "LIST" }],
     }),
 
     registerInTournament: builder.mutation({
@@ -62,7 +68,11 @@ export const tournamentApi = createApi({
         credentials: "include",
       }),
 
-      invalidatesTags: [{ type: "TournamentId" }],
+      invalidatesTags: (result, error, { tournament }) => [
+        { type: "MyTournament", id: "LIST" }, // 🔄 getMyTournaments
+        { type: "Tournament", id: tournament }, // 🔄 getTournamentById(tournamentId)
+        { type: "Tournament", id: "LIST" },     // 🔄 getTournaments
+      ],
     }),
 
     updateRegistrationData: builder.mutation({
@@ -73,7 +83,9 @@ export const tournamentApi = createApi({
         credentials: "include",
       }),
 
-      invalidatesTags: [{ type: "TournamentId" }],
+      invalidatesTags: (result, error, { registrationId }) => [
+        { type: "MyTournament", id: registrationId }, // 🔄 getMyTournaments
+      ],
     }),
   }),
 });

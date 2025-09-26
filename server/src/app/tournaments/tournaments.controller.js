@@ -25,7 +25,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
   const skip = (page - 1) * limit;
 
   // Query tournaments
-  console.log(filter);
+  
   const [tournaments, total] = await Promise.all([
     Tournament.find(filter)
       .sort({ "schedule.startTime": 1 }) // always sort by start time ascending
@@ -76,7 +76,6 @@ exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
       tournament: id,
       status: "paid",
     }).lean();
-    console.log(registration);
 
     isRegistered = !!registration;
   }

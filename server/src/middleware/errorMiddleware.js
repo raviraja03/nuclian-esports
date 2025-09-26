@@ -13,7 +13,7 @@ class CustomError extends Error {
 const errorMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-console.log(err);
+  
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((error) => ({
       field: error.path,

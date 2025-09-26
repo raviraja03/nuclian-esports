@@ -30,7 +30,6 @@ const ForgotPassword = () => {
   const onSubmitEmail = async ({ email }) => {
     try {
       const res = await forgotPassword({ email }).unwrap();
-      console.log(res);
       toast.success("OTP sent to your email!", TOAST_DESIGN_SUCCESS);
       setEmail(email);
       setStep(2);

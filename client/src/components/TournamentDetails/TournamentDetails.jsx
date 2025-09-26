@@ -6,7 +6,7 @@ import Button_2 from "../Button/Button_2";
 import Valo from "../../assets/Valo_game_poster.jpg";
 import Bgmi from "../../assets/bgmi_game_poster_2.jpg";
 import Cod from "../../assets/cod_game_poster.jpg";
-import Freefire from "../../assets/ff_game_poster.jpg";
+import Freefire from "../../assets/free_fire_live.jpeg";
 import axios from "axios";
 import { useGetTournamentByIdQuery } from "../../globalState/api/tournamentApi";
 import LoadingScreen from "../shared/LoadingScreen";

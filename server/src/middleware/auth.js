@@ -75,6 +75,7 @@ const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
   // Get user from token
   const user = await User.findById(decoded.id);
   if (!user) {
+    res.clearCookie('sessionId');
     return next(new CustomError("This user no longer exist", 401));
   }
 
