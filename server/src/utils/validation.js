@@ -1,6 +1,6 @@
-const { body, param, query } = require('express-validator');
+import {body,param,query} from "express-validator"
 
-const registerValidation = [
+export const registerValidation = [
   body('name')
     .trim()
     .notEmpty()
@@ -31,7 +31,7 @@ const registerValidation = [
     .withMessage('Invalid role specified'),
 ];
 
-const loginValidation = [
+export const loginValidation = [
   body('email')
     .trim()
     .notEmpty()
@@ -45,7 +45,7 @@ const loginValidation = [
     .withMessage('Password is required'),
 ];
 
-const updateUserValidation = [
+export const updateUserValidation = [
   body('name')
     .optional()
     .trim()
@@ -72,7 +72,7 @@ const updateUserValidation = [
     .withMessage('Invalid role specified'),
 ];
 
-const paginationValidation = [
+export const paginationValidation = [
   query('page')
     .optional()
     .isInt({ min: 1 })
@@ -85,7 +85,7 @@ const paginationValidation = [
     .toInt(),
 ];
 
-const userIdValidation = [
+export const userIdValidation = [
   param('id')
     .notEmpty()
     .withMessage('User ID is required')
@@ -93,7 +93,7 @@ const userIdValidation = [
     .withMessage('Invalid user ID format'),
 ];
 
-const forgotPasswordValidation = [
+export const forgotPasswordValidation = [
   body('email')
     .trim()
     .notEmpty()
@@ -109,7 +109,7 @@ const forgotPasswordValidation = [
     .withMessage('Please enter a valid phone number'),
 ];
 
-const verifyOtpValidation = [
+export const verifyOtpValidation = [
   body('email')
     .trim()
     .notEmpty()
@@ -133,7 +133,7 @@ const verifyOtpValidation = [
     .withMessage('Password must be at least 6 characters long'),
 ];
 
-const resendOtpValidation = [
+export const resendOtpValidation = [
   body('email')
     .trim()
     .notEmpty()
@@ -143,13 +143,4 @@ const resendOtpValidation = [
     .normalizeEmail(),
 ];
 
-module.exports = {
-  forgotPasswordValidation,
-  verifyOtpValidation,
-  resendOtpValidation,
-  registerValidation,
-  loginValidation,
-  updateUserValidation,
-  paginationValidation,
-  userIdValidation,
-};
+

@@ -1,16 +1,17 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/user.model");
-const { CustomError, GlobalErrorHandler } = require("./errorMiddleware");
+import jwt from "jsonwebtoken";
+import User from "../models/user.model.js";
+import { CustomError, GlobalErrorHandler } from "./errorMiddleware.js";
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // Use environment variable in production
 
-const generateToken = (userId) => {
+export const generateToken = (userId) => {
   return jwt.sign({ id: userId }, JWT_SECRET, {
     expiresIn: "30d",
   });
 };
 
-const protect = GlobalErrorHandler(async (req, res, next) => {
+export const protect = GlobalErrorHandler(async (req, res, next) => {
   let token;
   token = req.cookies.sessionId;
   // Get token from header
@@ -36,7 +37,7 @@ const protect = GlobalErrorHandler(async (req, res, next) => {
   // Get user from token
   const user = await User.findById(decoded.id);
   if (!user) {
-    return next(new CustomError("This user no longer exist", 401));
+    return next(new CustomError("This user no longer exists, Please log in again.", 401));
   }
 
   if (user.isSuspended) {
@@ -51,7 +52,7 @@ const protect = GlobalErrorHandler(async (req, res, next) => {
   next();
 });
 
-const authorize = (...roles) => {
+export const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
@@ -62,7 +63,7 @@ const authorize = (...roles) => {
   };
 };
 
-const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
+export const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
   let token = req.cookies.sessionId;
   if (!token) {
     req.user = null; 
@@ -75,8 +76,7 @@ const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
   // Get user from token
   const user = await User.findById(decoded.id);
   if (!user) {
-    res.clearCookie('sessionId');
-    return next(new CustomError("This user no longer exist", 401));
+    return next(new CustomError("This user no longer exists, Please log in again.", 401));
   }
 
   if (user.isSuspended) {
@@ -95,9 +95,4 @@ const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
 
 
 
-module.exports = {
-  generateToken,
-  protect,
-  authorize,
-  optionalAuth
-};
+

@@ -1,7 +1,6 @@
-const express = require("express");
-const {handleRegistration,verifyPayment,webhookHandler,getMyPayments,updateRegistrationData} = require("./payment.controller");
-const { protect, authorize } = require("../../middleware/auth");
-
+import express from "express";
+import { handleRegistration, verifyPayment, getMyPayments, updateRegistrationData } from "./payment.controller.js";
+import { protect, authorize } from "../../middleware/auth.js";
 
 
 const paymentRouter = express.Router();
@@ -14,4 +13,6 @@ paymentRouter.patch("/update-registration", updateRegistrationData);
 paymentRouter.post("/verify", verifyPayment);
 paymentRouter.get("/my-payments", getMyPayments);
 
-module.exports = paymentRouter;
+export default paymentRouter;
+
+

@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { CustomError } = require("../middleware/errorMiddleware");
+import mongoose from "mongoose";
+import { CustomError } from "../middleware/errorMiddleware.js";
 
 // const tournamentParticipantSchema = new mongoose.Schema(
 //   {
@@ -67,17 +67,23 @@ const tournamentSchema = new mongoose.Schema(
     },
 
     schedule: {
-      startTime: { type: Date, required: true },
-      endTime: { type: Date, required: true },
-      checkInStart: { type: Date, required: true },
-      checkInEnd: { type: Date, required: true },
-    },
+      registrationStart: { type: Date, required: true }, // e.g. 27 Sept 2025
+      registrationEnd: { type: Date, required: true }, // e.g. 29 Sept 2025
+      matchStart: { type: Date, required: true },
+      idPasswordRelease: { 
+        type: Date, 
+        required: true,
+        default: function() {
+          return new Date(this.matchStart.getTime() - 15 * 60 * 1000);
+        }
+      },
+        },
 
-    maxParticipants: {
+        maxParticipants: {
       type: Number,
       required: true,
       default: function () {
-            return this.totalTeams * this.totalMember;
+        return this.totalTeams * this.totalMember;
       },
     },
     entryFee: {
@@ -130,6 +136,7 @@ const tournamentSchema = new mongoose.Schema(
 
     isVisible: { type: Boolean, default: true },
     roomId: { type: String, trim: true, default: null },
+    registeredCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
@@ -142,27 +149,27 @@ tournamentSchema.index({ platform: 1, isVisible: 1 });
 
 // Validations
 tournamentSchema.pre("save", function (next) {
-  if (this.schedule.startTime >= this.schedule.endTime) {
-    return next(new CustomError("End time must be after start time", 400));
-  }
-  if (this.schedule.checkInStart >= this.schedule.checkInEnd) {
-    return next(new CustomError("Check-in end must be after start", 400));
-  }
-  if (this.schedule.checkInEnd > this.schedule.startTime) {
+  const { registrationStart, registrationEnd, matchStart, idPasswordRelease } =
+    this.schedule;
+
+  if (registrationStart >= registrationEnd) {
     return next(
-      new CustomError("Check-in must end before tournament starts", 400)
+      new CustomError("Registration end must be after registration start", 400)
     );
   }
-  // if (this.minParticipants > this.maxParticipants) {
-  //   return next(
-  //     new CustomError(
-  //       "Minimum cannot be greater than maximum participants",
-  //       400
-  //     )
-  //   );
-  // }
+  if (registrationEnd >= matchStart) {
+    return next(
+      new CustomError("Registration must end before match starts", 400)
+    );
+  }
+  if (idPasswordRelease >= matchStart) {
+    return next(
+      new CustomError("ID/Password must be released before match starts", 400)
+    );
+  }
+
   next();
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);
-module.exports = Tournament;
+export default Tournament;

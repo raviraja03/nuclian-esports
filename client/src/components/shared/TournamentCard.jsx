@@ -13,6 +13,7 @@ const TournamentCard = ({ card }) => {
     "Free Fire": Freefire
   };
 
+
   return (
     <div className="bg-[#0a141d]/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl border border-white/10 hover:border-[#FC4E5B]/50 hover:shadow-xl hover:shadow-[#E11D48]/20 transition-all duration-300 flex flex-col h-full group">
       
@@ -36,24 +37,28 @@ const TournamentCard = ({ card }) => {
         </span>
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col flex-grow text-white font-Lex">
-        <h3 className="text-lg sm:text-xl md:text-2xl font-bold line-clamp-2 mb-3 tracking-tight group-hover:text-[#FC4E5B] transition-colors duration-300">
-          {card.title}
-        </h3>
+        <div className="flex flex-col flex-grow text-white font-Lex">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold line-clamp-2 mb-3 tracking-tight group-hover:text-white/90 transition-colors duration-300">
+            {card.title}
+          </h3>
 
-        <div className="space-y-2 mb-4">
-          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
-            <span className="text-gray-300">Entry:</span>
-            <span className="text-[#E11D48] font-bold">₹{card.entryFee.amount}</span>
-          </div>
-          <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
-            <span className="text-gray-300">Prize Pool:</span>
-            <span className="text-[#FC4E5B] font-bold">₹{card.prizePool.totalCurrency}</span>
-          </div>
+          <div className="space-y-2 mb-4">
+        <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+          <span className="text-gray-400">Entry fee</span>
+          <span className="text-red-500 font-bold">₹{card.entryFee.amount}</span>
         </div>
+        <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+          <span className="text-gray-400">Prize Pool</span>
+          <span className="text-green-500 font-bold">₹{card.prizePool.totalCurrency}</span>
+        </div>
+        <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+          <span className="text-gray-400">Registered</span>
+          <span className="text-white font-bold">{`${card.registeredCount}/${card.totalTeams}`}</span>
+        </div>
+      </div>
 
-        {/* Button */}
+
+          {/* Button */}
         <div className="mt-auto pt-2">
           <Link to={`/tournaments/${card._id}`}>
             <button

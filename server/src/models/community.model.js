@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const communitySchema = new mongoose.Schema({
   userId: {
@@ -64,4 +64,4 @@ communitySchema.index({ 'recipients.userId': 1 });
 
 const Community = mongoose.model('Community', communitySchema);
 
-module.exports = Community; 
+export default Community; 

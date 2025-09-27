@@ -1,12 +1,12 @@
-const mongoose = require("mongoose");
-const Tournament = require("../../models/tournament.model");
-const {
+import mongoose from "mongoose";
+import Tournament from "../../models/tournament.model.js";
+import {
   CustomError,
   GlobalErrorHandler,
-} = require("../../middleware/errorMiddleware");
+} from "../../middleware/errorMiddleware.js";
 
 // ================== GET ALL TOURNAMENTS ==================
-exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
+ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
   const {
     page = 1,
     limit = 20,
@@ -50,7 +50,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
 });
 
 // ================== GET TOURNAMENT BY ID ==================
-exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
+ export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -65,7 +65,7 @@ exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // ================== CREATE TOURNAMENT ==================
-exports.createTournament = GlobalErrorHandler(async (req, res) => {
+ export const createTournament = GlobalErrorHandler(async (req, res) => {
   const tournament = new Tournament(req.body);
   await tournament.save();
 
@@ -77,7 +77,7 @@ exports.createTournament = GlobalErrorHandler(async (req, res) => {
 });
 
 // ================== UPDATE TOURNAMENT (PATCH) ==================
-exports.updateTournament = GlobalErrorHandler(async (req, res) => {
+ export const updateTournament = GlobalErrorHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -101,7 +101,7 @@ exports.updateTournament = GlobalErrorHandler(async (req, res) => {
 });
 
 // ================== DELETE TOURNAMENT ==================
-exports.deleteTournament = GlobalErrorHandler(async (req, res) => {
+ export const deleteTournament = GlobalErrorHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -119,7 +119,7 @@ exports.deleteTournament = GlobalErrorHandler(async (req, res) => {
 });
 
 // PATCH /tournaments/:id/status - Update tournament status
-exports.updateTournamentStatus = async (req, res, next) => {
+ export const updateTournamentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -144,7 +144,7 @@ exports.updateTournamentStatus = async (req, res, next) => {
 };
 
 // PATCH /tournaments/:id/participants/:userId/status - Update participant status (admin only)
-exports.updateParticipantStatus = async (req, res, next) => {
+ export const updateParticipantStatus = async (req, res, next) => {
   try {
     const { id, userId } = req.params;
     const { status } = req.body;

@@ -1,28 +1,24 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const mongoose = require("mongoose");
-const cookieParser = require("cookie-parser");
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import Registration from "./models/registrationSchema.mode.js";
+import Tournament from "./models/tournament.model.js";
 
 // Load environment variables
-dotenv.config();
+import "dotenv/config";
 
 // Routes
-const userRouter = require("./app/users/users.route");
-const tournamentRouter = require("./app/tournaments/tournaments.route");
-const tournamentAdminRouter = require("./app/tournaments/tournaments.admin.route");
-const paymentRouter = require("./app/payement/payment.route");
-
-// Error middleware
-const {
-  errorMiddleware,
-  CustomError,
-} = require("./middleware/errorMiddleware");
+import userRouter from "./app/users/users.route.js";
+import tournamentRouter from "./app/tournaments/tournaments.route.js";
+import tournamentAdminRouter from "./app/tournaments/tournaments.admin.route.js";
+import paymentRouter from "./app/payement/payment.route.js";
+import { errorMiddleware, CustomError } from "./middleware/errorMiddleware.js";
 
 const app = express();
-const server = http.createServer(app); 
+const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
@@ -55,8 +51,8 @@ app.use(express.urlencoded({ extended: true }));
 // MongoDB Connection
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI,{
-      dbName: process.env.DB_NAME,
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      autoIndex: false,
     });
     console.log(`MongoDB Connected Successfully: ${conn.connection.host}`);
   } catch (error) {
@@ -104,3 +100,19 @@ io.on("connection", (socket) => {
     // console.log("User disconnected:", socket.id);
   });
 });
+
+const updateRegistrationCounts = async () => {
+  try {
+    const tournaments = await Tournament.find();
+    for (let t of tournaments) {
+      const count = await Registration.countDocuments({ tournament: t._id });
+      await Tournament.findByIdAndUpdate(t._id, { registeredCount: count });
+    }
+    console.log("Registration counts updated successfully");
+  } catch (error) {
+    console.error("Error updating registration counts:", error);
+  }
+};
+
+// // Run the update function
+// updateRegistrationCounts();

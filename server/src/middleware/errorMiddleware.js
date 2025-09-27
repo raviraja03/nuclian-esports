@@ -1,5 +1,5 @@
 // Custom Error Class
-class CustomError extends Error {
+export class CustomError extends Error {
   constructor(message, statusCode) {
     super(message);
 
@@ -10,10 +10,9 @@ class CustomError extends Error {
   }
 }
 
-const errorMiddleware = (err, req, res, next) => {
+export const errorMiddleware = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
-  
   if (err.name === "ValidationError") {
     const errors = Object.values(err.errors).map((error) => ({
       field: error.path,
@@ -34,12 +33,8 @@ const errorMiddleware = (err, req, res, next) => {
     message = "Email already exists";
   } else if (fields.includes("username")) {
     message = "Username already exists";
-  } else if (fields.includes("team.members.gameId")) {
-    message = `Game ID "${values["team.members.gameId"]}" is already registered for this tournament`;
-  } else if (fields.includes("tournament")) {
-    message = "Tournament already exists";
   } else {
-    message = `${fields.join(", ")} must be unique`;
+    message = `${fields.join(", ")} already exists`;
   }
 
   err = new CustomError(message, 409);
@@ -93,14 +88,10 @@ const errorMiddleware = (err, req, res, next) => {
   });
 };
 
-const GlobalErrorHandler = (fn) => {
+export const GlobalErrorHandler = (fn) => {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
 
-module.exports = {
-  errorMiddleware,
-  CustomError,
-  GlobalErrorHandler,
-};
+

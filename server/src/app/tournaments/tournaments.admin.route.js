@@ -1,31 +1,34 @@
-const express = require("express");
-const adminController = require("./tournament.admin.controller");
-const { authorize ,protect} = require("../../middleware/auth");
-const { isAdminParticipant } = require("../../middleware/tournamentMiddleware");
+import { Router } from "express";
+import {
+  createTournament,
+  deleteTournament,
+  getAllTournaments,
+  getTournamentById,
+  updateParticipantStatus,
+  updateTournament,
+  updateTournamentStatus,
+} from "./tournament.admin.controller.js";
+import { authorize, protect } from "../../middleware/auth.js";
+import { isAdminParticipant } from "../../middleware/tournamentMiddleware.js";
 
-const tournamentAdminRouter = express.Router();
+const tournamentAdminRouter = Router();
 
 // All routes are admin-only
 
 tournamentAdminRouter.use(protect);
 tournamentAdminRouter.use(authorize("admin"));
 
+tournamentAdminRouter.get("/", getAllTournaments).post("/", createTournament);
 tournamentAdminRouter
-  .get("/", adminController.getAllTournaments)
-  .post("/", adminController.createTournament);
-tournamentAdminRouter
-  .get("/:id", adminController.getTournamentById)
-  .patch("/:id", adminController.updateTournament)
-  .delete("/:id", adminController.deleteTournament);
+  .get("/:id", getTournamentById)
+  .patch("/:id", updateTournament)
+  .delete("/:id", deleteTournament);
 
-tournamentAdminRouter.patch(
-  "/:id/status",
-  adminController.updateTournamentStatus
-);
+tournamentAdminRouter.patch("/:id/status", updateTournamentStatus);
 tournamentAdminRouter.patch(
   "/:id/participants/:userId/status",
   isAdminParticipant,
-  adminController.updateParticipantStatus
+  updateParticipantStatus
 );
 
-module.exports = tournamentAdminRouter;
+export default tournamentAdminRouter;

@@ -41,7 +41,6 @@ const PaymentSuccess = () => {
         },
         { withCredentials: true }
       );
-      console.log(response);
       if (response.status === 200 && response.data.success) {
         // setBooking(response.data.details);
         

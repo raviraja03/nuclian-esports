@@ -1,22 +1,30 @@
-const express = require("express");
-const controller = require("./tournaments.controller");
-const {
+import { Router } from "express";
+import {
+  getAllTournaments,
+  getLeaderboard,
+  getMatchDetails,
+  getMyTournaments,
+  getPlayerOrTeamStats,
+  getTournamentById,
+  withdrawFromTournament,
+} from "./tournaments.controller.js";
+import {
   requireAuth,
   validateObjectId,
   asyncHandler,
   isParticipant,
-} = require("../../middleware/tournamentMiddleware");
-const { protect, optionalAuth } = require("../../middleware/auth");
+} from "../../middleware/tournamentMiddleware.js";
+import { protect, optionalAuth } from "../../middleware/auth.js";
 
-const tournamentRouter = express.Router();
+const tournamentRouter = Router();
 
 // GET /api/v1/tournaments
-tournamentRouter.get("/", controller.getAllTournaments);
+tournamentRouter.get("/", getAllTournaments);
 
 // GET /api/v1/tournaments/:id
-tournamentRouter.get("/:id", optionalAuth, controller.getTournamentById);
+tournamentRouter.get("/:id", optionalAuth, getTournamentById);
 // GET /api/v1/tournaments/my/all
-tournamentRouter.get("/my/all", protect, controller.getMyTournaments);
+tournamentRouter.get("/my/all", protect, getMyTournaments);
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId
 // This route is for user withdrawal only. Admin removal should be in admin.route.js if needed.
@@ -25,7 +33,7 @@ tournamentRouter.delete(
   requireAuth,
   validateObjectId("tournamentId"),
   validateObjectId("participantId"),
-  asyncHandler(controller.withdrawFromTournament)
+  asyncHandler(withdrawFromTournament)
 );
 
 // GET /api/tournaments/:tournamentId/matches/:matchId
@@ -33,14 +41,14 @@ tournamentRouter.get(
   "/:tournamentId/matches/:matchId",
   validateObjectId("tournamentId"),
   validateObjectId("matchId"),
-  asyncHandler(controller.getMatchDetails)
+  asyncHandler(getMatchDetails)
 );
 
 // GET /api/tournaments/:tournamentId/leaderboard
 tournamentRouter.get(
   "/:tournamentId/leaderboard",
   validateObjectId("tournamentId"),
-  asyncHandler(controller.getLeaderboard)
+  asyncHandler(getLeaderboard)
 );
 
 // GET /api/tournaments/:tournamentId/stats/:playerOrTeamId
@@ -49,7 +57,7 @@ tournamentRouter.get(
   validateObjectId("tournamentId"),
   validateObjectId("playerOrTeamId"),
   isParticipant,
-  asyncHandler(controller.getPlayerOrTeamStats)
+  asyncHandler(getPlayerOrTeamStats)
 );
 
-module.exports = tournamentRouter;
+export default tournamentRouter;

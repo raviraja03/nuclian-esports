@@ -1,12 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { clearCredentials } from "../slices/auth";
+import { baseQueryWithAuth } from "../baseQuery/baseQueryWithAuth";
+import toast from "react-hot-toast";
+import {paymentApi} from "./paymentApi"
+import {tournamentApi} from "./tournamentApi"
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
 
-    credentials: "include",
-  }),
+  baseQuery: baseQueryWithAuth,
+  tagTypes: ["fetchUser"],
 
   endpoints: (builder) => ({
     signup: builder.mutation({
@@ -17,11 +19,30 @@ export const authApi = createApi({
       }),
     }),
     login: builder.mutation({
-      query: (credentials) => ({
+      query: (userData) => ({
         url: "/users/login",
         method: "POST",
-        body: credentials,
+        body: userData,
       }),
+    }),
+
+    logout: builder.mutation({
+      query: () => ({
+        url: "/users/logout",
+        method: "POST",
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(clearCredentials());
+          dispatch(tournamentApi.util.resetApiState()); // Clear cached API queries
+          dispatch(authApi.util.resetApiState()); // Clear cached API queries
+          dispatch(paymentApi.util.resetApiState()); // Clear cached API queries
+          toast.success("Logged out successfully");
+        } catch (error) {
+          console.log(error);
+        }
+      },
     }),
 
     fetchProfile: builder.query({
@@ -35,7 +56,6 @@ export const authApi = createApi({
         method: "POST",
         body: email,
       }),
-      transformResponse: (response) => response,
     }),
 
     verifyAndResetPassword: builder.mutation({
@@ -44,7 +64,6 @@ export const authApi = createApi({
         method: "POST",
         body: data,
       }),
-      transformResponse: (response) => response,
     }),
     updateProfile: builder.mutation({
       query: (data) => ({
@@ -52,7 +71,6 @@ export const authApi = createApi({
         method: "PATCH",
         body: data,
       }),
-      transformResponse: (response) => response,
       invalidatesTags: ["fetchUser"],
     }),
   }),
@@ -61,6 +79,7 @@ export const authApi = createApi({
 export const {
   useSignupMutation,
   useLoginMutation,
+  useLogoutMutation,
   useFetchProfileQuery,
   useForgotPasswordMutation,
   useVerifyAndResetPasswordMutation,

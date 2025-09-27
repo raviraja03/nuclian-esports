@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 const registrationSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -32,10 +32,17 @@ const registrationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Create compound index to ensure gameId is unique per tournament
+registrationSchema.post("save", async function (doc) {
+  if (doc.tournament) {
+    await mongoose.model("Tournament").findByIdAndUpdate(doc.tournament, {
+      $inc: { registeredCount: 1 },
+    });
+  }
+});
+
 
 const Registration =
   mongoose.models.Registration ||
   mongoose.model("Registration", registrationSchema);
 
-module.exports = Registration;
+export default Registration;

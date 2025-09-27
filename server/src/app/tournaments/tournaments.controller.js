@@ -1,14 +1,14 @@
-const Tournament = require("../../models/tournament.model");
-const mongoose = require("mongoose");
-const {
+import Tournament from "../../models/tournament.model.js";
+import mongoose from "mongoose";
+import {
   CustomError,
   GlobalErrorHandler,
-} = require("../../middleware/errorMiddleware");
-const Registration = require("../../models/registrationSchema.mode");
+} from "../../middleware/errorMiddleware.js";
+import Registration from "../../models/registrationSchema.mode.js";
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
+export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
   let { page = 1, limit = 20, game, status, type, search } = req.query;
 
   page = Math.max(1, parseInt(page, 10));
@@ -52,7 +52,7 @@ exports.getAllTournaments = GlobalErrorHandler(async (req, res) => {
 
 // GET /api/v1/tournaments/:id - Get single tournament details
 
-exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
+export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
   const userId = req?.user?._id; // user comes from auth middleware
 
@@ -66,7 +66,7 @@ exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   }).lean(); // lean = faster, returns plain JS object
 
   if (!tournament) {
-    return next(new CustomError("Tournament not found", 404));
+    return next(new CustomError("Tournament not found with this ID", 404));
   }
   let isRegistered = false;
 
@@ -87,7 +87,7 @@ exports.getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // GET /api/v1/tournaments/my/all - Get tournaments the logged-in user is registered in
-exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
+export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { page = 1, limit = 6 } = req.query;
   // ✅ Fetch user registrations (only paid ones)
@@ -122,7 +122,7 @@ exports.getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId - Withdraw a user from a tournament
-exports.withdrawFromTournament = async (req, res) => {
+export const withdrawFromTournament = async (req, res) => {
   const { tournamentId, participantId } = req.params;
   const userId = req.user._id;
   if (
@@ -158,13 +158,13 @@ exports.withdrawFromTournament = async (req, res) => {
 };
 
 // GET /api/tournaments/:tournamentId/matches/:matchId - Get specific match details
-exports.getMatchDetails = async (req, res) => {
+export const getMatchDetails = async (req, res) => {
   // Placeholder: Implement match details logic as per your match schema
   res.status(501).json({ message: "Match details not implemented" });
 };
 
 // GET /api/tournaments/:tournamentId/leaderboard - Get tournament leaderboard
-exports.getLeaderboard = async (req, res) => {
+export const getLeaderboard = async (req, res) => {
   const { tournamentId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
     return res.status(400).json({ message: "Invalid tournament ID" });
@@ -184,7 +184,7 @@ exports.getLeaderboard = async (req, res) => {
 };
 
 // GET /api/tournaments/:tournamentId/stats/:playerOrTeamId - Get stats of a player/team in the tournament
-exports.getPlayerOrTeamStats = async (req, res) => {
+export const getPlayerOrTeamStats = async (req, res) => {
   const { tournamentId, playerOrTeamId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(tournamentId)) {
     return res.status(400).json({ message: "Invalid tournament ID" });

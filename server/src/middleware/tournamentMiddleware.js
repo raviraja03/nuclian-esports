@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Middleware: requireAuth
-exports.requireAuth = (req, res, next) => {
+export const requireAuth = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
@@ -9,7 +9,7 @@ exports.requireAuth = (req, res, next) => {
 };
 
 // Middleware: validateObjectId(param)
-exports.validateObjectId = (param) => (req, res, next) => {
+export const validateObjectId = (param) => (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params[param])) {
     return res.status(400).json({ message: `Invalid ObjectId for ${param}` });
   }
@@ -17,12 +17,12 @@ exports.validateObjectId = (param) => (req, res, next) => {
 };
 
 // Middleware: asyncHandler
-exports.asyncHandler = (fn) => (req, res, next) => {
+export const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 // Middleware: isParticipant (for user endpoints only)
-exports.isParticipant = async (req, res, next) => {
+export const isParticipant = async (req, res, next) => {
   const Tournament = require('../models/Tournament');
   const tournamentId = req.params.id || req.params.tournamentId;
   const userId = req.user && req.user._id;
@@ -44,7 +44,7 @@ exports.isParticipant = async (req, res, next) => {
 };
 
 // Admin middleware: isAdminParticipant (for admin endpoints)
-exports.isAdminParticipant = async (req, res, next) => {
+export const isAdminParticipant = async (req, res, next) => {
   const Tournament = require('../models/Tournament');
   const tournamentId = req.params.id || req.params.tournamentId;
   const userId = req.params.userId || req.params.participantId;

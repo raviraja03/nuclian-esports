@@ -1,7 +1,6 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
-const { getProfileImage } = require("../utils/getProfileImage");
-
+import mongoose from  "mongoose";
+import bcrypt  from  "bcryptjs";
+import { getProfileImage } from "../utils/getProfileImage.js";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -139,4 +138,4 @@ userSchema.statics.findByEmail = function (email) {
 userSchema.index({ loc: "2dsphere" });
 
 const User = mongoose.model("User", userSchema);
-module.exports = User;
+export default User;

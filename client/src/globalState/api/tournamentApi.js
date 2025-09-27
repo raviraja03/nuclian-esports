@@ -1,11 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { baseQueryWithAuth } from "../baseQuery/baseQueryWithAuth";
 export const tournamentApi = createApi({
   reducerPath: "tournamentApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    // credentials: "include", // ✅ include cookies if auth needed
-  }),
+  baseQuery: baseQueryWithAuth,
   endpoints: (builder) => ({
     getTournaments: builder.query({
       query: ({ page = 1, limit, game, status } = {}) => {
@@ -14,9 +11,12 @@ export const tournamentApi = createApi({
         if (game) params.append("game", game);
         if (status) params.append("status", status);
 
-        return `/tournaments?${params.toString()}`;
+        return {
+          url: `/tournaments?${params.toString()}`,
+          credentials: "omit",
+        };
       },
-      transformResponse: (response) => response,
+
       providesTags: (result) =>
         result?.data?.length
           ? [
@@ -30,22 +30,19 @@ export const tournamentApi = createApi({
     }),
 
     getTournamentById: builder.query({
-      query: (id) => {
-        return {
-          url: `/tournaments/${id}`,
-          credentials: "include",
-        };
-      },
-
+      query: (id) => ({
+        url: `/tournaments/${id}`,
+      }),
+      keepUnusedDataFor: 0,
       transformResponse: (response) => response,
-      providesTags: (result, error, id) => [{ type: "Tournament", id }],
+
+      providesTags: (result, error, id) => [{ type: "TournamentId", id }],
     }),
 
     getMyTournaments: builder.query({
       query: ({ page = 1, limit = 6 } = {}) => ({
         url: `/tournaments/my/all?page=${page}&limit=${limit}`,
         method: "GET",
-        credentials: "include",
       }),
       transformResponse: (response) => response,
       providesTags: (result) =>
@@ -65,13 +62,12 @@ export const tournamentApi = createApi({
         url: "/payments/register-in",
         method: "POST",
         body: { tournament, teamName, players },
-        credentials: "include",
       }),
 
       invalidatesTags: (result, error, { tournament }) => [
         { type: "MyTournament", id: "LIST" }, // 🔄 getMyTournaments
-        { type: "Tournament", id: tournament }, // 🔄 getTournamentById(tournamentId)
-        { type: "Tournament", id: "LIST" },     // 🔄 getTournaments
+        { type: "TournamentId", id: tournament }, // 🔄 getTournamentById(tournamentId)
+        { type: "Tournament", id: "LIST" }, // 🔄 getTournaments
       ],
     }),
 

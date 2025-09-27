@@ -1,5 +1,6 @@
-const {CustomError}=require("./errorMiddleware")
-const validate = (scheme) => {
+import {CustomError} from "./errorMiddleware.js";
+
+export const validate = (scheme) => {
   return (req, res, next) => {
     try {
       scheme.parse(req.body);
@@ -10,4 +11,3 @@ const validate = (scheme) => {
   };
 };
 
-module.exports = { validate };

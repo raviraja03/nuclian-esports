@@ -1,23 +1,21 @@
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
-const User = require("../../models/user.model");
-const { generateToken } = require("../../middleware/auth");
-const  sendMail  = require("../../utilities/mailer");
-const {
+import User from "../../models/user.model.js";
+import { generateToken } from "../../middleware/auth.js";
+import sendMail from "../../utilities/mailer.js";
+import {
   CustomError,
   GlobalErrorHandler,
-} = require("../../middleware/errorMiddleware");
-const {
+} from "../../middleware/errorMiddleware.js";
+import {
   cookieOptions,
   cookieOptionsForClearCookie,
-} = require("../../utilities/jwt");
-const dotenv = require("dotenv");
+} from "../../utilities/jwt.js";
+import dotenv from "dotenv";
 dotenv.config();
 
 // @desc    Register new user
 // @route   POST /api/users/register
 // @access  Public
-const register = GlobalErrorHandler(async (req, res, next) => {
+export const register = GlobalErrorHandler(async (req, res, next) => {
   const { name, email, password, phoneNumber, role } = req.body;
   const user = await User.create({
     name,
@@ -47,7 +45,7 @@ const register = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
-const login = GlobalErrorHandler(async (req, res, next) => {
+export const login = GlobalErrorHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -79,7 +77,7 @@ const login = GlobalErrorHandler(async (req, res, next) => {
   const token = generateToken(user._id);
   res.clearCookie("sessionId", cookieOptionsForClearCookie);
   res.cookie("sessionId", token, cookieOptions);
-  res.json({
+  res.status(200).json({
     success: true,
     data: {
       _id: user._id,
@@ -88,7 +86,7 @@ const login = GlobalErrorHandler(async (req, res, next) => {
       phoneNumber: user.phoneNumber,
       role: user.role,
       userProfileImage: user.userProfileImage,
-      token,
+      // token,
     },
   });
 });
@@ -96,11 +94,11 @@ const login = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Logout user
 // @route   POST /api/users/logout
 // @access  Private
-const logout = GlobalErrorHandler(async (req, res, next) => {
+export const logout = GlobalErrorHandler(async (req, res, next) => {
   // Clear the session cookie
   res.clearCookie("sessionId", cookieOptionsForClearCookie);
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: "Logged out successfully",
   });
@@ -109,7 +107,7 @@ const logout = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Get all users with pagination
 // @route   GET /api/users
 // @access  Private/Admin
-const getUsers = GlobalErrorHandler(async (req, res, next) => {
+export const getUsers = GlobalErrorHandler(async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
@@ -136,7 +134,7 @@ const getUsers = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Get user by ID
 // @route   GET /api/users/:id
 // @access  Private/Admin
-const getUserById = GlobalErrorHandler(async (req, res, next) => {
+export const getUserById = GlobalErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) {
     return res.status(404).json({
@@ -154,7 +152,7 @@ const getUserById = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private/Admin
-const updateUser = GlobalErrorHandler(async (req, res, next) => {
+export const updateUser = GlobalErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) {
     return next(new CustomError("User not found", 404));
@@ -180,7 +178,7 @@ const updateUser = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Delete user (soft delete)
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
-const deleteUser = GlobalErrorHandler(async (req, res, next) => {
+export const deleteUser = GlobalErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user || user.isDeleted) {
     return next(new CustomError("User not found", 404));
@@ -199,9 +197,9 @@ const deleteUser = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
-const getProfile = GlobalErrorHandler(async (req, res, next) => {
+export const getProfile = GlobalErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id);
-  res.json({
+  res.status(200).json({
     success: true,
     data: user,
   });
@@ -210,7 +208,7 @@ const getProfile = GlobalErrorHandler(async (req, res, next) => {
 // @desc    Update user profile
 // @route   PUT /api/users/profile
 // @access  Private
-const updateProfile = GlobalErrorHandler(async (req, res, next) => {
+export const updateProfile = GlobalErrorHandler(async (req, res, next) => {
   const user = await User.findById(req.user._id).select("+password");
   const { name, email, phoneNumber, currentPassword, newPassword } = req.body;
 
@@ -249,7 +247,7 @@ const generateOTP = () => {
 // @desc    Forgot password - Send OTPs
 // @route   POST /api/users/forgot-password
 // @access  Public
-const sendOtp = GlobalErrorHandler(async (req, res, next) => {
+export const sendOtp = GlobalErrorHandler(async (req, res, next) => {
   const { email } = req.body;
 
   // Find user by email and phone
@@ -303,7 +301,7 @@ const sendOtp = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/verify-otp nlbh ckjy aiys eaib
 
 // @access  Public
-const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
+export const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
   const { email, emailOtp, newPassword } = req.body;
 
   // Find user
@@ -346,16 +344,3 @@ const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-module.exports = {
-  sendOtp,
-  verifyOtpAndResetPassword,
-  register,
-  login,
-  logout,
-  getUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-  getProfile,
-  updateProfile,
-};

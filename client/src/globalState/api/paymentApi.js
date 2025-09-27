@@ -1,11 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import {baseQueryWithAuth} from "../baseQuery/baseQueryWithAuth"
+  
 export const paymentApi = createApi({
   reducerPath: "paymentApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_BACKEND_URL,
-    credentials: "include",
-  }),
+  baseQuery: baseQueryWithAuth,
 
   endpoints: (builder) => ({
     getMyPayments: builder.query({

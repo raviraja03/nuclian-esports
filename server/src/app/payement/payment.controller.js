@@ -1,13 +1,15 @@
-const {
+import {
   CustomError,
   GlobalErrorHandler,
-} = require("../../middleware/errorMiddleware");
-const Registration = require("../../models/registrationSchema.mode");
-const Payment = require("../../models/payment.model");
-const Tournament = require("../../models/tournament.model");
-// const {cashfree} = require("../../index");
-require("dotenv").config();
-const { Cashfree, CFEnvironment } = require("cashfree-pg");
+} from "../../middleware/errorMiddleware.js";
+import Registration from "../../models/registrationSchema.mode.js";
+import Payment from "../../models/payment.model.js";
+import Tournament from "../../models/tournament.model.js";
+import "dotenv/config";
+import { Cashfree, CFEnvironment } from "cashfree-pg";
+
+
+
 const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID;
 const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
 const cashfree = new Cashfree(
@@ -24,7 +26,7 @@ const generateOrderId = () => {
   );
 };
 //for client (update registration data)
-const updateRegistrationData = GlobalErrorHandler(async (req, res, next) => {
+export const updateRegistrationData = GlobalErrorHandler(async (req, res, next) => {
   const { registrationId, teamName, members } = req.body;
 
   const registration = await Registration.findOne({ _id: registrationId });
@@ -46,7 +48,8 @@ const updateRegistrationData = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
+
+export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   const { tournament, teamName, players } = req.body;
 
   if (!tournament || !teamName || !players || players.length === 0) {
@@ -63,11 +66,9 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
       new CustomError("Registration is closed for this tournament", 400)
     );
   }
-  const count = await Registration.countDocuments({
-    tournament,
-    status: "paid",
-  });
-  if (count >= tournament.maxParticipants) {
+
+
+  if (tournament.totalTeams == tournament.registeredCount) {
     return next(new CustomError("Tournament is full", 400));
   }
   if (tournamentDoc.entryFee.amount === 0) {
@@ -238,7 +239,7 @@ const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
   }
 });
 
-const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
+export const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
   const { orderId } = req.body;
 
   if (!orderId) {
@@ -358,7 +359,7 @@ const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
 //   // });
 // });
 
-const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
+export const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
 
   const payments = await Payment.find({ user: userId })
@@ -372,10 +373,4 @@ const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-module.exports = {
-  handleRegistration,
-  verifyPayment,
-  getMyPayments,
-  updateRegistrationData
-  // webhookHandler,
-};
+

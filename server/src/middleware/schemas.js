@@ -1,6 +1,6 @@
-const {z}=require("zod")
+import {z} from "zod"
 
-const registerSchema = z.object({
+export const registerSchema = z.object({
   name: z.string().min(2, { error: "Name must be at least 2 characters long" }),
   email: z.email({ error: "Invalid email address" }),
   password: z
@@ -12,14 +12,11 @@ const registerSchema = z.object({
     .optional(),
 });
 
-const loginSchema = z.object({
+export const loginSchema = z.object({
   email: z.email({ error: "Invalid email address" }),
   password: z
     .string()
     .min(6, { error: "Password must be at least 6 characters long" }),
 });
 
-module.exports = {
-  registerSchema,
-  loginSchema,
-};
+

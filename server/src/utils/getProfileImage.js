@@ -1,4 +1,4 @@
- const getProfileImage = () => {
+ export const getProfileImage = () => {
     const style = ["croodles", "big-ears", "notionists", "bottts", "open-peeps"];
     const random_style = Math.floor(Math.random() * style.length);
     let seed = [
@@ -26,4 +26,3 @@
     const random_seed = Math.floor(Math.random() * seed.length);
     return `https://api.dicebear.com/9.x/${style[random_style]}/svg?seed=${seed[random_seed]}`;
   };
-module.exports = {getProfileImage};

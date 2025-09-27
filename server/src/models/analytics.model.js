@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const analyticsSchema = new mongoose.Schema({
   userId: {
@@ -65,4 +65,4 @@ analyticsSchema.index({ 'performanceMetrics.tournaments.totalEarnings': -1 });
 
 const Analytics = mongoose.model('Analytics', analyticsSchema);
 
-module.exports = Analytics; 
+export default Analytics

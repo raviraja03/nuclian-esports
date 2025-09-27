@@ -1,5 +1,5 @@
-const userRouter = require("express").Router();
-const {
+import { Router } from "express";
+import {
   register,
   login,
   logout,
@@ -11,10 +11,9 @@ const {
   updateProfile,
   sendOtp,
   verifyOtpAndResetPassword,
-  resendOtp,
-} = require("./users.controller");
-const { protect, authorize } = require("../../middleware/auth");
-const {
+} from "./users.controller.js";
+import { protect, authorize } from "../../middleware/auth.js";
+import {
   registerValidation,
   loginValidation,
   updateUserValidation,
@@ -23,9 +22,11 @@ const {
   forgotPasswordValidation,
   verifyOtpValidation,
   resendOtpValidation,
-} = require("../../utils/validation");
-const { validate } = require("../../middleware/zodMiddleware");
-const { registerSchema, loginSchema } = require("../../middleware/schemas");
+} from "../../utils/validation.js";
+import { validate } from "../../middleware/zodMiddleware.js";
+import { registerSchema, loginSchema } from "../../middleware/schemas.js";
+
+const userRouter = Router();
 
 // Public routes
 userRouter.post("/register", validate(registerSchema), register);
@@ -41,6 +42,9 @@ userRouter.use(protect); // Apply authentication middleware to all routes below
 
 // User profile routes
 userRouter.route("/profile").get(getProfile).patch(updateProfile);
+
+
+
 
 // Admin only routes
 userRouter
@@ -68,4 +72,4 @@ userRouter
     deleteUser
   );
 
-module.exports = userRouter;
+export default userRouter
