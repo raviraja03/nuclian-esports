@@ -14,26 +14,53 @@ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
   page = Math.max(1, parseInt(page, 10));
   limit = Math.max(1, parseInt(limit, 10));
 
-  // Base filter
   const filter = { isVisible: true };
 
+  // Apply filters
   if (game) filter.game = { $regex: new RegExp(game.trim(), "i") };
-  if (status) filter.status = status.trim();
-  if (type) filter.type = type.trim(); // solo, duo, squad
+  if (status) filter.status = { $regex: new RegExp(status.trim(), "i") };
+  if (type) filter.type = { $regex: new RegExp(type.trim(), "i") };
   if (search) filter.title = { $regex: new RegExp(search.trim(), "i") };
 
   const skip = (page - 1) * limit;
-
-  // Query tournaments
-  
+  // Query tournaments and total count in parallel
   const [tournaments, total] = await Promise.all([
-    Tournament.find(filter)
-      .sort({ "schedule.startTime": 1 }) // always sort by start time ascending
-      .skip(skip)
-      .limit(limit),
+    Tournament.aggregate([
+      { $match: filter },
+      { $sort: { "schedule.matchStart": 1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "registrations", // 👈 your Registration collection name (check actual collection!)
+          let: { tournamentId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$tournament", "$$tournamentId"] },
+                    { $eq: ["$status", "paid"] }, // only count paid users
+                  ],
+                },
+              },
+            },
+            { $count: "count" },
+          ],
+          as: "registrations",
+        },
+      },
+      {
+        $addFields: {
+          registeredCount: {
+            $ifNull: [{ $arrayElemAt: ["$registrations.count", 0] }, 0],
+          },
+        },
+      },
+      { $project: { registrations: 0 } }, // remove raw registrations array
+    ]),
     Tournament.countDocuments(filter),
   ]);
-  
 
   res.status(200).json({
     success: true,
@@ -48,7 +75,6 @@ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
     },
   });
 });
-
 
 // GET /api/v1/tournaments/:id - Get single tournament details
 
@@ -79,10 +105,14 @@ export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 
     isRegistered = !!registration;
   }
+  const registeredCount = await Registration.countDocuments({
+    tournament: id,
+    status: "paid",
+  });
 
   res.status(200).json({
     success: true,
-    data: { ...tournament, isRegistered },
+    data: { ...tournament, isRegistered,registeredCount },
   });
 });
 
@@ -104,8 +134,12 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .lean();
-    // console.log(registrations);
-  const tournaments = registrations.map((r) => { return {_id: r._id, tournament: r.tournament, team: r.team }; }).filter(Boolean);
+  // console.log(registrations);
+  const tournaments = registrations
+    .map((r) => {
+      return { _id: r._id, tournament: r.tournament, team: r.team };
+    })
+    .filter(Boolean);
   const total = await Registration.countDocuments({
     user: userId,
     status: "paid",
@@ -117,7 +151,6 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     page: Number(page),
     totalPages: Math.ceil(total / limit),
     data: tournaments,
-  
   });
 });
 

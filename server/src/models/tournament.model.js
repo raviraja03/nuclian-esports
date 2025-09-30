@@ -67,8 +67,8 @@ const tournamentSchema = new mongoose.Schema(
     },
 
     schedule: {
-      registrationStart: { type: Date, required: true }, // e.g. 27 Sept 2025
-      registrationEnd: { type: Date, required: true }, // e.g. 29 Sept 2025
+      registrationStart: { type: Date, required: true },
+      registrationEnd: { type: Date, required: true }, 
       matchStart: { type: Date, required: true },
       idPasswordRelease: { 
         type: Date, 
@@ -135,15 +135,13 @@ const tournamentSchema = new mongoose.Schema(
     metadata: { type: Map, of: String },
 
     isVisible: { type: Boolean, default: true },
-    roomId: { type: String, trim: true, default: null },
-    registeredCount: { type: Number, default: 0 },
-  },
+    roomId: { type: String, trim: true, default: null }  },
   { timestamps: true }
 );
 
 // Indexes for performance
-tournamentSchema.index({ status: 1, "schedule.startTime": 1 });
-tournamentSchema.index({ createdBy: 1 });
+tournamentSchema.index({ status: 1, "schedule.matchStart": 1 });
+// tournamentSchema.index({ createdBy: 1 });
 tournamentSchema.index({ game: 1, status: 1 });
 tournamentSchema.index({ platform: 1, isVisible: 1 });
 

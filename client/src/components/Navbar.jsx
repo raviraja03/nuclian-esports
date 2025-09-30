@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { MdLogout } from "react-icons/md";
-import logo from "../assets/loko.jpg";
+import logo from "../assets/logo.jpg";
 import { useLogoutMutation } from "../globalState/api/authApi";
 
 const Navbar = () => {

@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
+
 const registrationSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -32,13 +33,8 @@ const registrationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-registrationSchema.post("save", async function (doc) {
-  if (doc.tournament) {
-    await mongoose.model("Tournament").findByIdAndUpdate(doc.tournament, {
-      $inc: { registeredCount: 1 },
-    });
-  }
-});
+// Pre-save hook to increment registeredCount when status becomes "paid"
+registrationSchema.index({ tournament: 1, status: 1 });
 
 
 const Registration =

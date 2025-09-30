@@ -102,8 +102,6 @@ const TournamentDetails = () => {
     "Free Fire": Freefire,
   };
 
-  // Countdown timer
-
   const openModal = () => {
     if (!isUserLoggedIn) {
       toast.error("Please log in to join the tournament");
@@ -113,7 +111,7 @@ const TournamentDetails = () => {
   };
 
   // All return stared from here
-
+  // console.log(tournamentData);
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -447,52 +445,51 @@ const TournamentDetails = () => {
 
             <div className="h-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full mb-8"></div>
 
-            /* Schedule */
-                  <div className="mb-8">
-                    <h2 className="text-2xl sm:text-3xl font-bold text-[#E11D48] mb-4 text-shadow-sm">
-                    Schedule
-                    </h2>
-                    <div className="bg-[#1a2634]/50 rounded-lg p-4 sm:p-6 border border-white/10 animate-in slide-in-from-bottom-10 duration-300">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
-                      <div className="flex justify-between">
-                      <span className="text-gray-300">Registration Start:</span>
-                      <span className="text-white font-semibold">
-                        {formatDate12Hour(
+            <div className="mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#E11D48] mb-4 text-shadow-sm">
+                Schedule
+              </h2>
+              <div className="bg-[#1a2634]/50 rounded-lg p-4 sm:p-6 border border-white/10 animate-in slide-in-from-bottom-10 duration-300">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm sm:text-base">
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Registration Start:</span>
+                    <span className="text-white font-semibold">
+                      {formatDate12Hour(
                         tournamentData?.data?.schedule.registrationStart
-                        )}
-                      </span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-300">Registration End:</span>
-                      <span className="text-white font-semibold">
-                        {formatDate12Hour(
-                        tournamentData?.data?.schedule.registrationEnd
-                        )}
-                      </span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-300">Match Start:</span>
-                      <span className="text-white font-semibold">
-                        {formatDate12Hour(
-                        tournamentData?.data?.schedule.matchStart
-                        )}
-                      </span>
-                      </div>
-                      <div className="flex justify-between">
-                      <span className="text-gray-300">ID Password Release:</span>
-                      <span className="text-white font-semibold">
-                        {formatDate12Hour(
-                        tournamentData?.data?.schedule.idPasswordRelease
-                        )}
-                      </span>
-                      </div>
-                    </div>
-                    </div>
+                      )}
+                    </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Registration End:</span>
+                    <span className="text-white font-semibold">
+                      {formatDate12Hour(
+                        tournamentData?.data?.schedule.registrationEnd
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">Match Start:</span>
+                    <span className="text-white font-semibold">
+                      {formatDate12Hour(
+                        tournamentData?.data?.schedule.matchStart
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-300">ID Password Release:</span>
+                    <span className="text-white font-semibold">
+                      {formatDate12Hour(
+                        tournamentData?.data?.schedule.idPasswordRelease
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-                  <div className="h-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full mb-8"></div>
+            <div className="h-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] rounded-full mb-8"></div>
 
-                  {/* Entry & Prize Pool */}
+            {/* Entry & Prize Pool */}
             <div className="mb-8">
               <button
                 onClick={() => setIsPrizePoolOpen(!isPrizePoolOpen)}

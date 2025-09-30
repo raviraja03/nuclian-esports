@@ -66,9 +66,12 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
       new CustomError("Registration is closed for this tournament", 400)
     );
   }
+    const registeredCount = await Registration.countDocuments({
+    tournament: tournament,
+    status: "paid",
+  });
 
-
-  if (tournament.totalTeams == tournament.registeredCount) {
+  if (tournamentDoc.totalTeams === registeredCount) {
     return next(new CustomError("Tournament is full", 400));
   }
   if (tournamentDoc.entryFee.amount === 0) {
