@@ -15,7 +15,11 @@ const Home = () => {
     data: tournaments = {},
 
     isLoading,
-  } = useGetTournamentsQuery({ limit: 3,status:"registration-open" });
+  } = useGetTournamentsQuery({
+    limit: 3,
+    status: "registration-open",
+    isVisible: true,
+  });
 
   return (
     <div>

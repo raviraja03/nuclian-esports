@@ -70,13 +70,7 @@ const tournamentSchema = new mongoose.Schema(
       registrationStart: { type: Date, required: true },
       registrationEnd: { type: Date, required: true }, 
       matchStart: { type: Date, required: true },
-      idPasswordRelease: { 
-        type: Date, 
-        required: true,
-        default: function() {
-          return new Date(this.matchStart.getTime() - 15 * 60 * 1000);
-        }
-      },
+
         },
 
         maxParticipants: {
@@ -120,7 +114,7 @@ const tournamentSchema = new mongoose.Schema(
         "completed",
         "cancelled",
       ],
-      default: "draft",
+      default: "published",
     },
 
     // createdBy: {
@@ -135,7 +129,10 @@ const tournamentSchema = new mongoose.Schema(
     metadata: { type: Map, of: String },
 
     isVisible: { type: Boolean, default: true },
-    roomId: { type: String, trim: true, default: null }  },
+    roomId: { type: String, trim: true, default: "will be released 15 minutes before match start at" },
+    roomPassword: { type: String, trim: true, default: null },
+  
+  },
   { timestamps: true }
 );
 

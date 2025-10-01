@@ -5,21 +5,29 @@ import { useGetTournamentsQuery } from "../globalState/api/tournamentApi";
 import LoadingScreen from "../components/shared/LoadingScreen";
 import TournamentCard from "../components/shared/TournamentCard";
 
-
-
-
 // --- Main Page Content ---
 const TournamentsPageContent = () => {
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
 
   const {
-    data:tournamentsResponse={} ,
+    data: tournamentsResponse = {},
     isLoading,
     isError,
-
-  } = useGetTournamentsQuery({ page, limit: 6 });
-
+  } = useGetTournamentsQuery({
+    page,
+    limit: 6,
+    isVisible: true,
+    status: `
+      published,
+      registration-open,
+      registration-closed,
+      check-in,
+      in-progress,
+      completed,
+      cancelled,
+    `,
+  });
 
   const { data: tournamentsDatas = [], pagination } = tournamentsResponse;
   const filteredTournaments = tournamentsDatas.filter((tournament) => {
@@ -32,7 +40,7 @@ const TournamentsPageContent = () => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPage(newPage);
     }
-  }
+  };
 
   if (isLoading) {
     return <LoadingScreen />;

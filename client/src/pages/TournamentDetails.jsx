@@ -475,14 +475,14 @@ const TournamentDetails = () => {
                       )}
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-gray-300">ID Password Release:</span>
                     <span className="text-white font-semibold">
                       {formatDate12Hour(
                         tournamentData?.data?.schedule.idPasswordRelease
                       )}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

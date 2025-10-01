@@ -8,20 +8,52 @@ import Registration from "../../models/registrationSchema.mode.js";
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
-  let { page = 1, limit = 20, game, status, type, search } = req.query;
 
+function parseQueryField(value, useRegex = true) {
+  if (!value) return null;
+
+  let parsed = value;
+
+  // If comma separated
+  if (typeof value === "string" && value.includes(",")) {
+    parsed = value.split(",").map(v => v.trim());
+  }
+
+  if (Array.isArray(parsed)) {
+    return { $in: parsed };
+  } else if (useRegex) {
+    return { $regex: new RegExp(parsed.trim(), "i") };
+  } else {
+    return parsed;
+  }
+}
+
+
+export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
+  let {
+    page = 1,
+    limit = 20,
+    game,
+    status,
+    type,
+    search,
+    isVisible,
+  } = req.query;
+
+  let filter = {};
   page = Math.max(1, parseInt(page, 10));
   limit = Math.max(1, parseInt(limit, 10));
 
-  const filter = { isVisible: true };
-
   // Apply filters
-  if (game) filter.game = { $regex: new RegExp(game.trim(), "i") };
-  if (status) filter.status = { $regex: new RegExp(status.trim(), "i") };
-  if (type) filter.type = { $regex: new RegExp(type.trim(), "i") };
+  if (isVisible) filter.isVisible = true;
   if (search) filter.title = { $regex: new RegExp(search.trim(), "i") };
-
+  if (game) filter.game = parseQueryField(game);
+  if (status) {
+    filter.status = parseQueryField(status);
+  }
+  if (type) {
+    filter.type = parseQueryField(type);
+  }
   const skip = (page - 1) * limit;
   // Query tournaments and total count in parallel
   const [tournaments, total] = await Promise.all([
@@ -112,7 +144,7 @@ export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    data: { ...tournament, isRegistered,registeredCount },
+    data: { ...tournament, isRegistered, registeredCount },
   });
 });
 
@@ -129,7 +161,7 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
       path: "tournament",
       match: { isVisible: true },
       select:
-        "title game platform schedule status  entryFee prizePool roomId totalMember",
+        "title game platform schedule status  entryFee prizePool roomId roomPassword totalMember",
     })
     .skip((page - 1) * limit)
     .limit(Number(limit))

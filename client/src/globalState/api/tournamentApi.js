@@ -5,35 +5,27 @@ export const tournamentApi = createApi({
   baseQuery: baseQueryWithAuth,
   endpoints: (builder) => ({
     getTournaments: builder.query({
-      query: ({ page = 1, limit, game, status } = {}) => {
+      query: ({ page = 1, limit, game, status ,isVisible} = {}) => {
         const params = new URLSearchParams({ page });
         if (limit) params.append("limit", limit);
         if (game) params.append("game", game);
         if (status) params.append("status", status);
+        if (isVisible) params.append("isVisible", isVisible);
 
         return {
-          url: `/tournaments?${params.toString()}`,
+          url: `/tournaments?${params}`,
           credentials: "omit",
         };
       },
 
-      providesTags: (result) =>
-        result?.data?.length
-          ? [
-              ...result.data.map((t) => ({
-                type: "Tournament",
-                id: t._id,
-              })),
-              { type: "Tournament", id: "LIST" },
-            ]
-          : [{ type: "Tournament", id: "LIST" }],
+    providesTags: [{ type: "Tournament", id: "LIST" }],
+
     }),
 
     getTournamentById: builder.query({
       query: (id) => ({
         url: `/tournaments/${id}`,
       }),
-      keepUnusedDataFor: 0,
       transformResponse: (response) => response,
 
       providesTags: (result, error, id) => [{ type: "TournamentId", id }],
@@ -45,16 +37,8 @@ export const tournamentApi = createApi({
         method: "GET",
       }),
       transformResponse: (response) => response,
-      providesTags: (result) =>
-        result?.data
-          ? [
-              ...result.data.map((entry) => ({
-                type: "MyTournament",
-                id: entry._id, // 👈 registrationId
-              })),
-              { type: "MyTournament", id: "LIST" },
-            ]
-          : [{ type: "MyTournament", id: "LIST" }],
+     providesTags: () =>[{ type: "MyTournament", id: "LIST" }],
+
     }),
 
     registerInTournament: builder.mutation({
@@ -80,7 +64,7 @@ export const tournamentApi = createApi({
       }),
 
       invalidatesTags: (result, error, { registrationId }) => [
-        { type: "MyTournament", id: registrationId }, // 🔄 getMyTournaments
+        { type: "MyTournament", id: "LIST" }, // 🔄 getMyTournaments
       ],
     }),
   }),

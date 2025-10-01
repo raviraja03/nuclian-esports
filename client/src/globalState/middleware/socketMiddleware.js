@@ -17,11 +17,9 @@ export const socketMiddleware = (store) => (next) => (action) => {
         });
         socket.on("tournamentUpdated", (data) => {
           if (data.tournamentId) {
-            console.log("Tournament updated, refreshing data..." + data.tournamentId);
             store.dispatch(
               tournamentApi.util.invalidateTags([
-                // { type: "TournamentId", id: data.tournamentId },
-                { type: "TournamentId" },
+                { type: "MyTournament", id:"LIST" },
               ])
             );
           }

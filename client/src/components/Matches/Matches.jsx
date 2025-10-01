@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { openModal } from "../../globalState/slices/modal";
 const RegisteredTournamentsPage = () => {
   const dispatch = useDispatch();
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const {
     data: registrationsData = {},
@@ -111,14 +111,14 @@ const RegisteredTournamentsPage = () => {
                   className="group relative bg-gradient-to-b from-[#111a24] to-[#0a141d] rounded-2xl p-6 border border-white/10 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 >
                   {/* modal for edit team */}
-                 
+
                   {/* Tournament Header */}
                   <div className="mb-5">
                     <h2 className="text-xl font-bold text-[#FC4E5B] group-hover:text-[#ff6b75] transition-colors">
                       {cardData.tournament.title}
                     </h2>
                     <p className="text-xs text-gray-400 mt-1">
-                      {formatDate12Hour(cardData.tournament.schedule.startTime)}
+                      {formatDate12Hour(cardData.tournament.schedule.matchStart)}
                     </p>
                   </div>
 
@@ -160,17 +160,28 @@ const RegisteredTournamentsPage = () => {
                     </p>
                   </div>
 
-                  {/* Room ID Highlight */}
-                  <div className="mt-5 p-4 rounded-xl bg-[#1a232e]/70 border border-dashed border-[#FC4E5B]/40 text-center">
-                    <p className="text-xs uppercase tracking-wider text-gray-400">
+                  <div className="mt-4 p-3 rounded-lg bg-[#1a232e]/70 border border-dashed border-[#FC4E5B]/30 text-center">
+                    {/* Room ID */}
+                    <p className="text-[10px] uppercase tracking-wide text-gray-400">
                       Room ID
                     </p>
-                    <p className="text-lg font-bold text-white mt-1">
+                    <p className="text-base font-semibold text-white mt-1">
                       {cardData.tournament.roomId ?? "Will be shown soon"}
                     </p>
+
+                    {/* Room Password */}
+                    {cardData.tournament.roomPassword && (
+                      <div className="mt-2 bg-[#0b1620] rounded-md border border-white/5 px-3 py-2">
+                        <p className="text-[10px] uppercase tracking-wide text-gray-400">
+                          Password
+                        </p>
+                        <p className="text-sm font-mono text-white break-all mt-0.5">
+                          {cardData.tournament.roomPassword}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Team Section */}
                   {cardData.tournament.status === "registration-open" && (
                     <div className="mt-5">
                       <button
