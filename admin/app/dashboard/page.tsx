@@ -7,35 +7,35 @@ const stats = [
   {
     title: "Total Users",
     value: "12,847",
-    change: "+12.5%",
+    // change: "+12.5%",
     changeType: "positive" as const,
     icon: Users,
-    description: "Active registered users",
+    // description: "Active registered users",
   },
   {
     title: "Total Tournaments",
     value: "156",
-    change: "+8.2%",
+    // change: "+8.2%",
     changeType: "positive" as const,
     icon: Trophy,
-    description: "All-time tournaments hosted",
+    // description: "All-time tournaments hosted",
   },
-  {
-    title: "Active Tournaments",
-    value: "23",
-    change: "-2.1%",
-    changeType: "negative" as const,
-    icon: Activity,
-    description: "Currently running tournaments",
-  },
-  {
-    title: "Total Revenue",
-    value: "$89,247",
-    change: "+15.3%",
-    changeType: "positive" as const,
-    icon: DollarSign,
-    description: "Revenue from entry fees",
-  },
+  // {
+  //   title: "Active Tournaments",
+  //   value: "23",
+  //   change: "-2.1%",
+  //   changeType: "negative" as const,
+  //   icon: Activity,
+  //   description: "Currently running tournaments",
+  // },
+  // {
+  //   title: "Total Revenue",
+  //   value: "$89,247",
+  //   change: "+15.3%",
+  //   changeType: "positive" as const,
+  //   icon: DollarSign,
+  //   description: "Revenue from entry fees",
+  // },
 ]
 
 const recentTournaments = [
@@ -68,32 +68,33 @@ const recentTournaments = [
   },
 ]
 
-const recentActivity = [
-  {
-    id: 1,
-    type: "user_registration",
-    message: "New user registered: ProGamer2024",
-    timestamp: "2 minutes ago",
-  },
-  {
-    id: 2,
-    type: "tournament_registration",
-    message: "Team 'Elite Squad' registered for Valorant Champions Cup",
-    timestamp: "5 minutes ago",
-  },
-  {
-    id: 3,
-    type: "payment",
-    message: "Payment received: $50 entry fee for CS2 Winter League",
-    timestamp: "12 minutes ago",
-  },
-  {
-    id: 4,
-    type: "tournament_complete",
-    message: "League of Legends Clash tournament completed",
-    timestamp: "1 hour ago",
-  },
-]
+
+// const recentActivity = [
+//   {
+//     id: 1,
+//     type: "user_registration",
+//     message: "New user registered: ProGamer2024",
+//     timestamp: "2 minutes ago",
+//   },
+//   {
+//     id: 2,
+//     type: "tournament_registration",
+//     message: "Team 'Elite Squad' registered for Valorant Champions Cup",
+//     timestamp: "5 minutes ago",
+//   },
+//   {
+//     id: 3,
+//     type: "payment",
+//     message: "Payment received: $50 entry fee for CS2 Winter League",
+//     timestamp: "12 minutes ago",
+//   },
+//   {
+//     id: 4,
+//     type: "tournament_complete",
+//     message: "League of Legends Clash tournament completed",
+//     timestamp: "1 hour ago",
+//   },
+// ]
 
  function Page() {
   return (
@@ -131,8 +132,8 @@ const recentActivity = [
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Tournaments */}
+      <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Tournaments</CardTitle>
@@ -170,27 +171,27 @@ const recentActivity = [
         </Card>
 
         {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest platform activity and events</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-2 w-2 rounded-full bg-primary mt-2" />
+          {/* <Card>
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>Latest platform activity and events</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="h-2 w-2 rounded-full bg-primary mt-2" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm">{activity.message}</p>
+                      <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm">{activity.message}</p>
-                    <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card> */}
       </div>
 
       {/* Quick Actions */}

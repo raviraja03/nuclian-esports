@@ -1,5 +1,9 @@
-import Image from "next/image";
+"use client";
+import {useEffect} from "react"
 export default function Home() {
+
+  
+
   return (
   <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
