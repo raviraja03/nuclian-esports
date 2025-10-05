@@ -6,13 +6,30 @@ import { useRouter } from "next/navigation"
 import Sidebar from "../Sidebar"
 import  Header from "../Header"
 import { features } from "process"
-
+import { toast } from "sonner";
+import { useAppDispatch } from "@/features/type/hooks";
+import { clearCredentials, setCredentials } from "@/features/slice/userSlice";
+import { redirect } from "next/navigation";
+import { useFetchProfileQuery } from "@/features/api/authApi";
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 function DashboardLayout({ children }: DashboardLayoutProps) {
-  const router = useRouter()
+  const { data: profile, isError } = useFetchProfileQuery();
+
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    if (profile) {
+      dispatch(setCredentials({ user: profile.data }));
+      // toast.success("Logged in successfully");
+      // redirect("/dashboard");
+    } else if (isError) {
+      dispatch(clearCredentials());
+      toast.error("Session expired. Please log in again.");
+      redirect("/login");
+    }
+  }, [profile, isError, dispatch]);
 
   return (
     <div className="flex h-screen bg-background">

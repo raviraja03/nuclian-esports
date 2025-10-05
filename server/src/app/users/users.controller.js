@@ -1,6 +1,7 @@
 import User from "../../models/user.model.js";
 import { generateToken } from "../../middleware/auth.js";
 import sendMail from "../../utilities/mailer.js";
+import { generateOTP } from "../../utilities/otp.js";
 import {
   CustomError,
   GlobalErrorHandler,
@@ -9,8 +10,7 @@ import {
   cookieOptions,
   cookieOptionsForClearCookie,
 } from "../../utilities/jwt.js";
-import dotenv from "dotenv";
-dotenv.config();
+import "dotenv/config";
 
 // @desc    Register new user
 // @route   POST /api/users/register
@@ -46,7 +46,7 @@ export const register = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/login
 // @access  Public
 export const login = GlobalErrorHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, isAdminLogin=false} = req.body;
 
   if (!email || !password) {
     return next(new CustomError("Email and password are required", 400));
@@ -67,7 +67,9 @@ export const login = GlobalErrorHandler(async (req, res, next) => {
       )
     );
   }
-
+ if (isAdminLogin && user.role !== "admin") {
+    return next(new CustomError("Unauthorized: Admin access required", 403));
+  }
   // Update last login and session info
   user.lastLogin = Date.now();
   user.sessionInfo = "loggedIn";
@@ -104,104 +106,20 @@ export const logout = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Get all users with pagination
-// @route   GET /api/users
-// @access  Private/Admin
-export const getUsers = GlobalErrorHandler(async (req, res, next) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-
-  const query = { isDeleted: false };
-
-  const [users, total] = await Promise.all([
-    User.find(query).skip(skip).limit(limit).sort("-createdAt"),
-    User.countDocuments(query),
-  ]);
-
-  res.json({
-    success: true,
-    data: users,
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  });
-});
-
-// @desc    Get user by ID
-// @route   GET /api/users/:id
-// @access  Private/Admin
-export const getUserById = GlobalErrorHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-  if (!user || user.isDeleted) {
-    return res.status(404).json({
-      success: false,
-      message: "User not found",
-    });
-  }
-
-  res.json({
-    success: true,
-    data: user,
-  });
-});
-
-// @desc    Update user
-// @route   PUT /api/users/:id
-// @access  Private/Admin
-export const updateUser = GlobalErrorHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-  if (!user || user.isDeleted) {
-    return next(new CustomError("User not found", 404));
-  }
-
-  const { name, email, phone, role, userStatus } = req.body;
-
-  // Update fields
-  if (name) user.name = name;
-  if (email) user.email = email;
-  if (phone) user.phone = phone;
-  if (role) user.role = role;
-  if (userStatus) user.userStatus = userStatus;
-
-  const updatedUser = await user.save();
-
-  res.json({
-    success: true,
-    data: updatedUser,
-  });
-});
-
-// @desc    Delete user (soft delete)
-// @route   DELETE /api/users/:id
-// @access  Private/Admin
-export const deleteUser = GlobalErrorHandler(async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-  if (!user || user.isDeleted) {
-    return next(new CustomError("User not found", 404));
-  }
-
-  user.isDeleted = true;
-  user.sessionInfo = "loggedOut";
-  await user.save();
-
-  res.json({
-    success: true,
-    message: "User deleted successfully",
-  });
-});
-
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
 export const getProfile = GlobalErrorHandler(async (req, res, next) => {
-  const user = await User.findById(req.user._id);
   res.status(200).json({
     success: true,
-    data: user,
+    data: {
+      _id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      phoneNumber: req.user.phoneNumber,
+      role: req.user.role,
+      userProfileImage: req.user.userProfileImage,
+    },
   });
 });
 
@@ -240,9 +158,7 @@ export const updateProfile = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // Helper function to generate OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+
 
 // @desc    Forgot password - Send OTPs
 // @route   POST /api/users/forgot-password
@@ -251,7 +167,7 @@ export const sendOtp = GlobalErrorHandler(async (req, res, next) => {
   const { email } = req.body;
 
   // Find user by email and phone
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("+otp +otpExpiresAt");
   if (!user) {
     return next(new CustomError("No user found with this email", 404));
   }

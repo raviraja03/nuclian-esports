@@ -1,29 +1,28 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { USER_SLICE_TYPE } from "@/AllTypes";
 
-interface initialStateT {
-      user: Record<string, any> | null;
 
+interface InitialState {
+  user: USER_SLICE_TYPE | null;
 }
 
-const initialState: initialStateT = {
-    user: {}
+const initialState: InitialState = {
+  user: null,
 };
 
-export const userSlice = createSlice({
-    name: "USER",
-    initialState,
-    reducers: {
-  setCredentials: (state, action) => {
-      const { user } = action.payload;
-      state.user = user;
+const userSlice = createSlice({
+  name: "userslice",
+  initialState:initialState,
+  reducers: {
+    setCredentials: (state, action: PayloadAction<{ user: USER_SLICE_TYPE }>) => {
+      state.user = action.payload.user;
     },
     clearCredentials: (state) => {
       state.user = null;
     },
-        
-    }
+  },
 });
-export const { setCredentials, clearCredentials } = userSlice.actions;  
 
 
+export const { setCredentials, clearCredentials } = userSlice.actions;
 export default userSlice;

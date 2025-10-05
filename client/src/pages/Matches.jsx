@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useGetMyTournamentsQuery } from "../../globalState/api/tournamentApi";
+import { useGetMyTournamentsQuery } from "../globalState/api/tournamentApi";
 // import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import LoadingScreen from "../shared/LoadingScreen";
+import LoadingScreen from "../components/shared/LoadingScreen";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { formatDate12Hour } from "../../helpers/timeFormat";
-import EditTeamModal from "../modals/EditTeamModal";
-import ModalManager from "../shared/ModalManager";
+import { formatDate12Hour } from "../helpers/timeFormat";
+import EditTeamModal from "../components/modals/EditTeamModal";
+import ModalManager from "../components/shared/ModalManager";
 import { useDispatch } from "react-redux";
-import { openModal } from "../../globalState/slices/modal";
+import { openModal } from "../globalState/slices/modal";
 const RegisteredTournamentsPage = () => {
   const dispatch = useDispatch();
 

@@ -42,10 +42,10 @@ export const tournamentApi = createApi({
     }),
 
     registerInTournament: builder.mutation({
-      query: ({ tournament, teamName, players }) => ({
-        url: "/payments/register-in",
+      query: ({ tournamentId, teamName, players }) => ({
+        url: "/tournaments/register-in",
         method: "POST",
-        body: { tournament, teamName, players },
+        body: { tournamentId, teamName, players },
       }),
 
       invalidatesTags: (result, error, { tournament }) => [
@@ -57,7 +57,7 @@ export const tournamentApi = createApi({
 
     updateRegistrationData: builder.mutation({
       query: ({ registrationId, teamName, members }) => ({
-        url: "/payments/update-registration",
+        url: "/tournaments/update-registration",
         method: "PATCH",
         body: { registrationId, teamName, members },
         credentials: "include",

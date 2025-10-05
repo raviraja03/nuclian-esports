@@ -2,16 +2,27 @@ import mongoose from 'mongoose';
 
 const paymentSchema = new mongoose.Schema(
   {
-    user: {
+    userID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+      tournamentID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tournament",
+      required: true,
+      
+    },
+    registrationID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Registration",
+      
     },
     amount: {
       type: Number,
       required: true,
     },
-    orderId: {
+    orderID: {
       type: String,
       default: null,
     },
@@ -20,10 +31,10 @@ const paymentSchema = new mongoose.Schema(
       enum: ["pending", "paid", "cancelled", "completed", "failed"],
       default: "pending",
     },
-    transactionId: {
+    transactionID: {
       type: String,
-      required: true,
-      unique: true,
+        required: true,
+
     },
     metadata: {
       type: Object,
@@ -31,6 +42,10 @@ const paymentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+paymentSchema.index({ userID: 1, tournamentID: 1 });
+paymentSchema.index({ tournamentID: 1, status: 1 });
+paymentSchema.index({ registrationID: 1 });
 
 const Payment =
   mongoose.models.Payment || mongoose.model("Payment", paymentSchema);

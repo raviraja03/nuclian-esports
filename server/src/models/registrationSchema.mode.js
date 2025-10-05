@@ -2,40 +2,53 @@ import mongoose from "mongoose";
 
 const registrationSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    tournament: {
+    tournamentID: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tournament",
       required: true,
     },
-    team: {
-      name: { type: String, trim: true },
-      members: [
-        {
-          _id: false,
-          gameId: { type: String, trim: true }, // Player's game ID
-          gameName: { type: String, trim: true }, // Player's game name
-          role: {
-            type: String,
-            enum: ["leader", "member"],
-            default: "member",
-          },
-        },
-      ],
+    participantType: {
+      type: String,
+      enum: ["solo", "duo", "squad"],
+      required: true,
     },
-    payment: { type: mongoose.Schema.Types.ObjectId, ref: "Payment" },
+    userID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    teamID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
+      required: true,
+      default: null,
+    },
     status: {
       type: String,
-      enum: ["pending", "paid", "cancelled", "completed", "failed"],
-      default: "pending",
+      enum: ["registered", "waitlisted", "disqualified"],
+      // default: "registered",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "free"],
+      // default: "free",
+    },
+    registeredAt: {
+      type: Date,
+      default: Date.now,
     },
   },
   { timestamps: true }
 );
 
-// Pre-save hook to increment registeredCount when status becomes "paid"
-registrationSchema.index({ tournament: 1, status: 1 });
-
+  registrationSchema.index({ tournamentID: 1, paymentStatus: 1 });
+  // Prevent duplicate registration per tournament per user
+  registrationSchema.index(
+    { tournamentID: 1, userID: 1 },
+    { unique: true, partialFilterExpression: { userID: { $exists: true } } }
+  );
+  // Optional: index for team queries
+  registrationSchema.index({ teamID: 1 });
 
 const Registration =
   mongoose.models.Registration ||

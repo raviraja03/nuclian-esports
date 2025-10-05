@@ -1,7 +1,7 @@
 import React from "react";
 import Hero from "../components/Hero";
 import Banner from "../components/Banner";
-import Category from "../components/Category";
+import UpcomingTournaments from "../components/UpcomingTournaments";
 import Step from "../components/Step";
 import Games from "../components/Games";
 import Testimonials from "../components/Testimonials";
@@ -30,7 +30,7 @@ const Home = () => {
       ) : (
         <>
           {tournaments?.data?.length > 0 && (
-            <Category tournaments={tournaments.data} />
+            <UpcomingTournaments tournaments={tournaments.data} />
           )}
         </>
       )}

@@ -3,26 +3,12 @@ import {
   register,
   login,
   logout,
-  getUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
   getProfile,
   updateProfile,
   sendOtp,
   verifyOtpAndResetPassword,
 } from "./users.controller.js";
-import { protect, authorize } from "../../middleware/auth.js";
-import {
-  registerValidation,
-  loginValidation,
-  updateUserValidation,
-  paginationValidation,
-  userIdValidation,
-  forgotPasswordValidation,
-  verifyOtpValidation,
-  resendOtpValidation,
-} from "../../utils/validation.js";
+import { protect } from "../../middleware/auth.js";
 import { validate } from "../../middleware/zodMiddleware.js";
 import { registerSchema, loginSchema } from "../../middleware/schemas.js";
 
@@ -34,11 +20,10 @@ userRouter.post("/login", validate(loginSchema), login);
 userRouter.post("/logout", logout);
 
 userRouter.post("/forgot-password", sendOtp);
-userRouter.post("/verify-otp", verifyOtpValidation, verifyOtpAndResetPassword);
-// userRouter.post("/resend-otp", resendOtpValidation, resendOtp);
+userRouter.post("/verify-otp", verifyOtpAndResetPassword);
 
 // Protected routes
-userRouter.use(protect); // Apply authentication middleware to all routes below
+userRouter.use(protect); 
 
 // User profile routes
 userRouter.route("/profile").get(getProfile).patch(updateProfile);
@@ -46,30 +31,6 @@ userRouter.route("/profile").get(getProfile).patch(updateProfile);
 
 
 
-// Admin only routes
-userRouter
-  .route("/")
-  .get(authorize("admin", "superadmin"), paginationValidation, getUsers);
 
-userRouter
-  .route("/:id")
-  .get(
-    authorize("admin", "superadmin"),
-    userIdValidation,
-
-    getUserById
-  )
-  .put(
-    authorize("admin", "superadmin"),
-    [...userIdValidation, ...updateUserValidation],
-
-    updateUser
-  )
-  .delete(
-    authorize("admin", "superadmin"),
-    userIdValidation,
-
-    deleteUser
-  );
 
 export default userRouter

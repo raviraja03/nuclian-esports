@@ -1,6 +1,6 @@
-import mongoose from  "mongoose";
-import bcrypt  from  "bcryptjs";
-import { getProfileImage } from "../utils/getProfileImage.js";
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import { getProfileImage } from "../utilities/getProfileImage.js";
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
       sparse: true,
+      
     },
     email: {
       type: String,
@@ -20,12 +21,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
+      
     },
     phoneNumber: {
       type: String,
       trim: true,
       unique: true,
       sparse: true,
+      
     },
     userProfileImage: {
       type: String,
@@ -42,12 +45,14 @@ const userSchema = new mongoose.Schema(
       default: "pending",
     },
     otp: {
-      type:String,
-      default:null
+      type: String,
+      default: null,
+      select: false,
     },
     otpExpiresAt: {
-     type:Date,
-     default:null
+      type: Date,
+      default: null,
+      select: false,
     },
     isVerified: {
       email: {
@@ -63,6 +68,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin", "superadmin"],
       default: "user",
+      
     },
     loc: {
       type: {
@@ -70,7 +76,7 @@ const userSchema = new mongoose.Schema(
         enum: ["Point"],
         // default: "Point",
       },
-      coordinates: { type: [Number] }, // [longitude, latitude]
+      coordinates: { type: [Number], index: "2dsphere" }, // [longitude, latitude]
     },
     sessionInfo: {
       type: String,
@@ -114,27 +120,36 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+/* 🔑 Compare Password Method */
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+/* 🔐 Password Hash Middleware */
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 7);
   next();
 });
 
+/* 🔐 OTP Expiry Middleware */
 userSchema.pre("save", function (next) {
   if (this.isModified("otp")) {
     if (this.otp) {
-      this.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+      this.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     }
   }
   next();
 });
+
+/* 🔍 Static Query Helper */
 userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email });
 };
 
+
+userSchema.index({ role: 1 });
+userSchema.index({ userStatus: 1 });
 userSchema.index({ loc: "2dsphere" });
 
 const User = mongoose.model("User", userSchema);

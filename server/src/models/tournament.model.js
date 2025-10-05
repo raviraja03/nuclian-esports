@@ -1,64 +1,36 @@
 import mongoose from "mongoose";
 import { CustomError } from "../middleware/errorMiddleware.js";
 
-// const tournamentParticipantSchema = new mongoose.Schema(
-//   {
-//     tournamentId: {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "Tournament",
-//       required: true,
-//     },
-//     userId: {
-//       type: mongoose.Schema.Types.ObjectId,
-//       ref: "User",
-//       required: true,
-//     },
-
-//     registeredAt: { type: Date, default: Date.now },
-
-//     status: {
-//       type: String,
-//       enum: ["registered", "checked-in", "playing", "eliminated", "winner"],
-//       default: "registered",
-//     },
-
-//     teamName: { type: String, trim: true },
-//     position: { type: Number },
-
-//     metadata: { type: Map, of: String },
-//   },
-//   { timestamps: true }
-// );
-
-// // Prevent duplicate registrations
-// tournamentParticipantSchema.index(
-//   { tournamentId: 1, userId: 1 },
-//   { unique: true }
-// );
-
-// const TournamentParticipant = mongoose.model(
-//   "TournamentParticipant",
-//   tournamentParticipantSchema
-// );
-// module.exports = { TournamentParticipant };
-
 const tournamentSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
+    thumbnail: {
+      url: { type: String, },
+      public_id: { type: String,},
+    },
 
     type: { type: String, enum: ["solo", "duo", "squad"], required: true },
 
-    game: { type: String, required: true },
+    game: { type: String, required: true, trim: true, index: true },
     // gameId: { type: String, required: true },
-    totalMember: {
+
+    teamSize: {
       type: Number,
       required: true,
       default: function () {
         return this.type === "solo" ? 1 : this.type === "duo" ? 2 : 4;
       },
     },
-    totalTeams: { type: Number, required: true },
+    maxTeams: { type: Number },
+    maxPlayers: {
+      type: Number,
+      default: function () {
+        return this.type === "solo"
+          ? this.maxTeams // in solo, maxTeams actually = maxPlayers
+          : this.maxTeams * this.teamSize;
+      },
+    },
     platform: {
       type: String,
       enum: ["pc", "mobile", "console", "cross-platform"],
@@ -68,18 +40,11 @@ const tournamentSchema = new mongoose.Schema(
 
     schedule: {
       registrationStart: { type: Date, required: true },
-      registrationEnd: { type: Date, required: true }, 
+      registrationEnd: { type: Date, required: true },
       matchStart: { type: Date, required: true },
-
-        },
-
-        maxParticipants: {
-      type: Number,
-      required: true,
-      default: function () {
-        return this.totalTeams * this.totalMember;
-      },
     },
+
+
     entryFee: {
       coins: { type: Number, default: 0, min: 0 },
       amount: { type: Number, default: 0, min: 0 },
@@ -115,12 +80,14 @@ const tournamentSchema = new mongoose.Schema(
         "cancelled",
       ],
       default: "published",
+      
     },
 
     // createdBy: {
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: "User",
     //   required: true,
+    //   
     // },
 
     streamLink: { type: String, trim: true },
@@ -128,10 +95,13 @@ const tournamentSchema = new mongoose.Schema(
 
     metadata: { type: Map, of: String },
 
-    isVisible: { type: Boolean, default: true },
-    roomId: { type: String, trim: true, default: "will be released 15 minutes before match start at" },
+    isVisible: { type: Boolean, default: true, index: true },
+    roomId: {
+      type: String,
+      trim: true,
+      default: "will be released 15 minutes before match start at",
+    },
     roomPassword: { type: String, trim: true, default: null },
-  
   },
   { timestamps: true }
 );
@@ -144,8 +114,7 @@ tournamentSchema.index({ platform: 1, isVisible: 1 });
 
 // Validations
 tournamentSchema.pre("save", function (next) {
-  const { registrationStart, registrationEnd, matchStart, idPasswordRelease } =
-    this.schedule;
+  const { registrationStart, registrationEnd, matchStart } = this.schedule;
 
   if (registrationStart >= registrationEnd) {
     return next(
@@ -157,11 +126,11 @@ tournamentSchema.pre("save", function (next) {
       new CustomError("Registration must end before match starts", 400)
     );
   }
-  if (idPasswordRelease >= matchStart) {
-    return next(
-      new CustomError("ID/Password must be released before match starts", 400)
-    );
-  }
+  // if (idPasswordRelease >= matchStart) {
+  //   return next(
+  //     new CustomError("ID/Password must be released before match starts", 400)
+  //   );
+  // }
 
   next();
 });

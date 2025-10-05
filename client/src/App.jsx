@@ -11,7 +11,7 @@ const Tournament = React.lazy(() => import("./pages/Tournament"));
 const Leaderboard = React.lazy(() =>
   import("./components/Leaderboard/Leaderboard")
 );
-const Matches = React.lazy(() => import("./components/Matches/Matches"));
+const Matches = React.lazy(() => import("./pages/Matches"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Contact = React.lazy(() => import("./pages/Contact"));
 const Blog = React.lazy(() => import("./pages/Blog"));
@@ -20,10 +20,10 @@ const Signup = React.lazy(() => import("./pages/Signup"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const TournamentDetails = React.lazy(() => import("./pages/TournamentDetails"));
 const PaymentPage = React.lazy(() =>
-  import("./components/Payments/PaymentPage")
+  import("./pages/PaymentPage")
 );
 const PaymentSuccess = React.lazy(() =>
-  import("./components/Payments/PaymentSuccess")
+  import("./pages/PaymentSuccess")
 );
 const UnderDevelopment = React.lazy(() =>
   import("./components/shared/UnderDevelopment")

@@ -13,7 +13,7 @@ const images = {
   "Free Fire": Freefire,
 };
 
-const Category = ({ tournaments }) => {
+const UpcomingTournaments = ({ tournaments }) => {
   return (
     <section className="bg-[linear-gradient(176deg,rgba(0,0,0,1)_16%,rgba(25,31,52,0.6)_40%,rgba(100,100,100,0.2)_62%,rgba(0,0,0,1)_80%)] py-12">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
@@ -24,7 +24,7 @@ const Category = ({ tournaments }) => {
             return (
               <div
                 key={index}
-                className="bg-black/70 p-4 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-red-600/40 backdrop-blur-md min-w-[280px] sm:min-w-[320px] md:min-w-[360px] "
+                className="bg-black/70 p-4  rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-red-600/40 backdrop-blur-md  w-[280px] sm:w-[320px] md:w-[360px] "
               >
                 <div className="flex flex-col h-full">
                   {/* Card Image */}
@@ -35,18 +35,24 @@ const Category = ({ tournaments }) => {
                       className="w-full h-full object-top rounded-lg transition-transform duration-500 hover:scale-110"
                     />
                     <span
-                      className="absolute top-2 left-2 bg-red-700/80 text-white text-xs font-Lex font-bold px-2 py-1 rounded-md shadow-lg"
+                      className="absolute top-2 left-2 bg-green-700 text-white text-xs font-Lex font-bold px-2 py-1 rounded-md "
                       aria-label={`Tournament type: ${card.type}`}
                     >
                       {card.type}
                     </span>
-                    {/* Optional spark/overlay effect */}
-                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-transparent to-red-900/40 mix-blend-overlay"></div>
+                    <span
+                      className="absolute top-2 right-2 rounded-full bg-green-700 text-white text-xs font-Lex font-bold px-2 py-1"
+                      aria-label={`Tournament status: ${card.status}`}
+                    >
+                      {card.status}
+                    </span>
                   </div>
+                  {/* Optional spark/overlay effect */}
+                  {/* <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-transparent to-red-900/40 mix-blend-overlay"></div> */}
 
                   {/* Card Content */}
                   <div className="flex flex-col flex-grow p-4 text-white font-Lex">
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-wider uppercase mb-3 drop-shadow-lg">
+                    <h3 className="text-sm sm:text-xl md:text-xl font-extrabold tracking-wider uppercase mb-3 drop-shadow-lg">
                       {card.title}
                     </h3>
 
@@ -63,10 +69,10 @@ const Category = ({ tournaments }) => {
                         ₹{card.prizePool.totalCurrency}
                       </span>
                     </div>
-                            <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
-          <span className="text-gray-400">Registered</span>
-          <span className="text-white font-bold">{`${card.registeredCount}/${card.totalTeams}`}</span>
-        </div>
+                    <div className="flex justify-between font-semibold text-xs sm:text-sm md:text-base">
+                      <span className="text-gray-400">Registered</span>
+                      <span className="text-white font-bold">{`${card.registeredCount}/${card.maxTeams}`}</span>
+                    </div>
 
                     {/* Button at bottom */}
                     <div className="mt-auto pt-2">
@@ -84,16 +90,9 @@ const Category = ({ tournaments }) => {
             );
           })}
         </div>
-
-        {/* View All Button */}
-        {/* <div className="mt-8 flex justify-center">
-          <Link to="/tournaments">
-            <Button content="View All" />
-          </Link>
-        </div> */}
       </div>
     </section>
   );
 };
 
-export default Category;
+export default UpcomingTournaments;

@@ -23,21 +23,26 @@ export const errorMiddleware = (err, req, res, next) => {
   }
 
   if (err.code === 11000) {
-   const fields = Object.keys(err.keyPattern);
-  const values = err.keyValue;
+    const fields = Object.keys(err.keyPattern);
+    const values = err.keyValue;
 
-  let message;
+    let message;
 
-  // Handle specific cases
-  if (fields.includes("email")) {
-    message = "Email already exists";
-  } else if (fields.includes("username")) {
-    message = "Username already exists";
-  } else {
-    message = `${fields.join(", ")} already exists`;
-  }
+    // Handle specific cases
+    if (fields.includes("email")) {
+      message = "Email already exists";
+    } else if (fields.includes("username")) {
+      message = "Username already exists";
+    } else if (fields.includes("userID")) {
+      message = "player already registered in this tournament";
+    }else if (fields.includes("teamName")) {
+      message = "Team name already exists in this tournament";
+    }
+     else {
+      message = `${fields.join(", ")} already exists`;
+    }
 
-  err = new CustomError(message, 409);
+    err = new CustomError(message, 409);
   }
 
   if (err.name === "JsonWebTokenError") {
@@ -93,5 +98,3 @@ export const GlobalErrorHandler = (fn) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
-
-

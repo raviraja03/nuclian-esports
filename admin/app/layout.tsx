@@ -1,12 +1,11 @@
 // "use client";
 
-import { Provider } from "react-redux";
-import { store } from "../app/store";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+// @ts-ignore: allow side-effect import of CSS in Next.js app directory
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Providers } from "./Providers";
+import { Toaster } from "@/components/ui/sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,17 +37,12 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* <ThemeProvider
-          attribute="class"
-          defaultTheme={"dark"}
-          enableSystem={true}
-          disableTransitionOnChange
-        > */}
+  
         <Providers>
 
           {children}
         </Providers>
-        {/* </ThemeProvider> */}
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

@@ -7,6 +7,8 @@ import {
   getPlayerOrTeamStats,
   getTournamentById,
   withdrawFromTournament,
+  handleRegistration,
+  updateRegistrationData
 } from "./tournaments.controller.js";
 import {
   requireAuth,
@@ -25,6 +27,9 @@ tournamentRouter.get("/", getAllTournaments);
 tournamentRouter.get("/:id", optionalAuth, getTournamentById);
 // GET /api/v1/tournaments/my/all
 tournamentRouter.get("/my/all", protect, getMyTournaments);
+
+tournamentRouter.post("/register-in", protect, handleRegistration);
+tournamentRouter.patch("/update-registration", protect, updateRegistrationData);
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId
 // This route is for user withdrawal only. Admin removal should be in admin.route.js if needed.

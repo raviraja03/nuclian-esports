@@ -5,8 +5,10 @@ import {
   GlobalErrorHandler,
 } from "../../middleware/errorMiddleware.js";
 
+import { UploadToCloudnary,DeleteFromCloudnary } from "../../utilities/imageConfig.js";
+
 // ================== GET ALL TOURNAMENTS ==================
- export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
+export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
   const {
     page = 1,
     limit = 20,
@@ -50,7 +52,7 @@ import {
 });
 
 // ================== GET TOURNAMENT BY ID ==================
- export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
+export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -65,19 +67,33 @@ import {
 });
 
 // ================== CREATE TOURNAMENT ==================
- export const createTournament = GlobalErrorHandler(async (req, res) => {
-  const tournament = new Tournament(req.body);
-  await tournament.save();
+export const createTournament = GlobalErrorHandler(async (req, res) => {
+  if (!req.file) {
+    throw new CustomError("Thumbnail image is required", 400);
+  }
+  const uploadResults = await UploadToCloudnary([req.file]);
+  const image = uploadResults[0];
+
+  const tournament = new Tournament({
+    ...req.body,
+    thumbnail: { url: image.secure_url, public_id: image.public_id },
+  });
+  try {
+    await tournament.save();
+    req.app.get("io").emit("tournamentCreated", { message: "refresh" });
+  } catch (error) {
+    await DeleteFromCloudnary([image.public_id])
+    throw error;
+  }
 
   res.status(201).json({
     success: true,
     message: "Tournament created successfully",
-    // data: tournament,
   });
 });
 
 // ================== UPDATE TOURNAMENT (PATCH) ==================
- export const updateTournament = GlobalErrorHandler(async (req, res) => {
+export const updateTournament = GlobalErrorHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -91,8 +107,10 @@ import {
   if (!tournament) {
     throw new CustomError("Tournament not found", 404);
   }
-     req.app.get("io").emit("tournamentUpdated", {message:"refresh",tournamentId:id});
- 
+  req.app
+    .get("io")
+    .emit("tournamentUpdated", { message: "refresh", tournamentId: id });
+
   res.status(200).json({
     success: true,
     message: "Tournament updated successfully",
@@ -100,7 +118,7 @@ import {
 });
 
 // ================== DELETE TOURNAMENT ==================
- export const deleteTournament = GlobalErrorHandler(async (req, res) => {
+export const deleteTournament = GlobalErrorHandler(async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new CustomError("Invalid tournament ID", 400);
@@ -118,7 +136,7 @@ import {
 });
 
 // PATCH /tournaments/:id/status - Update tournament status
- export const updateTournamentStatus = async (req, res, next) => {
+export const updateTournamentStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -143,7 +161,7 @@ import {
 };
 
 // PATCH /tournaments/:id/participants/:userId/status - Update participant status (admin only)
- export const updateParticipantStatus = async (req, res, next) => {
+export const updateParticipantStatus = async (req, res, next) => {
   try {
     const { id, userId } = req.params;
     const { status } = req.body;

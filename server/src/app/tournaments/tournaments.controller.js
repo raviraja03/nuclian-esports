@@ -5,28 +5,16 @@ import {
   GlobalErrorHandler,
 } from "../../middleware/errorMiddleware.js";
 import Registration from "../../models/registrationSchema.mode.js";
+import { parseQueryField } from "../../utilities/parseQuery.js";
+import { generateOrderId } from "../../utilities/orderId.js";
+import {cashfree} from "../../config/cashfree.js";
+import Team from "../../models/team.model.js";
+import Payment from "../../models/payment.model.js";
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
 
-function parseQueryField(value, useRegex = true) {
-  if (!value) return null;
 
-  let parsed = value;
-
-  // If comma separated
-  if (typeof value === "string" && value.includes(",")) {
-    parsed = value.split(",").map(v => v.trim());
-  }
-
-  if (Array.isArray(parsed)) {
-    return { $in: parsed };
-  } else if (useRegex) {
-    return { $regex: new RegExp(parsed.trim(), "i") };
-  } else {
-    return parsed;
-  }
-}
 
 
 export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
@@ -71,8 +59,8 @@ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ["$tournament", "$$tournamentId"] },
-                    { $eq: ["$status", "paid"] }, // only count paid users
+                    { $eq: ["$tournamentID", "$$tournamentId"] },
+                    { $eq: ["$status", "registered"] }, // only count paid users
                   ],
                 },
               },
@@ -89,7 +77,7 @@ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
           },
         },
       },
-      { $project: { registrations: 0 } }, // remove raw registrations array
+      { $project: { registrations: 0 } },
     ]),
     Tournament.countDocuments(filter),
   ]);
@@ -130,16 +118,16 @@ export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 
   if (userId) {
     const registration = await Registration.findOne({
-      user: userId,
-      tournament: id,
-      status: "paid",
+      userID: userId,
+      tournamentID: id,
+      status: "registered",
     }).lean();
 
     isRegistered = !!registration;
   }
   const registeredCount = await Registration.countDocuments({
-    tournament: id,
-    status: "paid",
+    tournamentID: id,
+    status: "registered",
   });
 
   res.status(200).json({
@@ -152,30 +140,26 @@ export const getTournamentById = GlobalErrorHandler(async (req, res, next) => {
 export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
   const { page = 1, limit = 6 } = req.query;
-  // ✅ Fetch user registrations (only paid ones)
   const registrations = await Registration.find({
-    user: userId,
-    status: "paid",
+    userID: userId,
+    status: "registered",
   })
     .populate({
-      path: "tournament",
+      path: "tournamentID",
       match: { isVisible: true },
       select:
         "title game platform schedule status  entryFee prizePool roomId roomPassword totalMember",
-    })
+    }).populate({path:"teamID", select:"teamName members _id mode"})
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .lean();
-  // console.log(registrations);
   const tournaments = registrations
     .map((r) => {
-      return { _id: r._id, tournament: r.tournament, team: r.team };
+      return { _id: r._id, tournament: r.tournamentID, team: r.teamID };
     })
     .filter(Boolean);
-  const total = await Registration.countDocuments({
-    user: userId,
-    status: "paid",
-  });
+
+  const total=registrations.length;
 
   res.status(200).json({
     success: true,
@@ -185,6 +169,270 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     data: tournaments,
   });
 });
+
+
+//for updating registration data like team name and members
+export const updateRegistrationData = GlobalErrorHandler(
+  async (req, res, next) => {
+    const { registrationId, teamName, members } = req.body;
+
+    const registration = await Registration.findOne({ _id: registrationId });
+    if (!registration) {
+      return next(new CustomError("Registration not found", 404));
+    }
+
+    registration.team.name = teamName;
+    registration.team.members = members.map((member) => ({
+      gameId: member.gameId,
+      gameName: member.gameName,
+    }));
+
+    await registration.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Registration updated successfully",
+    });
+  }
+);
+
+// Register for a tournament (handles both free and paid)
+export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { tournamentId, teamName, players } = req.body;
+
+    if (!tournamentId) throw new CustomError("Tournament ID is required", 400);
+    const tournamentDoc = await Tournament.findById(tournamentId).session(
+      session
+    );
+    if (!tournamentDoc) throw new CustomError("Tournament not found", 404);
+
+    if (tournamentDoc.status !== "registration-open") {
+      throw new CustomError("Registration is closed for this tournament", 400);
+    }
+
+    const registeredCount = await Registration.countDocuments({
+      tournamentID: tournamentId,
+      status: "registered",
+    }).session(session);
+
+    if (registeredCount >= tournamentDoc.maxTeams) {
+      throw new CustomError("Tournament is full", 400);
+    }
+
+    const mode = tournamentDoc.type; // expected: solo, duo, squad
+    if (mode !== "solo" && !teamName) {
+      throw new CustomError(
+        "Team name is required for duo/squad tournaments",
+        400
+      );
+    }
+
+    if (tournamentDoc.entryFee.amount === 0) {
+      if (!players || players.length === 0) {
+        throw new CustomError("Players list required for duo/squad", 400);
+      }
+
+      const [teamDoc] = await Team.create(
+        [{
+          tournamentID: tournamentId,
+          mode,
+          captainID: req.user._id,
+            teamName: teamName ? teamName.trim() : null,
+            members: players.map((player, idx) => ({
+              gameId: player.gameId,
+              gameName: player.gameName,
+              role: idx === 0 ? "leader" : "member",
+            })),
+          }],
+        
+        { session }
+      );
+
+      const [registrationDoc] = await Registration.create(
+        [
+          {
+            tournamentID: tournamentId,
+            participantType: mode,
+            userID: req.user._id,
+            teamID: teamDoc._id,
+            status: "registered",
+            paymentStatus: "free",
+          }],
+      
+        { session }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return res.json({
+        success: true,
+        message: "Successfully registered for free tournament",
+        registrationId: registrationDoc._id,
+      });
+    } else {
+      // Paid Tournament
+      const existingRegistration = await Payment.findOne({
+        tournamentID: tournamentId,
+        userID: req.user._id,
+      })
+        .session(session)
+        .populate("registrationID");
+
+      if (existingRegistration) {
+        const cashfreeStatus = await cashfree.PGFetchOrder(
+          existingRegistration.orderID
+        );
+        const orderStatus = cashfreeStatus.data?.order_status;
+
+        if (existingRegistration.status === "paid" && orderStatus === "PAID") {
+          throw next(
+            new CustomError(
+              "You are already registered for this tournament",
+              400
+            )
+          );
+        }
+        if (
+          ["EXPIRED", "FAILED", "ACTIVE", "CANCELLED"].includes(orderStatus)
+        ) {
+          if (existingRegistration.status === "pending") {
+            //delete existing registration and team
+            const teamId = existingRegistration.registrationID.teamID;
+            if (teamId) {
+              await Team.deleteOne({ _id: teamId }, { session });
+            }
+            await Registration.deleteOne(
+              { _id: existingRegistration.registrationID._id },
+              { session }
+            );
+
+            //delete existing payment
+            await Payment.deleteOne(
+              { _id: existingRegistration._id },
+              { session }
+            );
+          }
+        }
+      }
+
+      const orderId = generateOrderId();
+      const orderData = {
+        order_amount: parseInt(tournamentDoc.entryFee.amount),
+        order_currency: "INR",
+        order_id: orderId,
+        customer_details: {
+          customer_id: `USER_${req.user.id}`,
+          customer_phone: req.user.phoneNumber,
+          customer_name: req.user.name,
+          customer_email: req.user.email,
+        },
+        order_meta: {
+          return_url: `${process.env.CLIENT_URL}/payment-success?order_id=${orderId}`,
+          payment_methods: "upi",
+        },
+        cart_details: {
+          cart_items: [
+            {
+              item_id: tournamentDoc._id.toString(),
+              item_name: tournamentDoc.title,
+              item_original_unit_price: tournamentDoc.entryFee.amount,
+              item_discounted_unit_price: tournamentDoc.entryFee.amount,
+              item_quantity: 1,
+              item_currency: "INR",
+            },
+          ],
+        },
+      };
+      const tempDetails = {
+        tournamentId,
+        teamName: teamName ? teamName.trim() : null,
+        mode,
+        players,
+      };
+      const [team] = await Team.create(
+       [ {
+          tournamentID: tournamentId,
+          teamName: teamName ? teamName.trim() : null,
+          mode,
+          captainID: req.user._id,
+            members: players.map((player, idx) => ({
+              gameId: player.gameId,
+              gameName: player.gameName,
+              role: idx === 0 ? "leader" : "member",
+            })),
+          }],
+        
+        { session }
+      );
+
+      const [registration]= await Registration.create(
+        
+         [ {
+            tournamentID: tournamentId,
+            participantType: mode,
+            userID: req.user._id,
+            teamID: team._id,
+            status: "waitlisted",
+            paymentStatus: "pending",
+          }],
+        
+        { session }
+      );
+
+      const cashfreeResponse = await cashfree.PGCreateOrder(orderData);
+      if (cashfreeResponse.data.payment_session_id) {
+        const [payment] = await Payment.create(
+          
+          [  {
+              userID: req.user._id,
+              tournamentID: tournamentId,
+              registrationID: registration._id,
+              amount: tournamentDoc.entryFee.amount,
+              orderID: orderId,
+              status: "pending",
+              transactionID: cashfreeResponse.data.payment_session_id, // use session ID
+              metadata: { cashfreeData: cashfreeResponse.data, tempDetails },
+            }],
+          
+          { session }
+        );
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.json({
+          success: true,
+          message: "Order created, complete payment to confirm registration",
+          orderId,
+          paymentSessionId: cashfreeResponse.data.payment_session_id,
+        });
+      } else {
+        throw next(new CustomError("Failed to create order", 500));
+      }
+    }
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    throw err;
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId - Withdraw a user from a tournament
 export const withdrawFromTournament = async (req, res) => {

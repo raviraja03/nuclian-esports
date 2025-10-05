@@ -29,8 +29,8 @@ const TournamentsPageContent = () => {
     `,
   });
 
-  const { data: tournamentsDatas = [], pagination } = tournamentsResponse;
-  const filteredTournaments = tournamentsDatas.filter((tournament) => {
+  const { data: tournamentsData = [], pagination } = tournamentsResponse;
+    const filteredTournaments = tournamentsData.filter((tournament) => {
     if (filter === "all") return true;
     return tournament.status === filter;
   });

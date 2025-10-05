@@ -15,23 +15,20 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, LogOut, User, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-
-export function Header() {
-  const { theme, setTheme } = useTheme();
-  const [user, setUser] = useState<{ name: string; email: string } | null>(
-    null
-  );
+import {useAppSelector} from "@/features/type/hooks"
+import {useLogoutMutation} from "@/features/api/authApi"
+export function Header() { 
   const router = useRouter();
-
-  useEffect(() => {
-    setUser({
-      email: "admin@g.com",
-      name: "admin",
-    });
-  }, []);
+  const { theme, setTheme } = useTheme();
+  const user = useAppSelector((state) => state.userslice.user);
+  const [logout,{isError}] = useLogoutMutation();
 
   const handleLogout = () => {
-    router.push("/login");
+    logout();
+
+if(!isError){
+  router.push("/login");
+}
   };
 
   return (
@@ -49,22 +46,30 @@ export function Header() {
       <div className="flex gap-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {user?.name?.charAt(0) || "A"}
-                </AvatarFallback>
-              </Avatar>
+            <Button variant="ghost" className="relative h-8 w-8 outline-none border-0">
+                <Avatar className="h-10 w-10">
+                {user?.userProfileImage ? (
+                  <img
+                  src={user.userProfileImage}
+                  alt={user?.name || "avatar"}
+                  className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                  {user?.name?.charAt(0).toUpperCase() }
+                  </AvatarFallback>
+                )}
+                </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  {user?.name || "Admin User"}
+                  {user?.name}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email || "admin@esports.com"}
+                  {user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>

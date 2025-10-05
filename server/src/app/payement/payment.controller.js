@@ -5,278 +5,107 @@ import {
 import Registration from "../../models/registrationSchema.mode.js";
 import Payment from "../../models/payment.model.js";
 import Tournament from "../../models/tournament.model.js";
+import Team from "../../models/team.model.js";
 import "dotenv/config";
-import { Cashfree, CFEnvironment } from "cashfree-pg";
+import mongoose from "mongoose";
+import {cashfree} from "../../config/cashfree.js";
 
 
 
-const CASHFREE_APP_ID = process.env.CASHFREE_APP_ID;
-const CASHFREE_SECRET_KEY = process.env.CASHFREE_SECRET_KEY;
-const cashfree = new Cashfree(
-  process.env.NODE_ENV === "production"
-    ? CFEnvironment.PRODUCTION
-    : CFEnvironment.SANDBOX,
-  CASHFREE_APP_ID,
-  CASHFREE_SECRET_KEY
-);
-
-const generateOrderId = () => {
-  return (
-    "ORDER_" + Date.now() + "_" + Math.random().toString(36).substring(2, 9)
-  );
-};
-//for client (update registration data)
-export const updateRegistrationData = GlobalErrorHandler(async (req, res, next) => {
-  const { registrationId, teamName, members } = req.body;
-
-  const registration = await Registration.findOne({ _id: registrationId });
-  if (!registration) {
-    return next(new CustomError("Registration not found", 404));
-  }
-
-  registration.team.name = teamName;
-  registration.team.members = members.map((member) => ({
-    gameId: member.gameId,
-    gameName: member.gameName,
-  }));
-
-  await registration.save();
-
-  res.status(200).json({
-    success: true,
-    message: "Registration updated successfully",
-  });
-});
-
-
-export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
-  const { tournament, teamName, players } = req.body;
-
-  if (!tournament || !teamName || !players || players.length === 0) {
-    return next(new CustomError("Missing required fields", 400));
-  }
-
-  const tournamentDoc = await Tournament.findById(tournament);
-  if (!tournamentDoc) {
-    return next(new CustomError("Tournament not found", 404));
-  }
-
-  if (tournamentDoc.status !== "registration-open") {
-    return next(
-      new CustomError("Registration is closed for this tournament", 400)
-    );
-  }
-    const registeredCount = await Registration.countDocuments({
-    tournament: tournament,
-    status: "paid",
-  });
-
-  if (tournamentDoc.totalTeams === registeredCount) {
-    return next(new CustomError("Tournament is full", 400));
-  }
-  if (tournamentDoc.entryFee.amount === 0) {
-    const registration = new Registration({
-      user: req.user._id,
-      tournament,
-      team: {
-        name: teamName,
-        members: players.map((player, idx) => ({
-          gameId: player.gameId,
-          gameName: player.gameName,
-          role: idx === 0 ? "leader" : "member",
-        })),
-      },
-      status: "paid",
-      payment: null, // no payment record needed
-    });
-    await registration.save();
-
-    return res.json({
-      success: true,
-      message: "Successfully registered for free tournament",
-      registrationId: registration._id,
-    });
-  }
-
-  const existingRegistration = await Registration.findOne({
-    user: req.user._id,
-    tournament,
-  }).populate("payment");
-
-  if (existingRegistration) {
-    const cashfreeResponse = await cashfree.PGFetchOrder(
-      existingRegistration.payment.orderId
-    );
-    const orderStatus = cashfreeResponse.data.order_status;
-
-    if (existingRegistration.status === "paid" && orderStatus === "PAID") {
-      return next(
-        new CustomError("You are already registered for this tournament", 400)
-      );
-    }
-
-    if (
-      orderStatus === "EXPIRED" ||
-      orderStatus === "FAILED" ||
-      orderStatus === "ACTIVE"
-    ) {
-      if (existingRegistration.status === "pending") {
-        existingRegistration.payment.status = "cancelled";
-        await existingRegistration.payment.save();
-      }
-
-      const orderId = generateOrderId();
-      const orderData = {
-        order_amount: parseInt(tournamentDoc.entryFee.amount),
-        order_currency: "INR",
-        order_id: orderId,
-        customer_details: {
-          customer_id: `USER_${req.user.id}`,
-          customer_phone: req.user.phoneNumber,
-          customer_name: req.user.name,
-          customer_email: req.user.email,
-        },
-        order_meta: {
-          return_url: `http://localhost:5173/payment-success?order_id=${orderId}`,
-          // notify_url: `http://localhost:5000/api/payment/webhook`,
-          notify_url: `https://34ce71a33dab.ngrok-free.app/api/v1/payments/webhook`,
-          payment_methods: "upi", // focus on UPI
-        },
-        cart_details: {
-          cart_items: [
-            {
-              item_id: tournamentDoc._id.toString(),
-              item_name: tournamentDoc.title,
-              item_original_unit_price: tournamentDoc.entryFee.amount,
-              item_discounted_unit_price: tournamentDoc.entryFee.amount,
-              item_quantity: 1,
-              item_currency: "INR",
-            },
-          ],
-        },
-      };
-
-      const cashfreeResponse = await cashfree.PGCreateOrder(orderData);
-
-      if (cashfreeResponse.data.payment_session_id) {
-        const newPayment = await Payment.create({
-          user: req.user._id,
-          amount: parseInt(tournamentDoc.entryFee.amount),
-          orderId,
-          transactionId: cashfreeResponse.data.payment_session_id, // use session ID
-          metadata: cashfreeResponse.data,
-        });
-
-        existingRegistration.payment = newPayment._id;
-        existingRegistration.status = "pending";
-        await existingRegistration.save();
-
-        return res.json({
-          success: true,
-          message: "Order created, complete payment to confirm registration",
-          orderId,
-          paymentSessionId: cashfreeResponse.data.payment_session_id,
-        });
-      } else {
-        return next(new CustomError("Failed to create order", 500));
-      }
-    }
-  }
-
-  const orderId = generateOrderId();
-  const orderData = {
-    order_amount: parseInt(tournamentDoc.entryFee.amount),
-    order_currency: "INR",
-    order_id: orderId,
-    customer_details: {
-      customer_id: `USER_${req.user.id}`,
-      customer_phone: req.user.phoneNumber,
-      customer_name: req.user.name,
-      customer_email: req.user.email,
-    },
-    order_meta: {
-      return_url: `${CLIENT_URL}/payment-success?order_id=${orderId}`,
-      // notify_url: `https://34ce71a33dab.ngrok-free.app/api/v1/payments/webhook`,
-      payment_methods: "upi",
-    },
-    cart_details: {
-      cart_items: [
-        {
-          item_id: tournamentDoc._id.toString(),
-          item_name: tournamentDoc.title,
-          item_original_unit_price: tournamentDoc.entryFee.amount,
-          item_discounted_unit_price: tournamentDoc.entryFee.amount,
-          item_quantity: 1,
-          item_currency: "INR",
-        },
-      ],
-    },
-  };
-
-  const cashfreeResponse = await cashfree.PGCreateOrder(orderData);
-
-  if (cashfreeResponse.data.payment_session_id) {
-    const payment = await Payment.create({
-      user: req.user._id,
-      amount: tournamentDoc.entryFee.amount,
-      orderId,
-      transactionId: cashfreeResponse.data.payment_session_id, // use session ID
-      metadata: cashfreeResponse.data,
-    });
-
-    // Save a "pending" registration
-    await Registration.create({
-      user: req.user._id,
-      tournament,
-      payment: payment._id,
-    });
-
-    res.json({
-      success: true,
-      message: "Order created, complete payment to confirm registration",
-      orderId,
-      paymentSessionId: cashfreeResponse.data.payment_session_id,
-    });
-  } else {
-    return next(new CustomError("Failed to create order", 500));
-  }
-});
 
 export const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
   const { orderId } = req.body;
+  const userId = req.user?._id;
 
   if (!orderId) {
     return next(new CustomError("Order ID is required", 400));
   }
 
+  // ✅ Step 1: Verify with Cashfree
   const cashfreeResponse = await cashfree.PGFetchOrder(orderId);
-  const orderStatus = cashfreeResponse.data.order_status;
+  if (!cashfreeResponse?.data) {
+    return next(new CustomError("Invalid response from Cashfree", 502));
+  }
 
-  const payment = await Payment.findOne({ orderId });
+  const orderStatus = cashfreeResponse.data.order_status;
+  // ✅ Step 2: Find Payment & populate registration
+  const payment = await Payment.findOne({ orderID: orderId }).populate(
+    "registrationID"
+  );
   if (!payment) {
     return next(new CustomError("Payment not found", 404));
   }
-  const paymentStatus =
-    orderStatus === "PAID"
-      ? "paid"
-      : orderStatus === "EXPIRED"
-      ? "cancelled"
-      : orderStatus === "FAILED"
-      ? "failed"
-      : "pending";
+
+  // ✅ Step 3: Normalize payment status
+  const statusMap = {
+    PAID: "paid",
+    EXPIRED: "cancelled",
+    FAILED: "failed",
+    PENDING: "pending",
+    ACTIVE: "pending",
+  };
+  const paymentStatus = statusMap[orderStatus];
   payment.status = paymentStatus;
-  await payment.save();
 
-  const registration = await Registration.findOne({ payment: payment._id });
-  if (!registration) {
-    return next(new CustomError("Registration not found", 404));
+  // ✅ Step 4: Handle status outcomes
+  if (paymentStatus === "paid") {
+    // Register the user officially
+    if (payment.registrationID) {
+      payment.registrationID.status = "registered";
+      payment.registrationID.paymentStatus = "paid";
+      await payment.registrationID.save();
+    }
+
+    await payment.save();
+
+    return res.status(200).json({
+      success: true,
+      paymentStatus,
+      details: cashfreeResponse.data,
+    });
   }
-  registration.status = paymentStatus;
-  await registration.save();
 
-  res.status(200).json({
+  // ✅ Step 5: Handle failed/cancelled payments only
+  if (["failed", "cancelled"].includes(paymentStatus)) {
+    if (payment.registrationID) {
+      const teamId = payment.registrationID.teamID;
+
+      // Start a transaction to safely clean up
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      try {
+        if (teamId) {
+          await Team.deleteOne({ _id: teamId }, { session });
+        }
+        await Registration.deleteOne(
+          { _id: payment.registrationID._id },
+          { session }
+        );
+
+        payment.registrationID = null;
+        await payment.save({ session });
+
+        await session.commitTransaction();
+      } catch (err) {
+        await session.abortTransaction();
+        throw err;
+      } finally {
+        session.endSession();
+      }
+    }
+
+    return next(new CustomError(`Payment ${paymentStatus}`, 400));
+  }
+  if (["pending", "active"].includes(paymentStatus)) {
+    return next(new CustomError("Payment is pending, if you paid, contact support", 400));
+  }
+
+  // ✅ Step 6: Pending or unknown state — just return safely
+  await payment.save();
+  return res.status(200).json({
     success: true,
-    paymentStatus: paymentStatus,
+    paymentStatus,
     details: cashfreeResponse.data,
   });
 });
@@ -365,7 +194,7 @@ export const verifyPayment = GlobalErrorHandler(async (req, res, next) => {
 export const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
   const userId = req.user._id;
 
-  const payments = await Payment.find({ user: userId })
+  const payments = await Payment.find({ userID: userId })
     .sort({ createdAt: -1 })
     .lean();
 
@@ -375,5 +204,3 @@ export const getMyPayments = GlobalErrorHandler(async (req, res, next) => {
     data: payments,
   });
 });
-
-

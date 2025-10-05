@@ -1,12 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { clearCredentials } from "../slice/userSlice";
-import { baseQueryWithAuth } from "../baseQuery/baseQuery";
-// import {paymentApi} from "./paymentApi"
-// import {tournamentApi} from "./tournamentApi"
-export const authApi = createApi({
+import { baseQuery } from "../baseQuery/baseQuery";
+import type { PROFILE_LOGIN_SIGNUP_TYPE } from "@/AllTypes";
+import { toast } from "sonner";
+const authApi = createApi({
   reducerPath: "authApi",
-
-  baseQuery: baseQueryWithAuth,
+  baseQuery: baseQuery,
   tagTypes: ["fetchUser"],
 
   endpoints: (builder) => ({
@@ -17,34 +16,38 @@ export const authApi = createApi({
     //     body: userData,
     //   }),
     // }),
-    login: builder.mutation({
-      query: (userData:{email:string,password:string}) => ({
-        url: "/users/admin/login",
+
+    login: builder.mutation<
+      PROFILE_LOGIN_SIGNUP_TYPE,
+      { email: string; password: string; isAdminLogin: boolean }
+    >({
+      query: (userData) => ({
+        url: "/users/login",
         method: "POST",
         body: userData,
       }),
     }),
 
-    logout: builder.mutation({
+    logout: builder.mutation<{ success: boolean; message: string }, void>({
       query: () => ({
         url: "/users/logout",
         method: "POST",
       }),
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
         try {
           await queryFulfilled;
           dispatch(clearCredentials());
-          dispatch(tournamentApi.util.resetApiState()); // Clear cached API queries
-          dispatch(authApi.util.resetApiState()); // Clear cached API queries
-          dispatch(paymentApi.util.resetApiState()); // Clear cached API queries
+          // dispatch(tournamentApi.util.resetApiState()); // Clear cached API queries
+          // dispatch(authApi.util.resetApiState()); // Clear cached API queries
+          // dispatch(paymentApi.util.resetApiState()); // Clear cached API queries
           toast.success("Logged out successfully");
         } catch (error) {
-          console.log(error);
+          toast.error("  Failed to log out. Please try again.");
         }
       },
     }),
 
-    fetchProfile: builder.query({
+    fetchProfile: builder.query<PROFILE_LOGIN_SIGNUP_TYPE, void>({
       query: () => "/users/profile",
       providesTags: ["fetchUser"],
     }),
@@ -64,7 +67,7 @@ export const authApi = createApi({
     //     body: data,
     //   }),
     // }),
-    // updateProfile: builder.mutation({
+    // updateProfile: builder.mutation<void>({
     //   query: (data) => ({
     //     url: "/users/profile",
     //     method: "PATCH",
@@ -76,11 +79,12 @@ export const authApi = createApi({
 });
 
 export const {
-  useSignupMutation,
+  // useSignupMutation,
   useLoginMutation,
   useLogoutMutation,
   useFetchProfileQuery,
-  useForgotPasswordMutation,
-  useVerifyAndResetPasswordMutation,
-  useUpdateProfileMutation,
+  // useForgotPasswordMutation,
+  // useVerifyAndResetPasswordMutation,
+  // useUpdateProfileMutation,
 } = authApi;
+export default authApi;

@@ -334,17 +334,17 @@ const Profile = () => {
                     <table className="w-full table-auto border-collapse">
                       <thead>
                         <tr className="bg-white/5">
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                             Date
                           </th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                             Amount
                           </th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                             Status
                           </th>
-                          <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">
-                            Payment Method
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                            Tournament Details
                           </th>
                         </tr>
                       </thead>
@@ -354,7 +354,7 @@ const Profile = () => {
                             key={index}
                             className="border-b border-white/10 hover:bg-white/5 transition-colors duration-200"
                           >
-                            <td className="px-4 py-3 text-sm text-white">
+                            <td className="px-4 py-3 text-sm text-white whitespace-nowrap">
                               {new Date(payment.createdAt).toLocaleDateString(
                                 "en-IN",
                                 {
@@ -364,25 +364,32 @@ const Profile = () => {
                                 }
                               )}
                             </td>
-                            <td className="px-4 py-3 text-sm text-white font-semibold">
-                              ₹{payment.amount}
+                            <td className="px-4 py-3 text-sm text-white font-semibold whitespace-nowrap">
+                              {new Intl.NumberFormat("en-IN", {
+                                style: "currency",
+                                currency: "INR",
+                                maximumFractionDigits: 0,
+                              }).format(payment.amount)}
                             </td>
                             <td className="px-4 py-3 text-sm">
                               <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ring-1 ring-white/5 ${
                                   payment.status === "paid"
-                                    ? "bg-green-500/20 text-green-400"
+                                    ? "bg-green-500/10 text-green-300 ring-green-500/20"
                                     : payment.status === "pending"
-                                    ? "bg-yellow-500/20 text-yellow-400"
-                                    : "bg-red-500/20 text-red-400"
+                                    ? "bg-yellow-500/10 text-yellow-300 ring-yellow-500/20"
+                                    : "bg-red-500/10 text-red-300 ring-red-500/20"
                                 }`}
                               >
                                 {payment.status}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm text-white capitalize">
-                              {payment?.metadata?.order_meta?.payment_methods ||
-                                "N/A"}
+                            <td className="px-4 py-3 text-sm text-white capitalize whitespace-nowrap">
+                              <Link
+                                to={`/tournaments/${payment?.tournamentID}`}
+                                aria-label={`View tournament ${payment?.tournamentID}`}
+                                className="text-sm px-3 py-1 bg-gradient-to-r from-[#E11D48] to-[#FC4E5B] hover:from-[#FC4E5B] hover:to-[#E11D48] text-white font-semibold rounded-md shadow-sm hover:shadow-lg transition-transform transform hover:-translate-y-0.5"
+                              >View</Link>
                             </td>
                           </tr>
                         ))}
