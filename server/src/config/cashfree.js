@@ -10,3 +10,8 @@ export const cashfree = new Cashfree(
   CASHFREE_APP_ID,
   CASHFREE_SECRET_KEY
 );
+// export const cashfree = new Cashfree(
+//   CFEnvironment.PRODUCTION, // ✅ always production
+//   process.env.CASHFREE_APP_ID,
+//   process.env.CASHFREE_SECRET_KEY
+// );

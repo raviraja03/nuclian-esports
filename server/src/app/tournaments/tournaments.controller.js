@@ -4,18 +4,15 @@ import {
   CustomError,
   GlobalErrorHandler,
 } from "../../middleware/errorMiddleware.js";
-import Registration from "../../models/registrationSchema.mode.js";
+import Registration from "../../models/registration.model.js";
 import { parseQueryField } from "../../utilities/parseQuery.js";
 import { generateOrderId } from "../../utilities/orderId.js";
-import {cashfree} from "../../config/cashfree.js";
+import { cashfree } from "../../config/cashfree.js";
 import Team from "../../models/team.model.js";
 import Payment from "../../models/payment.model.js";
 
 // USER ENDPOINTS
 // GET /api/v1/tournaments - Fetch all visible tournaments with filtering and pagination
-
-
-
 
 export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
   let {
@@ -77,7 +74,26 @@ export const getAllTournaments = GlobalErrorHandler(async (req, res) => {
           },
         },
       },
-      { $project: { registrations: 0 } },
+      {
+        $project: {
+          registrations: 0,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          type: 1,
+          status: 1,
+          entryFee: 1,
+          prizePool: 1,
+          registeredCount: 1,
+          maxTeams: 1,
+          thumbnail: 1,
+          round: 1,
+          eventCode: 1,
+        },
+      },
     ]),
     Tournament.countDocuments(filter),
   ]);
@@ -148,8 +164,9 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
       path: "tournamentID",
       match: { isVisible: true },
       select:
-        "title game platform schedule status  entryFee prizePool roomId roomPassword totalMember",
-    }).populate({path:"teamID", select:"teamName members _id mode"})
+        "title game platform schedule status  entryFee prizePool roomId roomPassword teamSize round name eventCode",
+    })
+    .populate({ path: "teamID", select: "teamName members" })
     .skip((page - 1) * limit)
     .limit(Number(limit))
     .lean();
@@ -159,7 +176,7 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
     })
     .filter(Boolean);
 
-  const total=registrations.length;
+  const total = registrations.length;
 
   res.status(200).json({
     success: true,
@@ -170,24 +187,42 @@ export const getMyTournaments = GlobalErrorHandler(async (req, res, next) => {
   });
 });
 
-
 //for updating registration data like team name and members
 export const updateRegistrationData = GlobalErrorHandler(
   async (req, res, next) => {
     const { registrationId, teamName, members } = req.body;
+  const userId = req.user?._id; // assuming authentication middleware
 
-    const registration = await Registration.findOne({ _id: registrationId });
-    if (!registration) {
+  const registration = await Registration.findOne({ _id: registrationId })
+    .populate("tournamentID", "title status teamSize eventCode")
+    .populate("teamID", "name members");
+        if (!registration) {
       return next(new CustomError("Registration not found", 404));
     }
+      // Ownership check (only the player who registered can edit)
 
-    registration.team.name = teamName;
-    registration.team.members = members.map((member) => ({
+      if (registration.userID.toString() !== userId.toString()) {
+    return next(new CustomError("Only the player who registered can edit this", 403));
+  }
+    const tournament = registration.tournamentID;
+
+  // ❌ Block if tournament closed/cancelled/completed
+  if (["registration-closed", "completed", "cancelled","in-progress"].includes(tournament.status)) {
+    return next(new CustomError("Cannot edit team after registration is closed or tournament ended", 400));
+  }
+
+   if (members.length > tournament.teamSize) {
+    return next(new CustomError(`Team size exceeds limit (${tournament.teamSize})`, 400));
+  }
+
+    registration.teamID.teamName = teamName ? teamName.trim() : null;
+    registration.teamID.members = members.map((member,idx) => ({
       gameId: member.gameId,
       gameName: member.gameName,
+      role: idx === 0 ? "leader" : "member",
     }));
 
-    await registration.save();
+    await registration.teamID.save();
 
     res.status(200).json({
       success: true,
@@ -237,18 +272,20 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
       }
 
       const [teamDoc] = await Team.create(
-        [{
-          tournamentID: tournamentId,
-          mode,
-          captainID: req.user._id,
+        [
+          {
+            tournamentID: tournamentId,
+            mode,
+            captainID: req.user._id,
             teamName: teamName ? teamName.trim() : null,
             members: players.map((player, idx) => ({
               gameId: player.gameId,
               gameName: player.gameName,
               role: idx === 0 ? "leader" : "member",
             })),
-          }],
-        
+          },
+        ],
+
         { session }
       );
 
@@ -261,8 +298,9 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
             teamID: teamDoc._id,
             status: "registered",
             paymentStatus: "free",
-          }],
-      
+          },
+        ],
+
         { session }
       );
 
@@ -355,40 +393,43 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
         players,
       };
       const [team] = await Team.create(
-       [ {
-          tournamentID: tournamentId,
-          teamName: teamName ? teamName.trim() : null,
-          mode,
-          captainID: req.user._id,
+        [
+          {
+            tournamentID: tournamentId,
+            teamName: teamName ? teamName.trim() : null,
+            mode,
+            captainID: req.user._id,
             members: players.map((player, idx) => ({
               gameId: player.gameId,
               gameName: player.gameName,
               role: idx === 0 ? "leader" : "member",
             })),
-          }],
-        
+          },
+        ],
+
         { session }
       );
 
-      const [registration]= await Registration.create(
-        
-         [ {
+      const [registration] = await Registration.create(
+        [
+          {
             tournamentID: tournamentId,
             participantType: mode,
             userID: req.user._id,
             teamID: team._id,
             status: "waitlisted",
             paymentStatus: "pending",
-          }],
-        
+          },
+        ],
+
         { session }
       );
 
       const cashfreeResponse = await cashfree.PGCreateOrder(orderData);
       if (cashfreeResponse.data.payment_session_id) {
         const [payment] = await Payment.create(
-          
-          [  {
+          [
+            {
               userID: req.user._id,
               tournamentID: tournamentId,
               registrationID: registration._id,
@@ -397,8 +438,9 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
               status: "pending",
               transactionID: cashfreeResponse.data.payment_session_id, // use session ID
               metadata: { cashfreeData: cashfreeResponse.data, tempDetails },
-            }],
-          
+            },
+          ],
+
           { session }
         );
 
@@ -421,18 +463,6 @@ export const handleRegistration = GlobalErrorHandler(async (req, res, next) => {
     throw err;
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 // DELETE /api/tournaments/:tournamentId/participants/:participantId - Withdraw a user from a tournament
 export const withdrawFromTournament = async (req, res) => {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import Registration from "../models/registrationSchema.mode.js";
+import Registration from "../models/registration.model.js";
 import Tournament from "../models/tournament.model.js";
 import Team from "../models/team.model.js";
 import Payment from "../models/payment.model.js";

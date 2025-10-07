@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import Button_2 from "../components/Button/Button_2";
-
 import { useGetTournamentsQuery } from "../globalState/api/tournamentApi";
-import LoadingScreen from "../components/shared/LoadingScreen";
 import TournamentCard from "../components/shared/TournamentCard";
+import LoadingScreen from "../components/shared/LoadingScreen";
 
-// --- Main Page Content ---
 const TournamentsPageContent = () => {
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -29,22 +26,38 @@ const TournamentsPageContent = () => {
     `,
   });
 
-  const { data: tournamentsData = [], pagination } = tournamentsResponse;
-    const filteredTournaments = tournamentsData.filter((tournament) => {
+  const { data: tournamentsData = [], pagination = {} } = tournamentsResponse;
+  const filteredTournaments = tournamentsData.filter((tournament) => {
     if (filter === "all") return true;
     return tournament.status === filter;
   });
 
-  // Handle page change
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       setPage(newPage);
     }
   };
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  // Create pagination numbers with ellipsis
+  const getPaginationRange = () => {
+    const total = pagination.totalPages || 1;
+    const delta = 2;
+    const range = [];
+    for (
+      let i = Math.max(2, page - delta);
+      i <= Math.min(total - 1, page + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+    if (page - delta > 2) range.unshift("...");
+    if (page + delta < total - 1) range.push("...");
+    range.unshift(1);
+    if (total > 1) range.push(total);
+    return range;
+  };
+
+  if (isLoading) return <LoadingScreen />;
 
   if (isError) {
     return (
@@ -57,14 +70,17 @@ const TournamentsPageContent = () => {
   }
 
   return (
-    <main className="bg-black/95 text-white font-Lex relative min-h-screen mt-[12vh] px-4 sm:px-6 lg:px-12 py-8 sm:py-10 lg:py-12">
+    <main className="bg-black/95 text-white font-Lex relative min-h-screen mt-[12vh] px-4 sm:px-6 lg:px-12 py-10">
       {/* Dropdown Filter */}
-      <div className="mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-wide">
+          Tournaments
+        </h1>
+
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="w-full sm:w-64 bg-[#0a141d]/60 backdrop-blur-md border border-white/20 text-white rounded-lg px-4 py-3 text-sm sm:text-base font-Lex focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300 hover:border-[#FC4E5B]/50"
-          aria-label="Filter tournaments by status"
+          className="w-full sm:w-64 bg-[#0a141d]/60 backdrop-blur-md border border-white/20 text-white rounded-lg px-4 py-3 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#E11D48] transition-all duration-300 hover:border-[#FC4E5B]/50"
         >
           <option value="all">All Tournaments</option>
           <option value="registration-open">Upcoming</option>
@@ -77,16 +93,18 @@ const TournamentsPageContent = () => {
       {/* Tournament Grid */}
       <section className="relative z-10">
         {filteredTournaments.length === 0 ? (
-          <p
-            className="text-gray-300 text-sm sm:text-base text-center"
-            aria-live="polite"
-          >
+          <p className="text-gray-400 text-center py-10 text-base sm:text-lg">
             No tournaments found for this filter.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 [@media(min-width:1450px)]:grid-cols-4 lg:grid-cols-3 gap-6 lg:gap-8">
             {filteredTournaments.map((cardData, index) => (
-              <TournamentCard key={index} card={cardData} />
+              <div
+                key={index}
+                className="transition-transform transform hover:-translate-y-1 hover:scale-[1.02] duration-300"
+              >
+                <TournamentCard card={cardData} />
+              </div>
             ))}
           </div>
         )}
@@ -94,53 +112,59 @@ const TournamentsPageContent = () => {
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
-        <div className="mt-8 sm:mt-10 flex justify-center">
+        <div className="mt-12 flex justify-center">
           <nav
-            className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-lg p-3 sm:p-4 flex items-center gap-2 sm:gap-3"
+            className="bg-[#0a141d]/60 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-center gap-2 sm:gap-3"
             aria-label="Pagination"
           >
             {/* Previous Button */}
             <button
               onClick={() => handlePageChange(page - 1)}
               disabled={!pagination.hasPrevPage}
-              className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex text-white rounded-md border border-white/20 hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#E11D48] ${
-                !pagination.hasPrevPage ? "bg-gray-700/50" : "bg-[#0a141d]/80"
+              className={`px-4 py-2 text-sm sm:text-base rounded-md border border-white/20 transition-all duration-300 ${
+                !pagination.hasPrevPage
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50"
               }`}
-              aria-label="Previous page"
             >
-              Previous
+              Prev
             </button>
 
             {/* Page Numbers */}
-            <div className="flex gap-1 sm:gap-2">
-              {[...Array(pagination.totalPages)].map((_, index) => {
-                const pageNum = index + 1;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex rounded-md border border-white/20 transition-all duration-300 ${
-                      pageNum === page
-                        ? "bg-[#E11D48] text-white border-[#FC4E5B]"
-                        : "bg-[#0a141d]/80 text-white hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5"
-                    } focus:outline-none focus:ring-2 focus:ring-[#E11D48]`}
-                    aria-current={pageNum === page ? "page" : undefined}
-                    aria-label={`Page ${pageNum}`}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {getPaginationRange().map((num, idx) =>
+                num === "..." ? (
+                  <span
+                    key={idx}
+                    className="px-2 text-gray-400 select-none text-sm"
                   >
-                    {pageNum}
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={num}
+                    onClick={() => handlePageChange(num)}
+                    className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-md border border-white/20 transition-all duration-300 ${
+                      page === num
+                        ? "bg-[#E11D48] text-white border-[#FC4E5B]"
+                        : "hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50"
+                    }`}
+                  >
+                    {num}
                   </button>
-                );
-              })}
+                )
+              )}
             </div>
 
             {/* Next Button */}
             <button
               onClick={() => handlePageChange(page + 1)}
               disabled={!pagination.hasNextPage}
-              className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-Lex text-white rounded-md border border-white/20 hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#E11D48] ${
-                !pagination.hasNextPage ? "bg-gray-700/50" : "bg-[#0a141d]/80"
+              className={`px-4 py-2 text-sm sm:text-base rounded-md border border-white/20 transition-all duration-300 ${
+                !pagination.hasNextPage
+                  ? "opacity-40 cursor-not-allowed"
+                  : "hover:bg-[#E11D48]/20 hover:border-[#FC4E5B]/50"
               }`}
-              aria-label="Next page"
             >
               Next
             </button>

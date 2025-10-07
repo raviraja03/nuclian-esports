@@ -32,7 +32,7 @@ export const baseQueryWithAuth = async (args, api, extraOptions) => {
   }
 
   if (result?.error?.status === 403) {
-    toast.error("Your account has been suspended or deleted.");
+    toast.error(result?.error?.data?.message||"Server refused to fulfill this request.");
   }
 
   return result;

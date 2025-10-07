@@ -4,6 +4,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import { useUpdateRegistrationDataMutation } from "../../globalState/api/tournamentApi";
 
 function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
+  console.log(totalMember);
   const {
     register,
     control,
@@ -12,7 +13,7 @@ function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
     reset,
   } = useForm({
     defaultValues: {
-      teamName: teamData?.name || "",
+      teamName: teamData?.teamName || "",
       members: teamData?.members.map((m) => ({
         gameId: m.gameId,
         gameName: m.gameName,
@@ -27,7 +28,7 @@ function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
   });
   // update-registration
 
-  const onSubmit = async(data) => {
+  const onSubmit = async (data) => {
     try {
       await updateRegistrationData({
         registrationId: id,
@@ -37,11 +38,12 @@ function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
       toast.success("Team updated successfully!");
       onClose();
     } catch (error) {
-      console.error("Error updating team:", error);
-      // toast.error(
-      //   error?.data?.message || "Failed to update team. Please try again."
-      // );
-    } 
+      if (error.status !== 403) {
+        toast.error(
+          error?.data?.message || "Failed to update team. Please try again."
+        );
+      }
+    }
   };
 
   const handleAddMember = () => {
@@ -62,6 +64,10 @@ function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Team Name */}
+          {totalMember > 1 && (
+
+
+        
           <div>
             <label className="text-sm font-medium text-gray-300 mb-1 block">
               Team Name
@@ -79,6 +85,7 @@ function EditTeamModal({ isOpen, onClose, teamData, id, totalMember }) {
               </p>
             )}
           </div>
+            )}
 
           {/* Members */}
           <div className="space-y-3">

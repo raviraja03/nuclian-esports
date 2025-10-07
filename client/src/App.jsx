@@ -19,12 +19,8 @@ const WalletPage = React.lazy(() => import("./components/Coins/WalletPage"));
 const Signup = React.lazy(() => import("./pages/Signup"));
 const Profile = React.lazy(() => import("./pages/Profile"));
 const TournamentDetails = React.lazy(() => import("./pages/TournamentDetails"));
-const PaymentPage = React.lazy(() =>
-  import("./pages/PaymentPage")
-);
-const PaymentSuccess = React.lazy(() =>
-  import("./pages/PaymentSuccess")
-);
+const PaymentPage = React.lazy(() => import("./pages/PaymentPage"));
+const PaymentSuccess = React.lazy(() => import("./pages/PaymentSuccess"));
 const UnderDevelopment = React.lazy(() =>
   import("./components/shared/UnderDevelopment")
 );
@@ -53,20 +49,40 @@ const App = () => {
     { path: "payment", element: <PaymentPage /> },
     { path: "payment-success", element: <PaymentSuccess /> },
     { path: "matches", element: <Matches /> },
-    { path: "free-tournament-success", element: <FreeTournamentSuccess /> },
   ];
 
   const publicRoutes = [
     { path: "/", element: <Home /> },
-    { path: "login", element: <Login /> },
-    { path: "signup", element: <Signup /> },
+    {
+      path: "login",
+      element: (
+        <Auth user={user} onlyPublic redirect="/">
+          <Login />
+        </Auth>
+      ),
+    },
+    {
+      path: "signup",
+      element: (
+        <Auth user={user} onlyPublic redirect="/">
+          <Signup />
+        </Auth>
+      ),
+    },
     { path: "tournaments", element: <Tournament /> },
     { path: "tournaments/:id", element: <TournamentDetails /> },
     { path: "leaderboard", element: <UnderDevelopment /> },
     { path: "blog", element: <Blog /> },
     { path: "walletpage", element: <WalletPage /> },
     { path: "contact", element: <Contact /> },
-    { path: "forgot-password", element: <ForgotPassword /> },
+    {
+      path: "forgot-password",
+      element: (
+        <Auth user={user} onlyPublic redirect="/">
+          <ForgotPassword />
+        </Auth>
+      ),
+    },
   ];
 
   if (loading) {
@@ -90,19 +106,7 @@ const App = () => {
 
               {/* 🌐 Public routes */}
               {publicRoutes.map(({ path, element }) => (
-                <Route
-                  key={path}
-                  path={path}
-                  element={
-                    path === "login" || path === "signup" ? (
-                      <Auth user={user} onlyPublic redirect="/">
-                        {element}
-                      </Auth>
-                    ) : (
-                      element
-                    )
-                  }
-                />
+                <Route key={path} path={path} element={element} />
               ))}
             </Route>
 

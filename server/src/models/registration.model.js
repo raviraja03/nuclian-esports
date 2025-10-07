@@ -26,12 +26,10 @@ const registrationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["registered", "waitlisted", "disqualified"],
-      // default: "registered",
     },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "free"],
-      // default: "free",
     },
     registeredAt: {
       type: Date,

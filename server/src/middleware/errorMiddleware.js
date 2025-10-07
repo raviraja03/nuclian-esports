@@ -11,6 +11,7 @@ export class CustomError extends Error {
 }
 
 export const errorMiddleware = (err, req, res, next) => {
+  // console.error("❌ ERROR:", err);
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
   if (err.name === "ValidationError") {

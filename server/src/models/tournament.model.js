@@ -6,15 +6,17 @@ const tournamentSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     thumbnail: {
-      url: { type: String, },
-      public_id: { type: String,},
+      url: { type: String },
+      public_id: { type: String },
     },
 
     type: { type: String, enum: ["solo", "duo", "squad"], required: true },
 
-    game: { type: String, required: true, trim: true, index: true },
-    // gameId: { type: String, required: true },
-
+    game: { type: String, required: true, trim: true, index: true,enum: ["Free Fire","BGMI","Valorant","COD"]  },
+    name: { type: String, trim: true,enum: ["Qualifier-#1","Qualifier-#2","Qualifier-#3","Qualifier-#4","Semi-Final-#1","Semi-Final-#2","Final","Single"]  },
+    round: { type: String, trim: true ,enum: ["Qualifier","Semi-Final","Final","Single"]  },
+    
+    eventCode: { type: String, required: true, trim: true, uppercase: true, unique: true },
     teamSize: {
       type: Number,
       required: true,
@@ -43,7 +45,6 @@ const tournamentSchema = new mongoose.Schema(
       registrationEnd: { type: Date, required: true },
       matchStart: { type: Date, required: true },
     },
-
 
     entryFee: {
       coins: { type: Number, default: 0, min: 0 },
@@ -80,14 +81,13 @@ const tournamentSchema = new mongoose.Schema(
         "cancelled",
       ],
       default: "published",
-      
     },
 
     // createdBy: {
     //   type: mongoose.Schema.Types.ObjectId,
     //   ref: "User",
     //   required: true,
-    //   
+    //
     // },
 
     streamLink: { type: String, trim: true },
@@ -100,15 +100,17 @@ const tournamentSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "will be released 15 minutes before match start at",
+      select: false,
     },
-    roomPassword: { type: String, trim: true, default: null },
+    roomPassword: { type: String, trim: true, default: null , select: false },
   },
   { timestamps: true }
 );
 
 // Indexes for performance
-tournamentSchema.index({ status: 1, "schedule.matchStart": 1 });
+tournamentSchema.index({ status: 1, "schedule.matchStart": 1 }); 
 // tournamentSchema.index({ createdBy: 1 });
+tournamentSchema.index({ eventCode: 1, round: 1 });
 tournamentSchema.index({ game: 1, status: 1 });
 tournamentSchema.index({ platform: 1, isVisible: 1 });
 
@@ -126,14 +128,12 @@ tournamentSchema.pre("save", function (next) {
       new CustomError("Registration must end before match starts", 400)
     );
   }
-  // if (idPasswordRelease >= matchStart) {
-  //   return next(
-  //     new CustomError("ID/Password must be released before match starts", 400)
-  //   );
-  // }
+
 
   next();
 });
 
 const Tournament = mongoose.model("Tournament", tournamentSchema);
 export default Tournament;
+
+

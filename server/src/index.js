@@ -5,7 +5,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 //models
-import Registration from "./models/registrationSchema.mode.js";
+import Registration from "./models/registration.model.js";
 import Tournament from "./models/tournament.model.js";
 import Team from "./models/team.model.js";
 import Payment from "./models/payment.model.js";
@@ -20,7 +20,8 @@ import tournamentRouter from "./app/tournaments/tournaments.route.js";
 import tournamentAdminRouter from "./app/tournaments/tournaments.admin.route.js";
 import paymentRouter from "./app/payement/payment.route.js";
 import { errorMiddleware, CustomError } from "./middleware/errorMiddleware.js";
-
+import { generateEventCode } from "./utilities/generateEventCode.js";
+console.log("Sample Event Code for Free Fire:", generateEventCode("Free Fire"));
 const app = express();
 const server = http.createServer(app);
 
@@ -113,18 +114,52 @@ io.on("connection", (socket) => {
   });
 });
 
-// const updateRegistrationCounts = async () => {
-//   try {
-//     const tournaments = await Tournament.find();
-//     for (let t of tournaments) {
-//       const count = await Registration.countDocuments({ tournament: t._id });
-//       await Tournament.findByIdAndUpdate(t._id, { registeredCount: count });
-//     }
-//     console.log("Registration counts updated successfully");
-//   } catch (error) {
-//     console.error("Error updating registration counts:", error);
-//   }
-// };
+// async function migrate() {
+//     await mongoose.connect(process.env.MONGODB_URI);
 
-// // Run the update function
-// updateRegistrationCounts();
+//   const db = mongoose.connection.db;
+
+//   const oldRegs = await db
+//     .collection("registrations")
+//     .find({ "team.name": { $exists: true } })
+//     .toArray();
+//   for (const old of oldRegs) {
+//     try {
+//       // console.log(old)
+//       // // 1️⃣ Create Team
+//       const teamDoc = new Team({
+//         tournamentID: old.tournament,
+//         teamName: old.team.name?.trim(),
+//         captainID: old.user,
+//         mode:  "squad",
+//         members: old.team.members.map((m, i) => ({
+//           gameId: m.gameId,
+//           gameName: m.gameName,
+//           role: i === 0 ? "leader" : "member",
+//         })),
+//       });
+//       await teamDoc.save();
+
+//       // 2️⃣ Create Registration
+//       // const regDoc = new Registration({
+//       //   tournamentID: old.tournament,
+//       //   participantType: teamDoc.mode,
+//       //   userID: old.user,
+//       //   teamID: teamDoc._id,
+//       //   status: "registered" ,
+//       //   paymentStatus: "free",
+//       //   registeredAt: old.createdAt,
+//       // });
+//       // await regDoc.save();
+
+//       // console.log(`✅ Migrated ${teamDoc.teamName}`);
+//     } catch (err) {
+//       console.error(`❌ Error migrating ${old._id}:`, err.message);
+//     }
+//   }
+
+//   console.log("Migration complete ✅");
+//   process.exit(0);
+// }
+
+// migrate().catch((err) => console.error(err));
