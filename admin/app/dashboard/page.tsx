@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Users, Trophy, DollarSign, Activity } from "lucide-react"
+import { Users, Trophy } from "lucide-react"
 
 // Mock data for demonstration
 const stats = [
@@ -102,7 +102,7 @@ const recentTournaments = [
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's what's happening with your eSports platform.</p>
+        <p className="text-muted-foreground">Welcome back! Here&apos;s what&apos;s happening with your eSports platform.</p>
       </div>
 
       {/* Stats Cards */}
@@ -115,7 +115,7 @@ const recentTournaments = [
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+              {/* <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                 <span
                   className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                     stat.changeType === "positive"
@@ -126,7 +126,7 @@ const recentTournaments = [
                   {stat.change}
                 </span>
                 <span>{stat.description}</span>
-              </div>
+              </div> */}
             </CardContent>
           </Card>
         ))}

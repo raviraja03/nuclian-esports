@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,20 +15,20 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, LogOut, User, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import {useAppSelector} from "@/features/type/hooks"
-import {useLogoutMutation} from "@/features/api/authApi"
-export function Header() { 
+import { useAppSelector } from "@/features/type/hooks";
+import { useLogoutMutation } from "@/features/api/authApi";
+export function Header() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const user = useAppSelector((state) => state.userslice.user);
-  const [logout,{isError}] = useLogoutMutation();
+  const [logout, { isError }] = useLogoutMutation();
 
   const handleLogout = () => {
     logout();
 
-if(!isError){
-  router.push("/login");
-}
+    if (!isError) {
+      router.push("/login");
+    }
   };
 
   return (
@@ -46,28 +46,29 @@ if(!isError){
       <div className="flex gap-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 outline-none border-0">
-                <Avatar className="h-10 w-10">
+            <Button
+              variant="ghost"
+              className="relative h-8 w-8 outline-none border-0"
+            >
+              <Avatar className="h-10 w-10">
                 {user?.userProfileImage ? (
-                  <img
-                  src={user.userProfileImage}
-                  alt={user?.name || "avatar"}
-                  className="h-full w-full rounded-full object-cover"
+                  <Image
+                    src={user.userProfileImage}
+                    alt={user?.name || "avatar"}
+                    className="h-full w-full rounded-full object-cover"
                   />
                 ) : (
                   <AvatarFallback className="bg-primary/10 text-primary">
-                  {user?.name?.charAt(0).toUpperCase() }
+                    {user?.name?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 )}
-                </Avatar>
+              </Avatar>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {user?.name}
-                </p>
+                <p className="text-sm font-medium leading-none">{user?.name}</p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>

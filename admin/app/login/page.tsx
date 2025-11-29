@@ -30,23 +30,26 @@ export default function LoginPage() {
   const [login,{isLoading}] = useLoginMutation();
   const router = useRouter(); // ✅
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     try {
-      const email = emailRef.current?.value!;
-      const password = passwordRef.current?.value!;
+      const email = emailRef.current?.value ?? "";
+      const password = passwordRef.current?.value ?? "";
 
-      const res=await login({ email, password , isAdminLogin: true}).unwrap();
+      const res = await login({ email, password, isAdminLogin: true }).unwrap();
       dispatch(setCredentials({ user: res.data }));
       router.push("/dashboard");
-    } catch (error:any) {
-      toast.error(error?.data?.message || "Login failed. Please try again.");
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null && "data" in error) {
+        const err = error as { data?: { message?: string } };
+        toast.error(err.data?.message || "Login failed. Please try again.");
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
     }
 
-
-
-  };
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

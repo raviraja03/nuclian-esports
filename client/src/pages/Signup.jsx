@@ -207,21 +207,7 @@ const Signup = () => {
                   {isSubmitting ? "Creating Account..." : "Create Account"}
                 </button>
 
-                {/* <div className="flex items-center">
-                  <div className="flex-1 border-t border-white/20"></div>
-                  <span className="px-3 sm:px-4 text-xs sm:text-sm text-[#E11D48]">
-                    OR
-                  </span>
-                  <div className="flex-1 border-t border-white/20"></div>
-                </div>
-
-                <button
-                  type="button"
-                  className="flex w-full items-center justify-center space-x-2 rounded-lg bg-white/90 py-3 px-4 font-semibold text-[#4285F4] shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#4285F4]/50"
-                >
-                  <FaGoogle />
-                  <span>Continue with Google</span>
-                </button> */}
+               
 
                 <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-400">
                   Already have an account?
@@ -235,6 +221,8 @@ const Signup = () => {
                 </div>
               </div>
             </form>
+
+            
           </div>
         </div>
       </div>

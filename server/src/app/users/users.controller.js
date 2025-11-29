@@ -1,5 +1,4 @@
 import User from "../../models/user.model.js";
-import { generateToken } from "../../middleware/auth.js";
 import sendMail from "../../utilities/mailer.js";
 import { generateOTP } from "../../utilities/otp.js";
 import {
@@ -7,10 +6,21 @@ import {
   GlobalErrorHandler,
 } from "../../middleware/errorMiddleware.js";
 import {
-  cookieOptions,
-  cookieOptionsForClearCookie,
+  generateAccessToken,
+  generateRefreshToken,
+  accessTokenCookieOptions,
+  refreshTokenCookieOptions,
+  clearCookieOptions,
+  verifyRefreshToken
 } from "../../utilities/jwt.js";
-import "dotenv/config";
+import Session from "../../models/session.model.js";
+import {createSession} from "../../utilities/getSessiondetails.js"
+
+
+
+
+
+
 
 // @desc    Register new user
 // @route   POST /api/users/register
@@ -25,9 +35,18 @@ export const register = GlobalErrorHandler(async (req, res, next) => {
     role: role || "user",
     userStatus: "active", // Middleware
   });
-  const token = generateToken(user._id);
-  res.clearCookie("sessionId", cookieOptionsForClearCookie);
-  res.cookie("sessionId", token, cookieOptions);
+
+ const session=await createSession(user,req)
+
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(session._id);
+
+  res.clearCookie("accessToken", clearCookieOptions);
+  res.clearCookie("refreshToken", clearCookieOptions);
+
+  res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+  res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+
   res.status(201).json({
     success: true,
     data: {
@@ -37,7 +56,6 @@ export const register = GlobalErrorHandler(async (req, res, next) => {
       phoneNumber: user.phoneNumber,
       role: user.role,
       userProfileImage: user.userProfileImage,
-      // token,
     },
   });
 });
@@ -46,7 +64,7 @@ export const register = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/login
 // @access  Public
 export const login = GlobalErrorHandler(async (req, res, next) => {
-  const { email, password, isAdminLogin=false} = req.body;
+  const { email, password, isAdminLogin = false } = req.body;
 
   if (!email || !password) {
     return next(new CustomError("Email and password are required", 400));
@@ -67,7 +85,7 @@ export const login = GlobalErrorHandler(async (req, res, next) => {
       )
     );
   }
- if (isAdminLogin && user.role !== "admin") {
+  if (isAdminLogin && user.role !== "admin") {
     return next(new CustomError("Unauthorized: Admin access required", 403));
   }
   // Update last login and session info
@@ -75,10 +93,17 @@ export const login = GlobalErrorHandler(async (req, res, next) => {
   user.sessionInfo = "loggedIn";
   await user.save();
 
-  // Generate token
-  const token = generateToken(user._id);
-  res.clearCookie("sessionId", cookieOptionsForClearCookie);
-  res.cookie("sessionId", token, cookieOptions);
+ const session=await createSession(user,req)
+
+  const accessToken = generateAccessToken(user._id);
+  const refreshToken = generateRefreshToken(session._id);
+
+  res.clearCookie("accessToken", clearCookieOptions);
+  res.clearCookie("refreshToken", clearCookieOptions);
+
+  res.cookie("accessToken", accessToken, accessTokenCookieOptions);
+  res.cookie("refreshToken", refreshToken, refreshTokenCookieOptions);
+
   res.status(200).json({
     success: true,
     data: {
@@ -88,7 +113,6 @@ export const login = GlobalErrorHandler(async (req, res, next) => {
       phoneNumber: user.phoneNumber,
       role: user.role,
       userProfileImage: user.userProfileImage,
-      // token,
     },
   });
 });
@@ -97,14 +121,24 @@ export const login = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/logout
 // @access  Private
 export const logout = GlobalErrorHandler(async (req, res, next) => {
-  // Clear the session cookie
-  res.clearCookie("sessionId", cookieOptionsForClearCookie);
+  const { refreshToken } = req.cookies;
 
-  res.status(200).json({
-    success: true,
-    message: "Logged out successfully",
-  });
+  if (refreshToken) {
+    try {
+      const decoded = verifyRefreshToken(refreshToken); // { sid }
+      await Session.findByIdAndUpdate(decoded.sid, { isRevoked: true });
+
+    } catch (err) {
+      // ignore invalid token, just clear cookies
+    }
+  }
+
+  res.clearCookie("accessToken", clearCookieOptions);
+  res.clearCookie("refreshToken", clearCookieOptions);
+
+  res.status(200).json({ success: true, message: "Logged out successfully" });
 });
+
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -158,7 +192,6 @@ export const updateProfile = GlobalErrorHandler(async (req, res, next) => {
 });
 
 // Helper function to generate OTP
-
 
 // @desc    Forgot password - Send OTPs
 // @route   POST /api/users/forgot-password
@@ -217,46 +250,47 @@ export const sendOtp = GlobalErrorHandler(async (req, res, next) => {
 // @route   POST /api/users/verify-otp nlbh ckjy aiys eaib
 
 // @access  Public
-export const verifyOtpAndResetPassword = GlobalErrorHandler(async (req, res, next) => {
-  const { email, emailOtp, newPassword } = req.body;
+export const verifyOtpAndResetPassword = GlobalErrorHandler(
+  async (req, res, next) => {
+    const { email, emailOtp, newPassword } = req.body;
 
-  // Find user
-  const user = await User.findOne({ email });
-  if (!user) {
-    return next(new CustomError("User not found", 404));
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return next(new CustomError("User not found", 404));
+    }
+
+    // Check if OTPs exist and are valid
+    if (!user.otp) {
+      return next(
+        new CustomError(
+          "OTPs have not been generated. Please request new OTPs",
+          400
+        )
+      );
+    }
+
+    // Check if OTPs have expired
+    if (user.otpExpiresAt < Date.now()) {
+      return next(
+        new CustomError("OTPs have expired. Please request new OTPs", 400)
+      );
+    }
+
+    // Verify OTPs
+    if (user.otp !== emailOtp) {
+      return next(new CustomError("Invalid OTPs. Please try again", 400));
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.otp = null;
+    user.otpExpiresAt = null;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successful",
+    });
   }
-
-  // Check if OTPs exist and are valid
-  if (!user.otp) {
-    return next(
-      new CustomError(
-        "OTPs have not been generated. Please request new OTPs",
-        400
-      )
-    );
-  }
-
-  // Check if OTPs have expired
-  if (user.otpExpiresAt < Date.now()) {
-    return next(
-      new CustomError("OTPs have expired. Please request new OTPs", 400)
-    );
-  }
-
-  // Verify OTPs
-  if (user.otp !== emailOtp) {
-    return next(new CustomError("Invalid OTPs. Please try again", 400));
-  }
-
-  // Update password
-  user.password = newPassword;
-  user.otp = null;
-  user.otpExpiresAt = null;
-  await user.save();
-
-  res.json({
-    success: true,
-    message: "Password reset successful",
-  });
-});
-
+);

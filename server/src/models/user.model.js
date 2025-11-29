@@ -39,11 +39,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
-    userStatus: {
-      type: String,
-      enum: ["active", "inactive", "pending", "blocked"],
-      default: "pending",
-    },
+   
     otp: {
       type: String,
       default: null,
@@ -70,14 +66,7 @@ const userSchema = new mongoose.Schema(
       default: "user",
       
     },
-    loc: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        // default: "Point",
-      },
-      coordinates: { type: [Number], index: "2dsphere" }, // [longitude, latitude]
-    },
+   
     sessionInfo: {
       type: String,
       enum: ["loggedIn", "loggedOut"],
@@ -87,23 +76,8 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    deviceType: {
-      type: String,
-      enum: ["desktop", "mobile", "tablet"],
-      default: "desktop",
-    },
-    deviceToken: {
-      type: String,
-      default: null,
-    },
-    appVersion: {
-      type: String,
-      default: null,
-    },
-    remark: {
-      type: String,
-      default: null,
-    },
+ 
+   
     isSuspended: {
       type: Boolean,
       default: false,
@@ -120,19 +94,16 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-/* 🔑 Compare Password Method */
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-/* 🔐 Password Hash Middleware */
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 7);
   next();
 });
 
-/* 🔐 OTP Expiry Middleware */
 userSchema.pre("save", function (next) {
   if (this.isModified("otp")) {
     if (this.otp) {
@@ -149,7 +120,6 @@ userSchema.statics.findByEmail = function (email) {
 
 
 userSchema.index({ role: 1 });
-userSchema.index({ userStatus: 1 });
 userSchema.index({ loc: "2dsphere" });
 
 const User = mongoose.model("User", userSchema);

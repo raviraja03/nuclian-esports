@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import {
   CreditCard,
   Settings,
   ChevronLeft,
-  Shield,
   MenuIcon,
 } from "lucide-react";
 
@@ -30,13 +29,13 @@ function Sidebar() {
   const pathname = usePathname();
 
   // prevent body scroll when drawer is open
-//   useEffect(() => {
-//     if (typeof window === "undefined") return;
-//     document.body.style.overflow = mobileOpen ? "hidden" : "";
-//     return () => {
-//       document.body.style.overflow = "";
-//     };
-//   }, [mobileOpen]);
+  //   useEffect(() => {
+  //     if (typeof window === "undefined") return;
+  //     document.body.style.overflow = mobileOpen ? "hidden" : "";
+  //     return () => {
+  //       document.body.style.overflow = "";
+  //     };
+  //   }, [mobileOpen]);
 
   const NavContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <>

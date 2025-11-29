@@ -1,6 +1,3 @@
-"use client"
-
-import { useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,6 +29,12 @@ const tournament = {
   discordLink: "https://discord.gg/valorantcup",
   rules:
     "Standard Valorant competitive rules apply. Best of 3 format for all matches except finals which is best of 5.",
+}
+
+// Provide static params for static export builds (output: "export")
+export async function generateStaticParams() {
+  // Return at least one id for the static export; expand or fetch dynamically as needed
+  return [{ id: "1" }]
 }
 
 // Mock registered teams data
@@ -79,9 +82,9 @@ const registeredTeams = [
     registrationDate: "2024-01-12",
   },
 ]
-
-export default function TournamentDetailsPage({ params }: { params: { id: string } }) {
-  const [selectedTeam, setSelectedTeam] = useState<(typeof registeredTeams)[0] | null>(null)
+//{ params }: { params: { id: string } }
+export default function TournamentDetailsPage() {
+  // const [selectedTeam, setSelectedTeam] = useState<(typeof registeredTeams)[0] | null>(null)
 
   const getStatusColor = (status: string) => {
     switch (status) {

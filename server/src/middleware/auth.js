@@ -1,43 +1,60 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import Session from "../models/session.model.js";
 import { CustomError, GlobalErrorHandler } from "./errorMiddleware.js";
+import {
+  verifyAccessToken,
+  verifyRefreshToken,
+  generateAccessToken,
+  accessTokenCookieOptions,
+} from "../utilities/jwt.js";
 
-
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // Use environment variable in production
-
-export const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, JWT_SECRET, {
-    expiresIn: "30d",
-  });
-};
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const protect = GlobalErrorHandler(async (req, res, next) => {
-  let token;
-  token = req.cookies.sessionId;
-  // Get token from header
-  // if (
-  //   req.headers.authorization &&
-  //   req.headers.authorization.startsWith("Bearer")
-  // ) {
-  //   token = req.headers.authorization.split(" ")[1];
-  // }
+  const accessToken = req.cookies.accessToken;
+  const refreshToken = req.cookies.refreshToken;
 
-  if (!token) {
-    return next(
-      new CustomError(
-        `You are not logged in! Please login to get access..`,
-        401
-      )
-    );
+  if (!accessToken) {
+    return next(new CustomError("Not authenticated", 401));
   }
 
-  // Verify token
-  const decoded = jwt.verify(token, JWT_SECRET);
+  let decodedAccess;
+  try {
+    decodedAccess = verifyAccessToken(accessToken);
+  } catch (err) {
+    if (err.name !== "TokenExpiredError") {
+      return next(new CustomError("Invalid access token", 401));
+    }
+    // Access token expired → try refresh
+    if (!refreshToken) {
+      return next(new CustomError("Session expired, please log in again", 401));
+    }
 
-  // Get user from token
-  const user = await User.findById(decoded.id);
+    let decodedRefresh;
+    try {
+      decodedRefresh = verifyRefreshToken(refreshToken); // { sid }
+    } catch (err) {
+      return next(new CustomError("Session expired, please log in again", 401));
+    }
+
+    const session = await Session.findById(decodedRefresh.sid).populate("user");
+    if (!session || session.isRevoked || !session.user) {
+      return next(new CustomError("Session invalid, please log in again", 401));
+    }
+
+    // ✨ Issue New Access Token
+    const newAccessToken = generateAccessToken(session.user._id);
+    res.cookie("accessToken", newAccessToken, accessTokenCookieOptions);
+
+    req.user = session.user;
+    return next();
+  }
+
+  // Access Token Valid → continue
+  const user = await User.findById(decodedAccess.sub);
   if (!user) {
-    return next(new CustomError("This user no longer exists, Please log in again.", 401));
+    return next(new CustomError("User not found", 401));
   }
 
   if (user.isSuspended) {
@@ -66,17 +83,18 @@ export const authorize = (...roles) => {
 export const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
   let token = req.cookies.sessionId;
   if (!token) {
-    req.user = null; 
+    req.user = null;
     return next();
   }
 
- 
   const decoded = jwt.verify(token, JWT_SECRET);
 
   // Get user from token
   const user = await User.findById(decoded.id);
   if (!user) {
-    return next(new CustomError("This user no longer exists, Please log in again.", 401));
+    return next(
+      new CustomError("This user no longer exists, Please log in again.", 401)
+    );
   }
 
   if (user.isSuspended) {
@@ -90,9 +108,3 @@ export const optionalAuth = GlobalErrorHandler(async (req, res, next) => {
   req.user = user;
   next();
 });
-
-
-
-
-
-
